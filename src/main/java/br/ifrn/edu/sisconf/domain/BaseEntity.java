@@ -9,7 +9,11 @@ import java.time.LocalDateTime;
 
 @Data
 @MappedSuperclass
-public abstract class TimeStampedEntity {
+public abstract class BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 

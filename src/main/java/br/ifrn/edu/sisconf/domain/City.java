@@ -8,12 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name="city")
-public class City extends TimeStampedEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(length = 255)
+public class City extends BaseEntity {
+    @Column(length = 255, nullable = false)
     private String name;
 
     @ManyToOne
