@@ -18,7 +18,7 @@ public class Address extends BaseEntity {
     @Column(nullable = false)
     private Integer number;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "city_id", nullable = false)
     private City city;
 }
