@@ -1,6 +1,5 @@
 package br.ifrn.edu.sisconf.domain;
 
-import br.ifrn.edu.sisconf.domain.enums.CustomerCategory;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,11 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "customer")
-public class Customer extends BaseEntity {
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private CustomerCategory category;
+@Table(name = "entrepreneur")
+public class Entrepreneur extends BaseEntity {
+    @Column(length = 128, nullable = false, name = "business_name")
+    private String businessName;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "person_id", nullable = false, unique = true)
