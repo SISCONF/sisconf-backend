@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -34,4 +36,7 @@ public class Order extends BaseEntity {
 
     @Column(name = "order_date", nullable = false)
     private LocalDateTime orderDate;
+
+    @OneToMany(mappedBy = "order", targetEntity = OrderFood.class)
+    private List<Food> foods = new ArrayList<>();
 }

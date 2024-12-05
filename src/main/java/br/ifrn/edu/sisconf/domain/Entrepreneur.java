@@ -15,4 +15,7 @@ public class Entrepreneur extends BaseEntity {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "person_id", nullable = false, unique = true)
     private Person person;
+
+    @OneToOne(mappedBy = "entrepreneur")
+    private Stock stock;
 }
