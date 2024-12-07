@@ -1,11 +1,16 @@
 package br.ifrn.edu.sisconf.controller;
 
-import br.ifrn.edu.sisconf.domain.Food;
 import br.ifrn.edu.sisconf.domain.dtos.FoodCreateRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.FoodResponseDTO;
 import br.ifrn.edu.sisconf.service.FoodService;
+
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,5 +26,16 @@ public class FoodController {
     @PostMapping
     public ResponseEntity<FoodResponseDTO> createFood(@RequestBody FoodCreateRequestDTO createFoodDto) {
         return ResponseEntity.ok(foodService.createFood(createFoodDto));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<FoodResponseDTO>> getAllFoods() {
+        return ResponseEntity.ok(foodService.listAllFoods());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        foodService.delete(id);
+        return ResponseEntity.ok().build();
     }
 }
