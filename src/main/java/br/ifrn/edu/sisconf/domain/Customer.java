@@ -2,14 +2,15 @@ package br.ifrn.edu.sisconf.domain;
 
 import br.ifrn.edu.sisconf.domain.enums.CustomerCategory;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "customer")
 public class Customer extends BaseEntity {
@@ -23,28 +24,4 @@ public class Customer extends BaseEntity {
 
     @OneToMany(mappedBy = "customer")
     private List<Order> orders = new ArrayList<>();
-
-    public CustomerCategory getCategory() {
-        return category;
-    }
-
-    public void setCategory(CustomerCategory category) {
-        this.category = category;
-    }
-
-    public Person getPerson() {
-        return person;
-    }
-
-    public void setPerson(Person person) {
-        this.person = person;
-    }
-
-    public List<Order> getOrders() {
-        return orders;
-    }
-
-    public void setOrders(List<Order> orders) {
-        this.orders = orders;
-    }
 }

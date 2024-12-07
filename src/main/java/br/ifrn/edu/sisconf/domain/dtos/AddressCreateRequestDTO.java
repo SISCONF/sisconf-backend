@@ -3,10 +3,11 @@ package br.ifrn.edu.sisconf.domain.dtos;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 public class AddressCreateRequestDTO {
     @NotBlank(message = "Rua deve ser preenchida")

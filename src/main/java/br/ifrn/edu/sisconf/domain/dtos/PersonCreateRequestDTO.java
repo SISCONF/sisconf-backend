@@ -2,9 +2,11 @@ package br.ifrn.edu.sisconf.domain.dtos;
 
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 public class PersonCreateRequestDTO {
     @NotBlank(message = "Nome não pode ser vazio")
@@ -20,7 +22,6 @@ public class PersonCreateRequestDTO {
     private Integer cpf;
 
     @Size(min = 14, max = 14, message = "O CNPJ deve conter 14 dígitos")
-    @NotNull(message = "CNPJ must not be null")
     private Integer cnpj;
 
     @NotBlank(message = "Senha não pode ser vazia")
