@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class FoodService {
@@ -36,5 +37,15 @@ public class FoodService {
             throw new ResourceNotFoundException("Comida não encontrada");
         }
         foodRepository.deleteById(id);
+    }
+
+    public FoodResponseDTO getFood(Long id) {
+        Optional<Food> foundFood = foodRepository.findById(id);
+        Food food = foundFood.get();
+        if (food == null) {
+            throw new ResourceNotFoundException("Esta comida não está registrada no banco");
+        }
+        return mapper.toResponseDTO(food);
+
     }
 }

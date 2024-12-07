@@ -38,4 +38,9 @@ public class FoodController {
         foodService.delete(id);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<FoodResponseDTO> getFood(@PathVariable Long id) {
+        return ResponseEntity.ok(foodService.getFood(id));
+    }
 }

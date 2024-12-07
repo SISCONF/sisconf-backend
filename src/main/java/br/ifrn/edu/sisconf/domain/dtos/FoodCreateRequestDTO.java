@@ -1,6 +1,5 @@
 package br.ifrn.edu.sisconf.domain.dtos;
 
-
 import br.ifrn.edu.sisconf.domain.enums.FoodCategory;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
