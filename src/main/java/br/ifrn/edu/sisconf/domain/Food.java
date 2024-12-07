@@ -21,4 +21,28 @@ public class Food extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(length = 7, nullable = false)
     private FoodCategory category;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public BigDecimal getUnit_price() {
+        return unit_price;
+    }
+
+    public void setUnit_price(BigDecimal unit_price) {
+        this.unit_price = unit_price;
+    }
+
+    public FoodCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(FoodCategory category) {
+        this.category = category;
+    }
 }
