@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name="food")
+@Table(name = "food")
 public class Food extends BaseEntity {
     @Column(length = 255, nullable = false)
     private String name;
@@ -19,7 +19,7 @@ public class Food extends BaseEntity {
     private BigDecimal unit_price;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 7, nullable = false)
+    @Column(length = 9, nullable = false)
     private FoodCategory category;
 
     public String getName() {

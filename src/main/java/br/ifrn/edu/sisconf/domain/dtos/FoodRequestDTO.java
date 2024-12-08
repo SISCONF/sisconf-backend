@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class FoodCreateRequestDTO {
+public class FoodRequestDTO {
     @NotBlank(message = "O nome é obrigatório")
     private String name;
 

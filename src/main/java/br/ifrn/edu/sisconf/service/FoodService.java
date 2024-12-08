@@ -1,7 +1,7 @@
 package br.ifrn.edu.sisconf.service;
 
 import br.ifrn.edu.sisconf.domain.Food;
-import br.ifrn.edu.sisconf.domain.dtos.FoodCreateRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.FoodRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.FoodResponseDTO;
 import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.FoodMapper;
@@ -21,7 +21,7 @@ public class FoodService {
     @Autowired
     private FoodMapper mapper;
 
-    public FoodResponseDTO createFood(FoodCreateRequestDTO createFoodDto) {
+    public FoodResponseDTO createFood(FoodRequestDTO createFoodDto) {
         var food = mapper.toEntity(createFoodDto);
         foodRepository.save(food);
         return mapper.toResponseDTO(food);
@@ -47,5 +47,14 @@ public class FoodService {
         }
         return mapper.toResponseDTO(food);
 
+    }
+
+    public FoodResponseDTO update(Long id, FoodRequestDTO foodDto) {
+        Food food = foodRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Comida não econtrada."));
+        mapper.updateEntityFromDTO(foodDto, food);
+        var updatedFood = foodRepository.save(food);
+
+        return mapper.toResponseDTO(updatedFood);
     }
 }
