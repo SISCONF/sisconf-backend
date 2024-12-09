@@ -1,4 +1,4 @@
-package br.ifrn.edu.sisconf.utils.keycloak;
+package br.ifrn.edu.sisconf.configs;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "keycloak")
 public class KeycloakProperties {
-    private String baseUrl;
-    private String realmName;
+    private String serverUrl;
+    private String realm;
     private String clientId;
     private String clientSecret;
 }

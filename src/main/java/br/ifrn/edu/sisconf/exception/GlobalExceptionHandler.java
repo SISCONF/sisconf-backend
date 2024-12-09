@@ -1,14 +1,13 @@
 package br.ifrn.edu.sisconf.exception;
 
-import br.ifrn.edu.sisconf.utils.keycloak.exceptions.AuthenticateClientFailedException;
 import lombok.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
 
@@ -30,21 +29,19 @@ public class GlobalExceptionHandler {
             this.timestamp = LocalDateTime.now();
             this.message = message;
         }
-    }
 
-    @ExceptionHandler(AuthenticateClientFailedException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<ErrorResponse> handleAuthenticateClientFailedException(
-            AuthenticateClientFailedException exception,
-            WebRequest request) {
-        ErrorResponse error = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .message(exception.getMessage())
-                .path(((ServletWebRequest) request).getRequest().getRequestURI())
-                .build();
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-
+        @ExceptionHandler(BusinessException.class)
+        @ResponseStatus(HttpStatus.BAD_REQUEST)
+        public ResponseEntity<ErrorResponse> handleBusinessException(
+                BusinessException exeption,
+                WebRequest request) {
+            ErrorResponse error = ErrorResponse.builder()
+                    .timestamp(LocalDateTime.now())
+                    .status(HttpStatus.BAD_REQUEST.value())
+                    .message(exeption.getMessage())
+                    .path(((ServletWebRequest) request).getRequest().getRequestURI())
+                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
     }
 }
