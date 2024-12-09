@@ -1,4 +1,4 @@
-package br.ifrn.edu.sisconf.utils.keycloak;
+package br.ifrn.edu.sisconf.utils.keycloak.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

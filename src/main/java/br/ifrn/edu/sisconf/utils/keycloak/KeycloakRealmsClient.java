@@ -1,5 +1,7 @@
 package br.ifrn.edu.sisconf.utils.keycloak;
 
+import br.ifrn.edu.sisconf.utils.keycloak.dtos.GetClientTokenResponseDTO;
+import br.ifrn.edu.sisconf.utils.keycloak.exceptions.AuthenticateClientFailedException;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
@@ -22,7 +25,6 @@ public class KeycloakRealmsClient {
     private KeycloakProperties keycloakProperties;
     private String baseURL;
     private WebClient webClient;
-    private String accessToken;
 
     @Autowired
     public KeycloakRealmsClient(KeycloakProperties keycloakProperties) {
@@ -53,6 +55,10 @@ public class KeycloakRealmsClient {
                 .uri("/protocol/openid-connect/token/")
                 .bodyValue(formData)
                 .retrieve()
+                .onStatus(
+                        status -> !status.is2xxSuccessful(),
+                        clientResponse -> Mono.error(new AuthenticateClientFailedException("Authentication for Keycloak Client failed"))
+                )
                 .bodyToMono(GetClientTokenResponseDTO.class)
                 .block();
     }

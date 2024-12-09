@@ -6,7 +6,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @SpringBootApplication
 public class SisconfApplication {
@@ -16,15 +15,10 @@ public class SisconfApplication {
 	}
 
 	@Bean
-	public CommandLineRunner run(@Autowired KeycloakRealmsClient KeycloakRealmsClient) {
+	public CommandLineRunner run(@Autowired KeycloakRealmsClient keycloakRealmsClient) {
 		return args -> {
-			try {
-				var teste = KeycloakRealmsClient.getClientAccessToken();
-			} catch (WebClientResponseException exception) {
-				if (exception.getStatusCode().is4xxClientError()) {
-					System.out.println(exception.getStatusCode().value());
-				}
-			}
+			var teste = keycloakRealmsClient.getClientAccessToken();
+			System.out.println(teste.getAccessToken());
 		};
 	}
 }
