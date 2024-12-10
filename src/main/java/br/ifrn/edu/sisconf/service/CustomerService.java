@@ -1,7 +1,6 @@
 package br.ifrn.edu.sisconf.service;
 
 import br.ifrn.edu.sisconf.domain.Customer;
-import br.ifrn.edu.sisconf.domain.Person;
 import br.ifrn.edu.sisconf.domain.dtos.CustomerCreateRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.CustomerResponseDTO;
 import br.ifrn.edu.sisconf.domain.dtos.PersonCreateRequestDTO;
@@ -13,6 +12,8 @@ import br.ifrn.edu.sisconf.repository.CustomerRepository;
 import br.ifrn.edu.sisconf.service.keycloak.KeycloakUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class CustomerService {
@@ -30,6 +31,11 @@ public class CustomerService {
 
     @Autowired
     private CustomerMapper customerMapper;
+
+    public List<CustomerResponseDTO> getAll() {
+        List<Customer> customers = customerRepository.findAll();
+        return customerMapper.toListResponse(customers);
+    }
 
     public CustomerResponseDTO getById(Long id) {
         Customer customer = customerRepository.findById(id).orElseThrow(() -> new BusinessException("Usuário com esse ID não existe"));

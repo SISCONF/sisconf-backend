@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/customer")
 public class CustomerController {
@@ -22,5 +24,10 @@ public class CustomerController {
     @GetMapping("/{id}")
     public ResponseEntity<CustomerResponseDTO> getById(@PathVariable Long id){
         return ResponseEntity.ok(customerService.getById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<CustomerResponseDTO>> getAll() {
+        return ResponseEntity.ok(customerService.getAll());
     }
 }
