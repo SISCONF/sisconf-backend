@@ -6,10 +6,7 @@ import br.ifrn.edu.sisconf.service.CustomerService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/customer")
@@ -20,5 +17,10 @@ public class CustomerController {
     @PostMapping
     public ResponseEntity<CustomerResponseDTO> save(@Valid @RequestBody CustomerCreateRequestDTO customerCreateRequestDTO) {
         return ResponseEntity.ok(customerService.save(customerCreateRequestDTO));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CustomerResponseDTO> getById(@PathVariable Long id){
+        return ResponseEntity.ok(customerService.getById(id));
     }
 }

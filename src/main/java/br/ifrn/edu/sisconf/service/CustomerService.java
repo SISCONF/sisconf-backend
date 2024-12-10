@@ -1,10 +1,13 @@
 package br.ifrn.edu.sisconf.service;
 
+import br.ifrn.edu.sisconf.domain.Customer;
+import br.ifrn.edu.sisconf.domain.Person;
 import br.ifrn.edu.sisconf.domain.dtos.CustomerCreateRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.CustomerResponseDTO;
 import br.ifrn.edu.sisconf.domain.dtos.PersonCreateRequestDTO;
 import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationRecord;
 import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationResponse;
+import br.ifrn.edu.sisconf.exception.BusinessException;
 import br.ifrn.edu.sisconf.mapper.CustomerMapper;
 import br.ifrn.edu.sisconf.repository.CustomerRepository;
 import br.ifrn.edu.sisconf.service.keycloak.KeycloakUserService;
@@ -27,6 +30,11 @@ public class CustomerService {
 
     @Autowired
     private CustomerMapper customerMapper;
+
+    public CustomerResponseDTO getById(Long id) {
+        Customer customer = customerRepository.findById(id).orElseThrow(() -> new BusinessException("Usuário com esse ID não existe"));
+        return customerMapper.toResponse(customer);
+    }
 
     public CustomerResponseDTO save(CustomerCreateRequestDTO customerCreateRequestDTO) {
         PersonCreateRequestDTO personCreateRequestDTO = customerCreateRequestDTO.getPerson();
