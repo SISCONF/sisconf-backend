@@ -15,14 +15,14 @@ import lombok.Setter;
 public class Address extends BaseEntity {
     @Column(length = 128, nullable = false)
     private String street;
-    @Column(nullable = false)
-    private Integer zip_code;
+    @Column(name = "zip_code", nullable = false, length = 9)
+    private String zipCode;
     @Column(length = 128, nullable = false)
     private String neighbourhood;
     @Column(nullable = false)
     private Integer number;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "city_id", nullable = false)
     private City city;
 }

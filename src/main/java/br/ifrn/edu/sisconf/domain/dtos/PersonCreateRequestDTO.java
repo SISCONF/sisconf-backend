@@ -3,44 +3,41 @@ package br.ifrn.edu.sisconf.domain.dtos;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class PersonCreateRequestDTO {
-    @NotBlank(message = "Nome não pode ser vazio")
-    @NotNull
+    @NotBlank(message = "firstName must not be blank")
     private String firstName;
 
-    @NotBlank(message = "Sobrenome não pode ser vazio")
-    @NotNull
+    @NotBlank(message = "lastName must not be blank")
     private String lastName;
 
-    @Size(min = 11, max = 11, message = "O CPF deve conter 11 dígitos")
-    @NotNull(message = "CPF must no be null")
-    private Integer cpf;
-
-    @Size(min = 14, max = 14, message = "O CNPJ deve conter 14 dígitos")
-    private Integer cnpj;
-
-    @NotBlank(message = "Senha não pode ser vazia")
+    @NotBlank(message = "CPF must not be blank")
     @NotNull
-    @Size(min = 8, max = 16)
+    @Pattern(regexp = "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}", message = "CPF must follow XXX.XXX.XXX-XX format")
+    private String cpf;
+
+    @Pattern(regexp = "\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}")
+    private String cnpj;
+
+    @NotBlank(message = "You must provide a password")
+    @Size(min = 8, max = 16, message = "Password must be 8 to 16 characters")
     private String password;
 
-    @NotBlank(message = "Confirmar senha não pode ser vazio")
-    @NotNull
-    @Size(min = 8, max = 16)
+    @NotBlank(message = "Confirm password must not be blank")
+    @Size(min = 8, max = 16, message = "Confirm passsword must be 8 to 16 characters")
     private String password2;
 
-    @NotBlank(message = "Telefone não pode ser vazio")
-    @NotNull
-    @Pattern(regexp = "\\(\\d{2}\\) 9\\d{4}-\\d{4}", message = "O telefone deve seguir o formato (XX) XXXXX-XXXX")
+    @NotBlank(message = "Phone must not be blank")
+    @Pattern(regexp = "\\(\\d{2}\\) 9\\d{4}-\\d{4}", message = "Phone format must match (XX) XXXXX-XXXX")
     private String phone;
 
-    @NotBlank(message = "Email não pode ser vazio")
-    @NotNull
+    @NotBlank(message = "Email cant be blank")
     @Email
     private String email;
 

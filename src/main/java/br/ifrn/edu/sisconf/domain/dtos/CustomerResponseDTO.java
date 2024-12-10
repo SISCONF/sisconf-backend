@@ -13,6 +13,6 @@ public class CustomerResponseDTO {
     private Long id;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Person person;
+    private PersonResponseDTO person;
     private CustomerCategory category;
 }
