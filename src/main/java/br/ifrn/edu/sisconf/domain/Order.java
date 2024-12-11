@@ -2,6 +2,7 @@ package br.ifrn.edu.sisconf.domain;
 
 import br.ifrn.edu.sisconf.domain.enums.OrderStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,8 +14,9 @@ import java.util.UUID;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@Table(name = "order")
+@Table(name = "orders")
 public class Order extends BaseEntity {
     @Column(columnDefinition = "UUID", nullable = false)
     private UUID code;

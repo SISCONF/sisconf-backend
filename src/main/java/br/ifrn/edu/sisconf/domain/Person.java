@@ -16,10 +16,10 @@ public class Person extends BaseEntity {
     private String lastName;
 
     @Column(unique = true, nullable = false)
-    private Integer cpf;
+    private Long cpf;
 
     @Column(unique = true)
-    private Integer cnpj;
+    private Long cnpj;
 
     @Column(length = 16)
     private String password;
