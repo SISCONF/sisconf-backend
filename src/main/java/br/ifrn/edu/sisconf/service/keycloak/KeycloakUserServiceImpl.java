@@ -3,12 +3,16 @@ package br.ifrn.edu.sisconf.service.keycloak;
 import br.ifrn.edu.sisconf.configs.KeycloakProperties;
 import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationRecord;
 import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationResponse;
+import br.ifrn.edu.sisconf.dto.keycloak.UserUpdateRecord;
 import br.ifrn.edu.sisconf.exception.BusinessException;
 import br.ifrn.edu.sisconf.exception.keycloak.KeycloakUnavailableException;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -38,7 +42,6 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
 
     @Override
     public UserRegistrationResponse createUser(UserRegistrationRecord userRegistrationRecord) {
-        System.out.println(userRegistrationRecord.email());
         UserRepresentation user = new UserRepresentation();
         user.setEnabled(true);
         user.setUsername(userRegistrationRecord.email());
@@ -83,5 +86,26 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
     @Override
     public void deleteUserById(String userId) {
         getUsersResource().delete(userId);
+    }
+
+    @Override
+    public UserRegistrationResponse updateUser(UserUpdateRecord userUpdateRecord) {
+        try {
+            UserResource userResource = getUsersResource().get(userUpdateRecord.keycloakId());
+            UserRepresentation userRepresentation = userResource.toRepresentation();
+
+            userRepresentation.setFirstName(userUpdateRecord.firstName());
+            userRepresentation.setLastName(userUpdateRecord.lastName());
+            userResource.update(userRepresentation);
+
+            return new UserRegistrationResponse(
+                    userRepresentation.getId(),
+                    userRepresentation.getFirstName(),
+                    userRepresentation.getLastName(),
+                    userRepresentation.getEmail()
+            );
+        } catch (BadRequestException | InternalServerErrorException exception) {
+            throw new BusinessException(exception.getMessage());
+        }
     }
 }

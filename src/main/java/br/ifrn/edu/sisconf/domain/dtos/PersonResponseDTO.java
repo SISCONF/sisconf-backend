@@ -13,6 +13,7 @@ public class PersonResponseDTO {
     private String keycloakId;
     private String firstName;
     private String lastName;
+    private String email;
     private String cpf;
     private String cnpj;
     private AddressResponseDTO address;

@@ -2,6 +2,7 @@ package br.ifrn.edu.sisconf.controller;
 
 import br.ifrn.edu.sisconf.domain.dtos.CustomerCreateRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.CustomerResponseDTO;
+import br.ifrn.edu.sisconf.domain.dtos.CustomerUpdateRequestDTO;
 import br.ifrn.edu.sisconf.service.CustomerService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,5 +30,10 @@ public class CustomerController {
     @GetMapping
     public ResponseEntity<List<CustomerResponseDTO>> getAll() {
         return ResponseEntity.ok(customerService.getAll());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CustomerResponseDTO> update(@PathVariable Long id, @Valid @RequestBody CustomerUpdateRequestDTO customerUpdateRequestDTO) {
+        return ResponseEntity.ok(customerService.update(customerUpdateRequestDTO, id));
     }
 }
