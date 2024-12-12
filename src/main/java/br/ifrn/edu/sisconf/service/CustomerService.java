@@ -72,6 +72,7 @@ public class CustomerService {
 
     public CustomerResponseDTO update(CustomerUpdateRequestDTO customerUpdateRequestDTO, Long id) {
         Customer customer = getCustomerById(id);
+        cityService.getById(customerUpdateRequestDTO.getPerson().getAddress().getCity());
 
         UserUpdateRecord userUpdateRecord = new UserUpdateRecord(
                 customer.getPerson().getKeycloakId(),
