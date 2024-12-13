@@ -71,7 +71,7 @@ public class CustomerService {
     }
 
     public CustomerResponseDTO update(CustomerUpdateRequestDTO customerUpdateRequestDTO, Long id) {
-        if (customerRepository.existsById(id)) {
+        if (!customerRepository.existsById(id)) {
             throw new BusinessException("Usuário com esse ID não existe");
         }
 
@@ -87,7 +87,9 @@ public class CustomerService {
         keycloakUserService.updateUser(userUpdateRecord);
 
         customerMapper.updateEntityFromDTO(customerUpdateRequestDTO, customer);
-        return customerMapper.toResponse(customer);
+        var updatedCustomer = customerRepository.save(customer);
+
+        return customerMapper.toResponse(updatedCustomer);
     }
 
     public void delete(Long id) {

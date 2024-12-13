@@ -1,5 +1,6 @@
 package br.ifrn.edu.sisconf.exception;
 
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import lombok.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,12 +34,26 @@ public class GlobalExceptionHandler {
         @ExceptionHandler(BusinessException.class)
         @ResponseStatus(HttpStatus.BAD_REQUEST)
         public ResponseEntity<ErrorResponse> handleBusinessException(
-                BusinessException exeption,
+                BusinessException exception,
                 WebRequest request) {
             ErrorResponse error = ErrorResponse.builder()
                     .timestamp(LocalDateTime.now())
                     .status(HttpStatus.BAD_REQUEST.value())
-                    .message(exeption.getMessage())
+                    .message(exception.getMessage())
+                    .path(((ServletWebRequest) request).getRequest().getRequestURI())
+                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+
+        @ExceptionHandler(UnrecognizedPropertyException.class)
+        @ResponseStatus(HttpStatus.BAD_REQUEST)
+        public ResponseEntity<ErrorResponse> handleUnrecognizedPropertyException(
+                UnrecognizedPropertyException exception,
+                WebRequest request) {
+            ErrorResponse error = ErrorResponse.builder()
+                    .timestamp(LocalDateTime.now())
+                    .status(HttpStatus.BAD_REQUEST.value())
+                    .message(exception.getMessage())
                     .path(((ServletWebRequest) request).getRequest().getRequestURI())
                     .build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
