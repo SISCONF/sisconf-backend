@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -85,7 +86,18 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
 
     @Override
     public void deleteUserById(String userId) {
-        getUsersResource().delete(userId);
+        Response response = getUsersResource().delete(userId);
+        Response.Status.Family statusFamily = Response.Status.Family.familyOf(response.getStatus());
+
+        if (Objects.requireNonNull(statusFamily) != Response.Status.Family.SUCCESSFUL) {
+            if (Objects.requireNonNull(statusFamily) == Response.Status.Family.CLIENT_ERROR) {
+                throw new BusinessException(response.readEntity(String.class));
+            }
+            if (Objects.requireNonNull(statusFamily) == Response.Status.Family.SERVER_ERROR) {
+                throw new KeycloakUnavailableException("falied contacting keycloak");
+            }
+        }
+
     }
 
     @Override

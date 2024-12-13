@@ -71,7 +71,12 @@ public class CustomerService {
     }
 
     public CustomerResponseDTO update(CustomerUpdateRequestDTO customerUpdateRequestDTO, Long id) {
+        if (customerRepository.existsById(id)) {
+            throw new BusinessException("Usuário com esse ID não existe");
+        }
+
         Customer customer = getCustomerById(id);
+
         cityService.getById(customerUpdateRequestDTO.getPerson().getAddress().getCity());
 
         UserUpdateRecord userUpdateRecord = new UserUpdateRecord(
@@ -83,5 +88,11 @@ public class CustomerService {
 
         customerMapper.updateEntityFromDTO(customerUpdateRequestDTO, customer);
         return customerMapper.toResponse(customer);
+    }
+
+    public void delete(Long id) {
+        Customer customer = getCustomerById(id);
+        keycloakUserService.deleteUserById(customer.getPerson().getKeycloakId());
+        customerRepository.deleteById(id);
     }
 }
