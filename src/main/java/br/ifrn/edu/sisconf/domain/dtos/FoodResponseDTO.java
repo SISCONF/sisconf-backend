@@ -13,7 +13,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FoodResponseDTO {
+    private Long id;
     private String name;
-    private BigDecimal unit_price;
+    private BigDecimal unitPrice;
     private FoodCategory category;
 }

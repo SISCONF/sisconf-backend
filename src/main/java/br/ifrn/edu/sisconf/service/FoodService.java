@@ -21,13 +21,21 @@ public class FoodService {
     @Autowired
     private FoodMapper mapper;
 
-    public FoodResponseDTO createFood(FoodRequestDTO createFoodDto) {
-        if (createFoodDto.getUnit_price() != null && createFoodDto.getUnit_price().signum() != 1) {
+    public void throwIfInvalidUnitPrice(FoodRequestDTO createFoodDto) {
+        if (createFoodDto.getUnitPrice() != null && createFoodDto.getUnitPrice().signum() != 1) {
             throw new BusinessException("O preço unitário não pode ser 0, nem negativo.");
         }
+    }
+
+    public void throwIfInvalidName(FoodRequestDTO createFoodDto) {
         if (createFoodDto.getName() != null && createFoodDto.getName().isEmpty()) {
             throw new BusinessException("O campo nome não pode ser um texto vazio.");
         }
+    }
+
+    public FoodResponseDTO createFood(FoodRequestDTO createFoodDto) {
+        throwIfInvalidUnitPrice(createFoodDto);
+        throwIfInvalidName(createFoodDto);
         var food = mapper.toEntity(createFoodDto);
         foodRepository.save(food);
         return mapper.toResponseDTO(food);
@@ -55,12 +63,8 @@ public class FoodService {
     public FoodResponseDTO update(Long id, FoodRequestDTO foodDto) {
         Food food = foodRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comida não econtrada."));
-        if (foodDto.getUnit_price() != null && foodDto.getUnit_price().signum() != 1) {
-            throw new BusinessException("O preço unitário não pode ser 0, nem negativo.");
-        }
-        if (foodDto.getName() != null && foodDto.getName().isEmpty()) {
-            throw new BusinessException("O campo nome não pode ser um texto vazio.");
-        }
+        throwIfInvalidUnitPrice(foodDto);
+        throwIfInvalidName(foodDto);
         mapper.updateEntityFromDTO(foodDto, food);
         var updatedFood = foodRepository.save(food);
 
