@@ -94,7 +94,7 @@ public class CustomerService {
         return customerMapper.toResponseDTO(updatedCustomer);
     }
 
-    public void delete(Long id) {
+    public void deleteById(Long id) {
         Customer customer = getCustomerById(id);
         keycloakUserService.deleteById(customer.getPerson().getKeycloakId());
         customerRepository.deleteById(id);
