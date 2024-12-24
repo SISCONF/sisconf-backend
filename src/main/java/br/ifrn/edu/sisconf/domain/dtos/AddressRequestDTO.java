@@ -19,12 +19,12 @@ public class AddressRequestDTO {
     @Pattern(regexp = "\\d{5}-\\d{3}", message = "CEP precisa estar no formato XXXXX-XXX")
     private String zipCode;
 
-    @NotBlank(message = "Neighbourhood não pode ser vazio")
+    @NotBlank(message = "Bairro não pode ser vazio")
     private String neighbourhood;
 
-    @NotBlank(message = "Number não pode ser vazio")
+    @NotBlank(message = "Número não pode ser vazio")
     private Integer number;
 
-    @NotBlank(message = "City (id) não pode ser vazio")
+    @NotBlank(message = "Cidade (id) não pode ser vazio")
     private Long city;
 }

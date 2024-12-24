@@ -13,10 +13,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CustomerUpdateRequestDTO {
-    @NotNull(message = "Category não pode ser vazio")
+    @NotNull(message = "Categoria não pode ser vazio")
     private CustomerCategory category;
 
-    @NotNull(message = "Person não pode ser vazio")
+    @NotNull(message = "Pessoa não pode ser vazio")
     @Valid
     private PersonUpdateRequestDTO person;
 }
