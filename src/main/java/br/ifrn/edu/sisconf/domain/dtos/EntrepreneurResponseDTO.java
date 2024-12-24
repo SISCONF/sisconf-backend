@@ -13,5 +13,4 @@ import lombok.Setter;
 public class EntrepreneurResponseDTO {
     private PersonResponseDTO person;
     private String businessName;
-    private Stock stock;
 }

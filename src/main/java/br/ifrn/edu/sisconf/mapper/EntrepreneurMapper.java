@@ -7,6 +7,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
+import java.util.List;
+
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface EntrepreneurMapper {
     @Mapping(source = "person.address.city", target = "person.address.city.id")
@@ -15,4 +17,6 @@ public interface EntrepreneurMapper {
 
     @Mapping(source = "person.address.city.id", target = "person.address.city")
     EntrepreneurResponseDTO toResponseDTO(Entrepreneur entrepreneur);
+
+    List<EntrepreneurResponseDTO> toDTOList(List<Entrepreneur> entrepreneurs);
 }
