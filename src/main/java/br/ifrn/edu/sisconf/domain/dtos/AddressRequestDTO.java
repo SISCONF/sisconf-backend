@@ -25,6 +25,6 @@ public class AddressRequestDTO {
     @NotBlank(message = "Número não pode ser vazio")
     private Integer number;
 
-    @NotBlank(message = "Cidade (id) não pode ser vazio")
+    @NotBlank(message = "Cidade não pode ser vazio")
     private Long city;
 }
