@@ -40,12 +40,12 @@ public class CustomerService {
 
     public List<CustomerResponseDTO> getAll() {
         List<Customer> customers = customerRepository.findAll();
-        return customerMapper.toListResponse(customers);
+        return customerMapper.toDTOList(customers);
     }
 
     public CustomerResponseDTO getById(Long id) {
         Customer customer = getCustomerById(id);
-        return customerMapper.toResponse(customer);
+        return customerMapper.toResponseDTO(customer);
     }
 
     public CustomerResponseDTO save(CustomerCreateRequestDTO customerCreateRequestDTO) {
@@ -64,16 +64,18 @@ public class CustomerService {
                 personCreateRequestDTO.getPassword(),
                 personCreateRequestDTO.getEmail()
         );
-        UserRegistrationResponse userRegistrationResponse = keycloakUserService.createUser(userRegistrationRecord);
+        UserRegistrationResponse userRegistrationResponse = keycloakUserService.create(userRegistrationRecord);
         customer.getPerson().setKeycloakId(userRegistrationResponse.keycloakId());
         customerRepository.save(customer);
-        return customerMapper.toResponse(customer);
+        return customerMapper.toResponseDTO(customer);
     }
 
     public CustomerResponseDTO update(CustomerUpdateRequestDTO customerUpdateRequestDTO, Long id) {
         if (!customerRepository.existsById(id)) {
             throw new BusinessException("Usuário com esse ID não existe");
         }
+        personService.throwIfPhoneIsNotUnique(customerUpdateRequestDTO.getPerson());
+        personService.throwIfCpfIsNotUnique(customerUpdateRequestDTO.getPerson());
 
         Customer customer = getCustomerById(id);
 
@@ -84,17 +86,17 @@ public class CustomerService {
                 customerUpdateRequestDTO.getPerson().getFirstName(),
                 customerUpdateRequestDTO.getPerson().getLastName()
         );
-        keycloakUserService.updateUser(userUpdateRecord);
+        keycloakUserService.update(userUpdateRecord);
 
         customerMapper.updateEntityFromDTO(customerUpdateRequestDTO, customer);
         var updatedCustomer = customerRepository.save(customer);
 
-        return customerMapper.toResponse(updatedCustomer);
+        return customerMapper.toResponseDTO(updatedCustomer);
     }
 
     public void delete(Long id) {
         Customer customer = getCustomerById(id);
-        keycloakUserService.deleteUserById(customer.getPerson().getKeycloakId());
+        keycloakUserService.deleteById(customer.getPerson().getKeycloakId());
         customerRepository.deleteById(id);
     }
 }

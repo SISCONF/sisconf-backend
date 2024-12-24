@@ -1,6 +1,5 @@
 package br.ifrn.edu.sisconf.domain.dtos;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -14,24 +13,24 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PersonUpdateRequestDTO {
-    @NotBlank(message = "firstName must not be blank")
+    @NotBlank(message = "firstName não pode ser vazio")
     private String firstName;
 
-    @NotBlank(message = "lastName must not be blank")
+    @NotBlank(message = "lastName não pode ser vazio")
     private String lastName;
 
-    @NotBlank(message = "CPF must not be blank")
+    @NotBlank(message = "CPF não pode ser vazio")
     @NotNull
-    @Pattern(regexp = "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}", message = "CPF must follow XXX.XXX.XXX-XX format")
+    @Pattern(regexp = "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}", message = "CPF deve seguir o formato XXX.XXX.XXX-XX")
     private String cpf;
 
     @Pattern(regexp = "\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}")
     private String cnpj;
 
-    @NotBlank(message = "Phone must not be blank")
-    @Pattern(regexp = "\\(\\d{2}\\) 9\\d{4}-\\d{4}", message = "Phone format must match (XX) XXXXX-XXXX")
+    @NotBlank(message = "Phone não pode ser vazio")
+    @Pattern(regexp = "\\(\\d{2}\\) 9\\d{4}-\\d{4}", message = "Phone deve seguir formato (XX) XXXXX-XXXX")
     private String phone;
 
     @NotNull
-    private AddressCreateRequestDTO address;
+    private AddressRequestDTO address;
 }

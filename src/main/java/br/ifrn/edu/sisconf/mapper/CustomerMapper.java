@@ -13,9 +13,9 @@ public interface CustomerMapper {
     Customer toEntity(CustomerCreateRequestDTO customerCreateRequestDto);
 
     @Mapping(target = "person.address.city", source = "person.address.city.id")
-    CustomerResponseDTO toResponse(Customer customer);
+    CustomerResponseDTO toResponseDTO(Customer customer);
 
-    List<CustomerResponseDTO> toListResponse(List<Customer> customers);
+    List<CustomerResponseDTO> toDTOList(List<Customer> customers);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)

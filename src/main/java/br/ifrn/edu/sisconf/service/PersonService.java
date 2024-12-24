@@ -2,6 +2,7 @@ package br.ifrn.edu.sisconf.service;
 
 import br.ifrn.edu.sisconf.domain.Person;
 import br.ifrn.edu.sisconf.domain.dtos.PersonCreateRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.PersonUpdateRequestDTO;
 import br.ifrn.edu.sisconf.exception.BusinessException;
 import br.ifrn.edu.sisconf.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,7 @@ public class PersonService {
     @Autowired
     private PersonRepository personRepository;
 
-    public void throwIfCpfIsNotUnique(PersonCreateRequestDTO personCreateRequestDTO) {
+    public void throwIfCpfIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO) {
         String cpf =personCreateRequestDTO.getCpf();
         if (personRepository.existsByCpf(cpf)) {
             var errorMsg = String.format("Usuário com CPF %s já existe", cpf);
@@ -34,7 +35,7 @@ public class PersonService {
         }
     }
 
-    public void throwIfCnpjIsNotUnique(PersonCreateRequestDTO personCreateRequestDTO) {
+    public void throwIfCnpjIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO) {
         String cnpj = personCreateRequestDTO.getCnpj();
         if (personRepository.existsByCnpj(cnpj)) {
             var errorMsg = String.format("Empresa com CNPJ %s já existe", cnpj);
@@ -42,7 +43,7 @@ public class PersonService {
         }
     }
 
-    public void throwIfPhoneIsNotUnique(PersonCreateRequestDTO personCreateRequestDTO) {
+    public void throwIfPhoneIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO) {
         String phone = personCreateRequestDTO.getPhone();
         if (personRepository.existsByPhone(phone)) {
             var errorMsg = String.format("Usuário com telefone %s já existe", phone);

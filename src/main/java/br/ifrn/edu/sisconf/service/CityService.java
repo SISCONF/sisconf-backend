@@ -16,7 +16,7 @@ public class CityService {
     private CityMapper cityMapper;
 
     public CityResponseDTO getById(Long id) {
-        var city = cityRepository.findById(id).orElseThrow(() -> new BusinessException(String.format("City with id %d not found", id)));
+        var city = cityRepository.findById(id).orElseThrow(() -> new BusinessException(String.format("City com id %d não encontrada", id)));
         return cityMapper.toResponse(city);
     }
 }

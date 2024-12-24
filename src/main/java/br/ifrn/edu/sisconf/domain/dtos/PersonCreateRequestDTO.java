@@ -11,15 +11,15 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PersonCreateRequestDTO extends PersonUpdateRequestDTO {
-    @NotBlank(message = "You must provide a password")
-    @Size(min = 8, max = 16, message = "Password must be 8 to 16 characters")
+    @NotBlank(message = "Password não pode ser vazia")
+    @Size(min = 8, max = 16, message = "Senha deve ter de 8 a 16 caracteres")
     private String password;
 
-    @NotBlank(message = "Confirm password must not be blank")
-    @Size(min = 8, max = 16, message = "Confirm passsword must be 8 to 16 characters")
+    @NotBlank(message = "Password2 não pode ser vazia ")
+    @Size(min = 8, max = 16, message = "Password2 deve ter de 8 a 16 caracteres")
     private String password2;
 
-    @NotBlank(message = "Email cant be blank")
+    @NotBlank(message = "Email não pode ser vazio")
     @Email
     private String email;
 }

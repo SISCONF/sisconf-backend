@@ -16,5 +16,6 @@ public class PersonResponseDTO {
     private String email;
     private String cpf;
     private String cnpj;
+    private String phone;
     private AddressResponseDTO address;
 }

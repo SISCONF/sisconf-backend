@@ -6,8 +6,8 @@ import br.ifrn.edu.sisconf.dto.keycloak.UserUpdateRecord;
 import org.keycloak.representations.idm.UserRepresentation;
 
 public interface KeycloakUserService {
-    UserRegistrationResponse createUser(UserRegistrationRecord userRegistrationRecord);
-    UserRegistrationResponse updateUser(UserUpdateRecord userUpdateRecord);
-    UserRepresentation getUserById(String userId);
-    void deleteUserById(String userId);
+    UserRegistrationResponse create(UserRegistrationRecord userRegistrationRecord);
+    UserRegistrationResponse update(UserUpdateRecord userUpdateRecord);
+    UserRepresentation getById(String userId);
+    void deleteById(String userId);
 }

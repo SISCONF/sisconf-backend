@@ -42,7 +42,7 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
     }
 
     @Override
-    public UserRegistrationResponse createUser(UserRegistrationRecord userRegistrationRecord) {
+    public UserRegistrationResponse create(UserRegistrationRecord userRegistrationRecord) {
         UserRepresentation user = new UserRepresentation();
         user.setEnabled(true);
         user.setUsername(userRegistrationRecord.email());
@@ -80,12 +80,12 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
     }
 
     @Override
-    public UserRepresentation getUserById(String userId) {
+    public UserRepresentation getById(String userId) {
         return getUsersResource().get(userId).toRepresentation();
     }
 
     @Override
-    public void deleteUserById(String userId) {
+    public void deleteById(String userId) {
         Response response = getUsersResource().delete(userId);
         Response.Status.Family statusFamily = Response.Status.Family.familyOf(response.getStatus());
 
@@ -101,7 +101,7 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
     }
 
     @Override
-    public UserRegistrationResponse updateUser(UserUpdateRecord userUpdateRecord) {
+    public UserRegistrationResponse update(UserUpdateRecord userUpdateRecord) {
         try {
             UserResource userResource = getUsersResource().get(userUpdateRecord.keycloakId());
             UserRepresentation userRepresentation = userResource.toRepresentation();

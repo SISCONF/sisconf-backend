@@ -1,4 +1,4 @@
-package br.ifrn.edu.sisconf.configs.securiy;
+package br.ifrn.edu.sisconf.configs.security;
 
 import br.ifrn.edu.sisconf.configs.KeycloakProperties;
 import org.keycloak.OAuth2Constants;
