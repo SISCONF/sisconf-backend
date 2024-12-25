@@ -1,13 +1,15 @@
 package br.ifrn.edu.sisconf.domain;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @MappedSuperclass
 public abstract class BaseEntity {
     @Id
