@@ -18,16 +18,11 @@ public class PersonService {
     public void throwIfCpfIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO, Long id) {
         String cpf = personCreateRequestDTO.getCpf();
         var errorMsg = String.format("Usuário com CPF %s já existe", cpf);
-        System.out.println("SOu ID ==============");
-        System.out.println(id);
         if (id != null) {
-            System.out.println("EITAAAAAAAAAAAAAAaa");
-            System.out.println(personRepository.existsByCpfAndIdNot(cpf, id));
             if (personRepository.existsByCpfAndIdNot(cpf, id)) {
                 System.out.println("EITA SOU TRUE");
                 throw new BusinessException(errorMsg);
             }
-            System.out.println("EITA SOU FALSE");
         } else {
             if (personRepository.existsByCpf(cpf)) {
                 throw new BusinessException(errorMsg);
