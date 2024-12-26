@@ -37,4 +37,10 @@ public class EntrepreneurController {
     public ResponseEntity<EntrepreneurResponseDTO> update(@PathVariable Long id, @Valid @RequestBody EntrepreneurUpdateRequestDTO entrepreneurUpdateRequestDTO) {
         return ResponseEntity.ok(entrepreneurService.update(id, entrepreneurUpdateRequestDTO));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        entrepreneurService.deletebyId(id);
+        return ResponseEntity.noContent().build();
+    }
 }

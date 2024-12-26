@@ -125,4 +125,12 @@ public class EntrepreneurService {
             throw exception;
         }
     }
+
+    public void deletebyId(Long id) {
+        var entrepreneur = entrepreneurRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(
+                String.format("Empreendedor com id %d não existe", id)
+        ));
+        entrepreneurRepository.deleteById(id);
+        keycloakUserService.deleteById(entrepreneur.getPerson().getKeycloakId());
+    }
 }
