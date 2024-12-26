@@ -1,13 +1,13 @@
 package br.ifrn.edu.sisconf.controller;
 
+import br.ifrn.edu.sisconf.domain.dtos.EntrepreneurCreateRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.EntrepreneurResponseDTO;
 import br.ifrn.edu.sisconf.service.EntrepreneurService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -25,5 +25,10 @@ public class EntrepreneurController {
     @GetMapping
     public ResponseEntity<List<EntrepreneurResponseDTO>> getAll() {
         return ResponseEntity.ok(entrepreneurService.getAll());
+    }
+
+    @PostMapping
+    public ResponseEntity<EntrepreneurResponseDTO> save(@Valid @RequestBody EntrepreneurCreateRequestDTO entrepreneurCreateRequestDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(entrepreneurService.save(entrepreneurCreateRequestDTO));
     }
 }
