@@ -1,5 +1,6 @@
 package br.ifrn.edu.sisconf.service;
 
+import br.ifrn.edu.sisconf.constants.KeycloakConstants;
 import br.ifrn.edu.sisconf.domain.Entrepreneur;
 import br.ifrn.edu.sisconf.domain.dtos.EntrepreneurCreateRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.EntrepreneurResponseDTO;
@@ -66,7 +67,8 @@ public class EntrepreneurService {
                 personCreateRequestDTO.getFirstName(),
                 personCreateRequestDTO.getLastName(),
                 personCreateRequestDTO.getPassword(),
-                personCreateRequestDTO.getEmail()
+                personCreateRequestDTO.getEmail(),
+                KeycloakConstants.ENTREPRENEUR_GROUP_NAME
         );
         UserRegistrationResponse userRegistrationResponse = keycloakUserService.create(userRegistrationRecord);
 

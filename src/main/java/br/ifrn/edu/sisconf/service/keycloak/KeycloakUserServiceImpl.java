@@ -60,6 +60,7 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
         list.add(credentialRepresentation);
 
         user.setCredentials(list);
+        user.setGroups(new ArrayList<>(List.of(userRegistrationRecord.group())));
 
         UsersResource usersResource = getUsersResource();
 
