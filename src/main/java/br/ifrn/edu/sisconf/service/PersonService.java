@@ -1,6 +1,5 @@
 package br.ifrn.edu.sisconf.service;
 
-import br.ifrn.edu.sisconf.domain.Person;
 import br.ifrn.edu.sisconf.domain.dtos.PersonCreateRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.PersonUpdateRequestDTO;
 import br.ifrn.edu.sisconf.exception.BusinessException;
@@ -13,8 +12,11 @@ public class PersonService {
     @Autowired
     private PersonRepository personRepository;
 
+    @Autowired
+    private CityService cityService;
+
     public void throwIfCpfIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO) {
-        String cpf =personCreateRequestDTO.getCpf();
+        String cpf = personCreateRequestDTO.getCpf();
         if (personRepository.existsByCpf(cpf)) {
             var errorMsg = String.format("Usuário com CPF %s já existe", cpf);
             throw new BusinessException(errorMsg);
@@ -49,5 +51,19 @@ public class PersonService {
             var errorMsg = String.format("Usuário com telefone %s já existe", phone);
             throw new BusinessException(errorMsg);
         }
+    }
+
+    public void validatePersonCreation(PersonCreateRequestDTO personCreateRequestDTO) {
+        this.throwIfCpfIsNotUnique(personCreateRequestDTO);
+        this.throwIfEmailIsNotUnique(personCreateRequestDTO);
+        this.throwIfPasswordsDontMatch(personCreateRequestDTO);
+        this.throwIfPhoneIsNotUnique(personCreateRequestDTO);
+        cityService.getById(personCreateRequestDTO.getAddress().getCity());
+    }
+
+    public void validatePersonUpdate(PersonUpdateRequestDTO personUpdateRequestDTO) {
+        this.throwIfCpfIsNotUnique(personUpdateRequestDTO);
+        this.throwIfPhoneIsNotUnique(personUpdateRequestDTO);
+        cityService.getById(personUpdateRequestDTO.getAddress().getCity());
     }
 }

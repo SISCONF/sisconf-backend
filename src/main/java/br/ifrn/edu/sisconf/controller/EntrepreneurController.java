@@ -2,6 +2,7 @@ package br.ifrn.edu.sisconf.controller;
 
 import br.ifrn.edu.sisconf.domain.dtos.EntrepreneurCreateRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.EntrepreneurResponseDTO;
+import br.ifrn.edu.sisconf.domain.dtos.EntrepreneurUpdateRequestDTO;
 import br.ifrn.edu.sisconf.service.EntrepreneurService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,5 +31,10 @@ public class EntrepreneurController {
     @PostMapping
     public ResponseEntity<EntrepreneurResponseDTO> save(@Valid @RequestBody EntrepreneurCreateRequestDTO entrepreneurCreateRequestDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(entrepreneurService.save(entrepreneurCreateRequestDTO));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EntrepreneurResponseDTO> update(@PathVariable Long id, @Valid @RequestBody EntrepreneurUpdateRequestDTO entrepreneurUpdateRequestDTO) {
+        return ResponseEntity.ok(entrepreneurService.update(id, entrepreneurUpdateRequestDTO));
     }
 }
