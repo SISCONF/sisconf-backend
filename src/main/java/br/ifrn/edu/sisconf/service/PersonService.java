@@ -83,7 +83,6 @@ public class PersonService {
     public void validatePersonUpdate(PersonUpdateRequestDTO personUpdateRequestDTO, Long id) {
         this.throwIfCpfIsNotUnique(personUpdateRequestDTO, id);
         this.throwIfPhoneIsNotUnique(personUpdateRequestDTO, id);
-        this.throwIfCnpjIsNotUnique(personUpdateRequestDTO, id);
         cityService.getById(personUpdateRequestDTO.getAddress().getCity());
     }
 }
