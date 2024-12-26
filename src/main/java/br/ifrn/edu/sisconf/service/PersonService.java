@@ -15,11 +15,23 @@ public class PersonService {
     @Autowired
     private CityService cityService;
 
-    public void throwIfCpfIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO) {
+    public void throwIfCpfIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO, Long id) {
         String cpf = personCreateRequestDTO.getCpf();
-        if (personRepository.existsByCpf(cpf)) {
-            var errorMsg = String.format("Usuário com CPF %s já existe", cpf);
-            throw new BusinessException(errorMsg);
+        var errorMsg = String.format("Usuário com CPF %s já existe", cpf);
+        System.out.println("SOu ID ==============");
+        System.out.println(id);
+        if (id != null) {
+            System.out.println("EITAAAAAAAAAAAAAAaa");
+            System.out.println(personRepository.existsByCpfAndIdNot(cpf, id));
+            if (personRepository.existsByCpfAndIdNot(cpf, id)) {
+                System.out.println("EITA SOU TRUE");
+                throw new BusinessException(errorMsg);
+            }
+            System.out.println("EITA SOU FALSE");
+        } else {
+            if (personRepository.existsByCpf(cpf)) {
+                throw new BusinessException(errorMsg);
+            }
         }
     }
 
@@ -37,33 +49,46 @@ public class PersonService {
         }
     }
 
-    public void throwIfCnpjIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO) {
+    public void throwIfCnpjIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO, Long id) {
         String cnpj = personCreateRequestDTO.getCnpj();
-        if (personRepository.existsByCnpj(cnpj)) {
-            var errorMsg = String.format("Empresa com CNPJ %s já existe", cnpj);
-            throw new BusinessException(errorMsg);
+        var errorMsg = String.format("Empresa com CNPJ %s já existe", cnpj);
+        if (id != null) {
+            if (personRepository.existsByCnpjAndIdNot(cnpj, id)) {
+                throw new BusinessException(errorMsg);
+            }
+        } else {
+            if (personRepository.existsByCnpj(cnpj)) {
+                throw new BusinessException(errorMsg);
+            }
         }
     }
 
-    public void throwIfPhoneIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO) {
+    public void throwIfPhoneIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO, Long id) {
         String phone = personCreateRequestDTO.getPhone();
-        if (personRepository.existsByPhone(phone)) {
-            var errorMsg = String.format("Usuário com telefone %s já existe", phone);
-            throw new BusinessException(errorMsg);
+        var errorMsg = String.format("Usuário com telefone %s já existe", phone);
+        if (id != null) {
+            if (personRepository.existsByPhoneAndIdNot(phone, id)) {
+                throw new BusinessException(errorMsg);
+            }
+        } else {
+            if (personRepository.existsByPhone(phone)) {
+                throw new BusinessException(errorMsg);
+            }
         }
     }
 
     public void validatePersonCreation(PersonCreateRequestDTO personCreateRequestDTO) {
-        this.throwIfCpfIsNotUnique(personCreateRequestDTO);
+        this.throwIfCpfIsNotUnique(personCreateRequestDTO, null);
         this.throwIfEmailIsNotUnique(personCreateRequestDTO);
         this.throwIfPasswordsDontMatch(personCreateRequestDTO);
-        this.throwIfPhoneIsNotUnique(personCreateRequestDTO);
+        this.throwIfPhoneIsNotUnique(personCreateRequestDTO, null);
         cityService.getById(personCreateRequestDTO.getAddress().getCity());
     }
 
-    public void validatePersonUpdate(PersonUpdateRequestDTO personUpdateRequestDTO) {
-        this.throwIfCpfIsNotUnique(personUpdateRequestDTO);
-        this.throwIfPhoneIsNotUnique(personUpdateRequestDTO);
+    public void validatePersonUpdate(PersonUpdateRequestDTO personUpdateRequestDTO, Long id) {
+        this.throwIfCpfIsNotUnique(personUpdateRequestDTO, id);
+        this.throwIfPhoneIsNotUnique(personUpdateRequestDTO, id);
+        this.throwIfCnpjIsNotUnique(personUpdateRequestDTO, id);
         cityService.getById(personUpdateRequestDTO.getAddress().getCity());
     }
 }

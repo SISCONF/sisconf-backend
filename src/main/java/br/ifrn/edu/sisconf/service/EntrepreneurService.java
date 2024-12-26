@@ -33,7 +33,7 @@ public class EntrepreneurService {
     @Autowired
     private CityService cityService;
 
-    private void throwIfCnpjInvalid(PersonUpdateRequestDTO personUpdateRequestDTO) {
+    private void throwIfCnpjInvalid(PersonUpdateRequestDTO personUpdateRequestDTO, Long id) {
         String cnpj = personUpdateRequestDTO.getCnpj();
         String cnpjErrorMsg = "CNPJ não pode ser vazio";
 
@@ -45,17 +45,17 @@ public class EntrepreneurService {
         if (cnpj.isEmpty()) {
             throw new BusinessException(cnpjErrorMsg);
         }
-        personService.throwIfCnpjIsNotUnique(personUpdateRequestDTO);
+        personService.throwIfCnpjIsNotUnique(personUpdateRequestDTO, id);
     }
 
     private void validateEntrepreneurCreation(PersonCreateRequestDTO personCreateRequestDTO) {
         personService.validatePersonCreation(personCreateRequestDTO);
-        this.throwIfCnpjInvalid(personCreateRequestDTO);
+        this.throwIfCnpjInvalid(personCreateRequestDTO, null);
     }
 
-    private void validateEntrepreneurUpdate(PersonUpdateRequestDTO personUpdateRequestDTO) {
-        personService.validatePersonUpdate(personUpdateRequestDTO);
-        this.throwIfCnpjInvalid(personUpdateRequestDTO);
+    private void validateEntrepreneurUpdate(PersonUpdateRequestDTO personUpdateRequestDTO, Long id) {
+        personService.validatePersonUpdate(personUpdateRequestDTO, id);
+        this.throwIfCnpjInvalid(personUpdateRequestDTO, id);
     }
 
     public EntrepreneurResponseDTO getById(Long id) {
@@ -97,11 +97,11 @@ public class EntrepreneurService {
 
     public EntrepreneurResponseDTO update(Long id, EntrepreneurUpdateRequestDTO entrepreneurUpdateRequestDTO) {
         PersonUpdateRequestDTO personUpdateRequestDTO = entrepreneurUpdateRequestDTO.getPerson();
-        this.validateEntrepreneurUpdate(personUpdateRequestDTO);
 
         var entrepreneur = entrepreneurRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(
                 String.format("Empreendedor com id %d não existe", id)
         ));
+        this.validateEntrepreneurUpdate(personUpdateRequestDTO, entrepreneur.getPerson().getId());
 
         var userUpdateRecord = new UserUpdateRecord(
                 entrepreneur.getPerson().getKeycloakId(),
@@ -126,7 +126,7 @@ public class EntrepreneurService {
         }
     }
 
-    public void deletebyId(Long id) {
+    public void deleteById(Long id) {
         var entrepreneur = entrepreneurRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(
                 String.format("Empreendedor com id %d não existe", id)
         ));

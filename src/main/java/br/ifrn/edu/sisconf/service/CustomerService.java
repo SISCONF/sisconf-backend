@@ -52,9 +52,9 @@ public class CustomerService {
     public CustomerResponseDTO save(CustomerCreateRequestDTO customerCreateRequestDTO) {
         PersonCreateRequestDTO personCreateRequestDTO = customerCreateRequestDTO.getPerson();
         personService.throwIfPasswordsDontMatch(personCreateRequestDTO);
-        personService.throwIfCpfIsNotUnique(personCreateRequestDTO);
+        personService.throwIfCpfIsNotUnique(personCreateRequestDTO, null);
+        personService.throwIfPhoneIsNotUnique(personCreateRequestDTO, null);
         personService.throwIfEmailIsNotUnique(personCreateRequestDTO);
-        personService.throwIfPhoneIsNotUnique(personCreateRequestDTO);
 
         cityService.getById(personCreateRequestDTO.getAddress().getCity());
 
@@ -76,8 +76,8 @@ public class CustomerService {
         if (!customerRepository.existsById(id)) {
             throw new BusinessException("Usuário com esse ID não existe");
         }
-        personService.throwIfPhoneIsNotUnique(customerUpdateRequestDTO.getPerson());
-        personService.throwIfCpfIsNotUnique(customerUpdateRequestDTO.getPerson());
+        personService.throwIfPhoneIsNotUnique(customerUpdateRequestDTO.getPerson(), id);
+        personService.throwIfCpfIsNotUnique(customerUpdateRequestDTO.getPerson(), id);
 
         Customer customer = getCustomerById(id);
 

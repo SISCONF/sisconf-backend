@@ -40,7 +40,7 @@ public class EntrepreneurController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        entrepreneurService.deletebyId(id);
+        entrepreneurService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }
