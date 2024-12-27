@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS entrepreneur(
+    id SERIAL PRIMARY KEY,
+    business_name VARCHAR(128) NOT NULL,
+    person_id INT NOT NULL REFERENCES person ON DELETE RESTRICT UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE customer ADD CONSTRAINT customer_person_unique UNIQUE(person_id);

@@ -1,6 +1,5 @@
 package br.ifrn.edu.sisconf.service;
 
-import br.ifrn.edu.sisconf.domain.Person;
 import br.ifrn.edu.sisconf.domain.dtos.PersonCreateRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.PersonUpdateRequestDTO;
 import br.ifrn.edu.sisconf.exception.BusinessException;
@@ -13,11 +12,20 @@ public class PersonService {
     @Autowired
     private PersonRepository personRepository;
 
-    public void throwIfCpfIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO) {
-        String cpf =personCreateRequestDTO.getCpf();
-        if (personRepository.existsByCpf(cpf)) {
-            var errorMsg = String.format("Usuário com CPF %s já existe", cpf);
-            throw new BusinessException(errorMsg);
+    @Autowired
+    private CityService cityService;
+
+    public void throwIfCpfIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO, Long id) {
+        String cpf = personCreateRequestDTO.getCpf();
+        var errorMsg = String.format("Usuário com CPF %s já existe", cpf);
+        if (id != null) {
+            if (personRepository.existsByCpfAndIdNot(cpf, id)) {
+                throw new BusinessException(errorMsg);
+            }
+        } else {
+            if (personRepository.existsByCpf(cpf)) {
+                throw new BusinessException(errorMsg);
+            }
         }
     }
 
@@ -35,19 +43,45 @@ public class PersonService {
         }
     }
 
-    public void throwIfCnpjIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO) {
+    public void throwIfCnpjIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO, Long id) {
         String cnpj = personCreateRequestDTO.getCnpj();
-        if (personRepository.existsByCnpj(cnpj)) {
-            var errorMsg = String.format("Empresa com CNPJ %s já existe", cnpj);
-            throw new BusinessException(errorMsg);
+        var errorMsg = String.format("Empresa com CNPJ %s já existe", cnpj);
+        if (id != null) {
+            if (personRepository.existsByCnpjAndIdNot(cnpj, id)) {
+                throw new BusinessException(errorMsg);
+            }
+        } else {
+            if (personRepository.existsByCnpj(cnpj)) {
+                throw new BusinessException(errorMsg);
+            }
         }
     }
 
-    public void throwIfPhoneIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO) {
+    public void throwIfPhoneIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO, Long id) {
         String phone = personCreateRequestDTO.getPhone();
-        if (personRepository.existsByPhone(phone)) {
-            var errorMsg = String.format("Usuário com telefone %s já existe", phone);
-            throw new BusinessException(errorMsg);
+        var errorMsg = String.format("Usuário com telefone %s já existe", phone);
+        if (id != null) {
+            if (personRepository.existsByPhoneAndIdNot(phone, id)) {
+                throw new BusinessException(errorMsg);
+            }
+        } else {
+            if (personRepository.existsByPhone(phone)) {
+                throw new BusinessException(errorMsg);
+            }
         }
+    }
+
+    public void validatePersonCreation(PersonCreateRequestDTO personCreateRequestDTO) {
+        this.throwIfCpfIsNotUnique(personCreateRequestDTO, null);
+        this.throwIfEmailIsNotUnique(personCreateRequestDTO);
+        this.throwIfPasswordsDontMatch(personCreateRequestDTO);
+        this.throwIfPhoneIsNotUnique(personCreateRequestDTO, null);
+        cityService.getById(personCreateRequestDTO.getAddress().getCity());
+    }
+
+    public void validatePersonUpdate(PersonUpdateRequestDTO personUpdateRequestDTO, Long id) {
+        this.throwIfCpfIsNotUnique(personUpdateRequestDTO, id);
+        this.throwIfPhoneIsNotUnique(personUpdateRequestDTO, id);
+        cityService.getById(personUpdateRequestDTO.getAddress().getCity());
     }
 }

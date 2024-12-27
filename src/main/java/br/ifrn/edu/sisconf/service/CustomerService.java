@@ -1,5 +1,6 @@
 package br.ifrn.edu.sisconf.service;
 
+import br.ifrn.edu.sisconf.constants.KeycloakConstants;
 import br.ifrn.edu.sisconf.domain.Customer;
 import br.ifrn.edu.sisconf.domain.dtos.CustomerCreateRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.CustomerResponseDTO;
@@ -50,53 +51,60 @@ public class CustomerService {
 
     public CustomerResponseDTO save(CustomerCreateRequestDTO customerCreateRequestDTO) {
         PersonCreateRequestDTO personCreateRequestDTO = customerCreateRequestDTO.getPerson();
-        personService.throwIfPasswordsDontMatch(personCreateRequestDTO);
-        personService.throwIfCpfIsNotUnique(personCreateRequestDTO);
-        personService.throwIfEmailIsNotUnique(personCreateRequestDTO);
-        personService.throwIfPhoneIsNotUnique(personCreateRequestDTO);
-
-        cityService.getById(personCreateRequestDTO.getAddress().getCity());
+        personService.validatePersonCreation(personCreateRequestDTO);
 
         var customer = customerMapper.toEntity(customerCreateRequestDTO);
         UserRegistrationRecord userRegistrationRecord = new UserRegistrationRecord(
                 personCreateRequestDTO.getFirstName(),
                 personCreateRequestDTO.getLastName(),
                 personCreateRequestDTO.getPassword(),
-                personCreateRequestDTO.getEmail()
+                personCreateRequestDTO.getEmail(),
+                KeycloakConstants.CLIENT_GROUP_NAME
         );
         UserRegistrationResponse userRegistrationResponse = keycloakUserService.create(userRegistrationRecord);
         customer.getPerson().setKeycloakId(userRegistrationResponse.keycloakId());
-        customerRepository.save(customer);
-        return customerMapper.toResponseDTO(customer);
+        try {
+            customerRepository.save(customer);
+            return customerMapper.toResponseDTO(customer);
+        } catch (Exception exception) {
+            keycloakUserService.deleteById(userRegistrationResponse.keycloakId());
+            throw exception;
+        }
     }
 
     public CustomerResponseDTO update(CustomerUpdateRequestDTO customerUpdateRequestDTO, Long id) {
         if (!customerRepository.existsById(id)) {
             throw new BusinessException("Usuário com esse ID não existe");
         }
-        personService.throwIfPhoneIsNotUnique(customerUpdateRequestDTO.getPerson());
-        personService.throwIfCpfIsNotUnique(customerUpdateRequestDTO.getPerson());
+        var customer = getCustomerById(id);
+        personService.validatePersonUpdate(customerUpdateRequestDTO.getPerson(), customer.getPerson().getId());
 
-        Customer customer = getCustomerById(id);
-
-        cityService.getById(customerUpdateRequestDTO.getPerson().getAddress().getCity());
-
-        UserUpdateRecord userUpdateRecord = new UserUpdateRecord(
+        var userUpdateRecord = new UserUpdateRecord(
                 customer.getPerson().getKeycloakId(),
                 customerUpdateRequestDTO.getPerson().getFirstName(),
                 customerUpdateRequestDTO.getPerson().getLastName()
         );
         keycloakUserService.update(userUpdateRecord);
 
-        customerMapper.updateEntityFromDTO(customerUpdateRequestDTO, customer);
-        var updatedCustomer = customerRepository.save(customer);
-
-        return customerMapper.toResponseDTO(updatedCustomer);
+        try {
+            customerMapper.updateEntityFromDTO(customerUpdateRequestDTO, customer);
+            var updatedCustomer = customerRepository.save(customer);
+            return customerMapper.toResponseDTO(updatedCustomer);
+        } catch (Exception exception) {
+            // Must revert changes which were made to user on Keycloak
+            var oldUserRecord = new UserUpdateRecord(
+                    customer.getPerson().getKeycloakId(),
+                    customer.getPerson().getFirstName(),
+                    customer.getPerson().getLastName()
+            );
+            keycloakUserService.update(oldUserRecord);
+            throw exception;
+        }
     }
 
     public void deleteById(Long id) {
         Customer customer = getCustomerById(id);
-        keycloakUserService.deleteById(customer.getPerson().getKeycloakId());
         customerRepository.deleteById(id);
+        keycloakUserService.deleteById(customer.getPerson().getKeycloakId());
     }
 }
