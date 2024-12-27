@@ -20,7 +20,6 @@ public class PersonService {
         var errorMsg = String.format("Usuário com CPF %s já existe", cpf);
         if (id != null) {
             if (personRepository.existsByCpfAndIdNot(cpf, id)) {
-                System.out.println("EITA SOU TRUE");
                 throw new BusinessException(errorMsg);
             }
         } else {
