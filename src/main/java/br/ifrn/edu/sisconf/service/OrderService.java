@@ -1,9 +1,15 @@
 package br.ifrn.edu.sisconf.service;
 
+import br.ifrn.edu.sisconf.domain.Customer;
+import br.ifrn.edu.sisconf.domain.Food;
 import br.ifrn.edu.sisconf.domain.Order;
 import br.ifrn.edu.sisconf.domain.dtos.OrderRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrderResponseDTO;
+import br.ifrn.edu.sisconf.domain.dtos.OrderUpdateRequestDTO;
+import br.ifrn.edu.sisconf.exception.BusinessException;
 import br.ifrn.edu.sisconf.mapper.OrderMapper;
+import br.ifrn.edu.sisconf.repository.CustomerRepository;
+import br.ifrn.edu.sisconf.repository.FoodRepository;
 import br.ifrn.edu.sisconf.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,41 +25,52 @@ public class OrderService {
     private OrderRepository orderRepository;
 
     @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
+    private FoodRepository foodRepository;
+
+    @Autowired
     private OrderMapper mapper;
 
-    public OrderService(OrderRepository orderRepository, OrderMapper mapper) {
-        this.orderRepository = orderRepository;
-        this.mapper = mapper;
-    }
+    public OrderResponseDTO createOrder(OrderRequestDTO orderRequestDTO) {
+        Customer customer = customerRepository.findById(orderRequestDTO.getCustomerId())
+                .orElseThrow(() -> new BusinessException("Cliente não encontrado"));
 
-    public OrderResponseDTO create(OrderRequestDTO dto) {
-        Order order = mapper.toEntity(dto);
-        order.setCode(UUID.randomUUID()); // Gera um código único para o pedido
+        Order order = mapper.toEntity(orderRequestDTO);
+        order.setCustomer(customer);
+        order.setCode(UUID.randomUUID());
+
         return mapper.toResponseDTO(orderRepository.save(order));
     }
 
-    public List<OrderResponseDTO> listAll() {
+    public OrderResponseDTO getOrderById(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Pedido com ID não encontrado"));
+        return mapper.toResponseDTO(order);
+    }
+
+    public List<OrderResponseDTO> getAllOrders() {
         return orderRepository.findAll().stream()
                 .map(mapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    public OrderResponseDTO getById(Long id) {
+    public OrderResponseDTO updateOrder(Long id, OrderUpdateRequestDTO orderUpdateRequestDTO) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
-        return mapper.toResponseDTO(order);
+
+        if (order == null) {
+            throw new RuntimeException("Order not found with code: " + id);
+        }
+        mapper.updateEntityFromDTO(orderUpdateRequestDTO, order);
+        return mapper.toResponseDTO(orderRepository.save(order));
     }
 
-    public OrderResponseDTO update(Long id, OrderRequestDTO dto) {
-        Order existingOrder = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
-        Order updatedOrder = mapper.toEntity(dto);
-        updatedOrder.setId(existingOrder.getId());
-        updatedOrder.setCode(existingOrder.getCode()); // Preserva o código
-        return mapper.toResponseDTO(orderRepository.save(updatedOrder));
-    }
-
-    public void delete(Long id) {
+    public void deleteOrder(Long id) {
+        if (!orderRepository.existsById(id)) {
+            throw new BusinessException("Pedido não encontrado.");
+        }
         orderRepository.deleteById(id);
     }
 }

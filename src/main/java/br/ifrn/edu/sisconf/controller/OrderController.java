@@ -1,9 +1,8 @@
 package br.ifrn.edu.sisconf.controller;
 
-import br.ifrn.edu.sisconf.domain.Order;
 import br.ifrn.edu.sisconf.domain.dtos.OrderRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrderResponseDTO;
-import br.ifrn.edu.sisconf.repository.OrderRepository;
+import br.ifrn.edu.sisconf.domain.dtos.OrderUpdateRequestDTO;
 import br.ifrn.edu.sisconf.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,28 +22,28 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<OrderResponseDTO> createOrder(@RequestBody OrderRequestDTO dto) {
-        return ResponseEntity.ok(orderService.create(dto));
+    public ResponseEntity<OrderResponseDTO> createOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
+        return ResponseEntity.ok(orderService.createOrder(orderRequestDTO));
     }
 
     @GetMapping
-    public ResponseEntity<List<OrderResponseDTO>> listAllOrders() {
-        return ResponseEntity.ok(orderService.listAll());
+    public ResponseEntity<List<OrderResponseDTO>> getAllOrders() {
+        return ResponseEntity.ok(orderService.getAllOrders());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponseDTO> getOrderById(@PathVariable Long id) {
-        return ResponseEntity.ok(orderService.getById(id));
+        return ResponseEntity.ok(orderService.getOrderById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<OrderResponseDTO> updateOrder(@PathVariable Long id, @RequestBody OrderRequestDTO dto) {
-        return ResponseEntity.ok(orderService.update(id, dto));
+    public ResponseEntity<OrderResponseDTO> updateOrder(@PathVariable Long id, @RequestBody OrderUpdateRequestDTO orderUpdateRequestDTO) {
+        return ResponseEntity.ok(orderService.updateOrder(id, orderUpdateRequestDTO));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
-        orderService.delete(id);
+        orderService.deleteOrder(id);
         return ResponseEntity.noContent().build();
     }
 
