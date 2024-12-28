@@ -1,10 +1,14 @@
 package br.ifrn.edu.sisconf.domain;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
+@AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "entrepreneur")

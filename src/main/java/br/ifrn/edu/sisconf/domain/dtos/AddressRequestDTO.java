@@ -1,7 +1,9 @@
 package br.ifrn.edu.sisconf.domain.dtos;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AddressRequestDTO {
     @NotBlank(message = "Rua deve ser preenchida")
+    @Size(max = 128, message = "Rua deve ter no máximo 128 caracteres")
     private String street;
 
     @NotBlank(message = "O CEP deve ser preenchido")
@@ -20,11 +23,12 @@ public class AddressRequestDTO {
     private String zipCode;
 
     @NotBlank(message = "Bairro não pode ser vazio")
+    @Size(max = 128, message = "Bairro deve ter no máximo 128 caracteres")
     private String neighbourhood;
 
-    @NotBlank(message = "Número não pode ser vazio")
+    @NotNull(message = "Número não pode ser vazio")
     private Integer number;
 
-    @NotBlank(message = "Cidade não pode ser vazio")
+    @NotNull(message = "Cidade não pode ser vazio")
     private Long city;
 }
