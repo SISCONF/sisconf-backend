@@ -1,18 +1,16 @@
 package br.ifrn.edu.sisconf.domain;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "order_food")
-public class OrderFood {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+public class OrderFood extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "food_id", nullable = false)
     private Food food;
