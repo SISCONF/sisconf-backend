@@ -15,9 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class OrderRequestDTO {
     private BigDecimal totalPrice;
-    private OrderStatus status;
+    private OrderStatus status = OrderStatus.WAITING;
     private Long customerId;
-    private Long ordersGroupId;
-    private LocalDateTime orderDate;
-
+    private LocalDateTime orderDate = LocalDateTime.now();
 }
