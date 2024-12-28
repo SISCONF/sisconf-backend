@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,4 +25,8 @@ public class Food extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(length = 9, nullable = false)
     private FoodCategory category;
+
+    @OneToMany(mappedBy = "food", targetEntity = StockFood.class)
+    private List<Stock> stocks = new ArrayList<>();
+
 }
