@@ -33,6 +33,9 @@ public class EntrepreneurService {
     @Autowired
     private CityService cityService;
 
+    @Autowired
+    private StockService stockService;
+
     private void throwIfCnpjInvalid(PersonUpdateRequestDTO personUpdateRequestDTO, Long id) {
         String cnpj = personUpdateRequestDTO.getCnpj();
         String cnpjErrorMsg = "CNPJ não pode ser vazio";
@@ -88,6 +91,7 @@ public class EntrepreneurService {
         entrepreneur.getPerson().setKeycloakId(userRegistrationResponse.keycloakId());
         try {
             var savedEntrepreneur = entrepreneurRepository.save(entrepreneur);
+            stockService.save(entrepreneur);
             return entrepreneurMapper.toResponseDTO(savedEntrepreneur);
         } catch (Exception exception) {
             keycloakUserService.deleteById(userRegistrationResponse.keycloakId());
@@ -130,6 +134,7 @@ public class EntrepreneurService {
         var entrepreneur = entrepreneurRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(
                 String.format("Empreendedor com id %d não existe", id)
         ));
+        stockService.delete(entrepreneur);
         entrepreneurRepository.deleteById(id);
         keycloakUserService.deleteById(entrepreneur.getPerson().getKeycloakId());
     }
