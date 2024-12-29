@@ -1,0 +1,19 @@
+package br.ifrn.edu.sisconf.domain.dtos;
+
+import java.time.LocalDateTime;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class StockResponseDTO {
+    private Long id;
+    private Long entrepreneurId;
+    private LocalDateTime updatedAt;
+    private LocalDateTime createdAt;
+}
