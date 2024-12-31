@@ -14,10 +14,12 @@ RUN ./mvnw dependency:go-offline -B
 COPY src src
 RUN ./mvnw package -DskipTests
 
-FROM eclipse-temurin:21-jre-alpine
-WORKDIR /app
-COPY --from=build /workspace/app/target/*.jar app.jar
+FROM eclipse-temurin:21-jdk-alpine
+WORKDIR /workspace/app
+COPY --from=build /workspace/app .
 
 EXPOSE 8080
 
-CMD ["java", "-jar", "app.jar"]
+WORKDIR /workspace/app
+
+CMD ["./mvnw", "spring-boot:run"]

@@ -10,18 +10,23 @@ services:
       - keycloak-data:/opt/keycloak/conf
 
   postgres:
-    image: postgres:16-alphine
+    image: postgres:16
     volumes:
       - postgres-data:/var/lib/postgresql/data
     env_file:
       - ./envs/postgres.env
 
   sisconf:
-    build: ./
+    build:
+      context: ./
+      dockerfile: ./compose/local/Dockerfile
     ports:
       - '8080:8080'
     volumes:
-      - ./target:/workspace/app/target
+      - ./target:/workspace/app/target # For live reloading
+      - ./src:/workspace/app/src # For live reloading
+      - ./pom.xml:/workspace/app/pom.xml # For efficient build
+      - mvn-cache:/root/.m2 # For caching mvn dependencies
     env_file:
       - ./envs/spring.env
     depends_on:
@@ -31,3 +36,4 @@ services:
 volumes:
   keycloak-data:
   postgres-data:
+  mvn-cache:
