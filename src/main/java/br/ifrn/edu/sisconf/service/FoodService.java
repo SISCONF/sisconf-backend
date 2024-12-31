@@ -22,20 +22,26 @@ public class FoodService {
     private FoodMapper mapper;
 
     public void throwIfInvalidUnitPrice(FoodRequestDTO createFoodDto) {
-        if (createFoodDto.getUnitPrice() != null && createFoodDto.getUnitPrice().signum() != 1) {
+        if (createFoodDto.getUnitPrice().signum() != 1) {
             throw new BusinessException("O preço unitário não pode ser 0, nem negativo.");
         }
     }
 
-    public void throwIfInvalidName(FoodRequestDTO createFoodDto) {
-        if (createFoodDto.getName() != null && createFoodDto.getName().isEmpty()) {
-            throw new BusinessException("O campo nome não pode ser um texto vazio.");
+    public void throwIfFoodAlreadyExists(FoodRequestDTO createFoodDto, Long foodId) {
+        if (foodId == null) {
+            if (foodRepository.existsByNameAndCategory(createFoodDto.getName(), createFoodDto.getCategory())) {
+                throw new BusinessException("Esta comida já está registrada no sistema");
+            }
+        } else {
+            if (foodRepository.existsByNameAndCategoryAndIdNot(createFoodDto.getName(), createFoodDto.getCategory(), foodId)) {
+                throw new BusinessException("Esta comida já está registrada no sistema");
+            }
         }
     }
 
     public FoodResponseDTO createFood(FoodRequestDTO createFoodDto) {
         throwIfInvalidUnitPrice(createFoodDto);
-        throwIfInvalidName(createFoodDto);
+        throwIfFoodAlreadyExists(createFoodDto, null);
         var food = mapper.toEntity(createFoodDto);
         foodRepository.save(food);
         return mapper.toResponseDTO(food);
@@ -64,7 +70,7 @@ public class FoodService {
         Food food = foodRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comida não econtrada."));
         throwIfInvalidUnitPrice(foodDto);
-        throwIfInvalidName(foodDto);
+        throwIfFoodAlreadyExists(foodDto, id);
         mapper.updateEntityFromDTO(foodDto, food);
         var updatedFood = foodRepository.save(food);
 
