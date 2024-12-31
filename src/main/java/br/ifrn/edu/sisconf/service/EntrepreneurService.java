@@ -134,7 +134,7 @@ public class EntrepreneurService {
         var entrepreneur = entrepreneurRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(
                 String.format("Empreendedor com id %d não existe", id)
         ));
-        stockService.delete(entrepreneur);
+        stockService.deleteByEntrepreneurId(entrepreneur.getId());
         entrepreneurRepository.deleteById(id);
         keycloakUserService.deleteById(entrepreneur.getPerson().getKeycloakId());
     }

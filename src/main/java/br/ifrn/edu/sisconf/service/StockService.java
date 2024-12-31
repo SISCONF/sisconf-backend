@@ -28,8 +28,11 @@ public class StockService {
         stockRepository.save(stock);
     }
 
-    public void delete(Entrepreneur entrepreneur) {
-        Stock stock = stockRepository.findByEntrepreneurId(entrepreneur.getId());
+    public void deleteByEntrepreneurId(Long entrepreneurId) {
+        Stock stock = stockRepository.findByEntrepreneurId(entrepreneurId);
+        if (stock == null) {
+            throw new ResourceNotFoundException("Este estoque não existe");
+        }
         stockRepository.deleteById(stock.getId());
     }
 
