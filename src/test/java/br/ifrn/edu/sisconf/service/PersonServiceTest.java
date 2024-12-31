@@ -123,4 +123,184 @@ public class PersonServiceTest {
             () -> personService.throwIfCpfIsNotUnique(personUpdateRequestDTO, personToBeUpdated.getId())
         );
     }
+
+    @Test
+    void createPersonIfPasswordsMatch() {
+        var personCreateRequestDTO = new PersonCreateRequestDTO();
+        final String password = "abc12345";
+        personCreateRequestDTO.setPassword(password);
+        personCreateRequestDTO.setPassword2(password);
+
+        assertDoesNotThrow(() -> personService.throwIfPasswordsDontMatch(personCreateRequestDTO));
+    }
+
+    @Test
+    void dontCreatePersonIfPasswordsMatch() {
+        var personCreateRequestDTO = new PersonCreateRequestDTO();
+        personCreateRequestDTO.setPassword("abc123456");
+        personCreateRequestDTO.setPassword2("abc12345");
+
+        assertThrowsExactly(
+            BusinessException.class,
+            () -> personService.throwIfPasswordsDontMatch(personCreateRequestDTO)
+        );
+    }
+
+    @Test
+    void dontCreatePersonIfEmailIsNotUnique() {
+        var personCreateRequestDTO = new PersonCreateRequestDTO();
+        personCreateRequestDTO.setEmail("teste2@email.com");
+        when(personRepository.existsByEmail(personCreateRequestDTO.getEmail())).thenReturn(true);
+
+        assertThrowsExactly(
+            BusinessException.class,
+            () -> personService.throwIfEmailIsNotUnique(personCreateRequestDTO)
+        );
+    }
+
+    @Test
+    void createPersonIfEmailIsUnique() {
+        var personCreateRequestDTO = new PersonCreateRequestDTO();
+        personCreateRequestDTO.setEmail("teste@email.com");
+        when(personRepository.existsByEmail(personCreateRequestDTO.getEmail())).thenReturn(false);
+
+        assertDoesNotThrow(() -> personService.throwIfEmailIsNotUnique(personCreateRequestDTO));
+    }
+
+    @Test
+    void dontCreatePersonIfCnpjIsNotUnique() {
+        var personCreateRequestDTO = new PersonCreateRequestDTO();
+        personCreateRequestDTO.setCnpj("22.222.222/0001-22");
+        when(personRepository.existsByCnpj(personCreateRequestDTO.getCnpj())).thenReturn(true);
+
+        assertThrowsExactly(
+            BusinessException.class,
+            () -> personService.throwIfCnpjIsNotUnique(personCreateRequestDTO, null)
+        );
+    }
+
+    @Test
+    void createPersonIfCnpjIsUnique() {
+        var personCreateRequestDTO = new PersonCreateRequestDTO();
+        personCreateRequestDTO.setCnpj("11.111.111/0001-11");
+        when(personRepository.existsByCnpj(personCreateRequestDTO.getCnpj())).thenReturn(false);
+
+        assertDoesNotThrow(() -> personService.throwIfCnpjIsNotUnique(personCreateRequestDTO, null));
+    }
+
+    @Test
+    void dontUpdatePersonIfCnpjIsNotUnique() {
+        var countryState = new CountryState("Pernambuco", "PE");
+        countryState.setId(1L);
+        var city = new City("Petrolina", countryState);
+        city.setId(1L);
+        var address = new Address(
+            "Rua Teste",
+            "10000-000",
+            "Teste",
+            10,
+            city
+        );
+        address.setId(1L);
+        var personToBeUpdated = new Person(
+            "asdasd019201",
+            "Lôbo",
+            "Solitário",
+            "lobo.solitario@gmail.com",
+            "111.111.111-34",
+            "33.333.333/0001-33",
+            "(22) 22222-2222",
+            address
+        );
+        personToBeUpdated.setId(1L);
+        var personUpdateRequestDTO = new PersonUpdateRequestDTO();
+        personUpdateRequestDTO.setCnpj("22.222.222/0001-22");
+        when(personRepository.existsByCnpjAndIdNot(personUpdateRequestDTO.getCnpj(), personToBeUpdated.getId())).thenReturn(true);
+
+        assertThrowsExactly(
+            BusinessException.class,
+            () -> personService.throwIfCnpjIsNotUnique(personUpdateRequestDTO, personToBeUpdated.getId())
+        );
+    }
+
+    @Test
+    void updatePersonIfCnpjIsUnique() {
+        var countryState = new CountryState("Pernambuco", "PE");
+        countryState.setId(1L);
+        var city = new City("Petrolina", countryState);
+        city.setId(1L);
+        var address = new Address(
+            "Rua Teste",
+            "10000-000",
+            "Teste",
+            10,
+            city
+        );
+        address.setId(1L);
+        var personToBeUpdated = new Person(
+            "asdasd019201",
+            "Lôbo",
+            "Solitário",
+            "lobo.solitario@gmail.com",
+            "111.111.111-34",
+            "33.333.333/0001-33",
+            "(22) 22222-2222",
+            address
+        );
+        personToBeUpdated.setId(1L);
+        var personUpdateRequestDTO = new PersonUpdateRequestDTO();
+        personUpdateRequestDTO.setCnpj("11.111.111/0001-11");
+        when(personRepository.existsByCnpjAndIdNot(personUpdateRequestDTO.getCnpj(), personToBeUpdated.getId())).thenReturn(false);
+
+        assertDoesNotThrow(() -> personService.throwIfCnpjIsNotUnique(personUpdateRequestDTO, personToBeUpdated.getId()));
+    }
+
+    @Test
+    void createPersonIfPhoneIsUnique() {
+        var personCreateRequestDTO = new PersonCreateRequestDTO();
+        personCreateRequestDTO.setPhone("(11) 91111-1111");
+        when(personRepository.existsByPhone(personCreateRequestDTO.getPhone())).thenReturn(false);
+
+        assertDoesNotThrow(() -> personService.throwIfPhoneIsNotUnique(
+            personCreateRequestDTO,
+            null
+        ));
+    }
+
+    @Test
+    void dontCreatePersonIfPhoneIsNotUnique() {
+        var personCreateRequestDTO = new PersonCreateRequestDTO();
+        personCreateRequestDTO.setPhone("(11) 92222-2222");
+        when(personRepository.existsByPhone(personCreateRequestDTO.getPhone())).thenReturn(true);
+
+        assertThrowsExactly(
+            BusinessException.class,
+            () -> personService.throwIfPhoneIsNotUnique(personCreateRequestDTO, null)
+        );
+    }
+
+    @Test
+    void updatePersonIfPhoneIsUnique() {
+        var person = new Person();
+        person.setId(1L);
+        var personUpdateRequestDTO = new PersonUpdateRequestDTO();
+        personUpdateRequestDTO.setPhone("(11) 91111-1111");
+        when(personRepository.existsByPhoneAndIdNot(personUpdateRequestDTO.getPhone(), person.getId())).thenReturn(false);
+
+        assertDoesNotThrow(() -> personService.throwIfPhoneIsNotUnique(personUpdateRequestDTO, person.getId()));
+    }
+
+    @Test
+    void dontUpdatePersonIfPhoneIsNotUnique() {
+        var person = new Person();
+        person.setId(1L);
+        var personUpdateRequestDTO = new PersonUpdateRequestDTO();
+        personUpdateRequestDTO.setPhone("(11) 92222-2222");
+        when(personRepository.existsByPhoneAndIdNot(personUpdateRequestDTO.getPhone(), person.getId())).thenReturn(true);
+        
+        assertThrowsExactly(
+            BusinessException.class,
+            () -> personService.throwIfPhoneIsNotUnique(personUpdateRequestDTO, person.getId())
+        );
+    }
 }
