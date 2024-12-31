@@ -1,0 +1,33 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.7
+    ports:
+      - '8000:8080'
+    env_file:
+      - ./envs/keycloak.env
+    command: start-dev
+    volumes:
+      - keycloak-data:/opt/keycloak/conf
+
+  postgres:
+    image: postgres:16-alphine
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    env_file:
+      - ./envs/postgres.env
+
+  sisconf:
+    build: ./
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./target:/workspace/app/target
+    env_file:
+      - ./envs/spring.env
+    depends_on:
+      - keycloak
+      - postgres
+
+volumes:
+  keycloak-data:
+  postgres-data:
