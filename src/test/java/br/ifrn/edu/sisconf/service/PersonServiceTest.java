@@ -148,69 +148,27 @@ public class PersonServiceTest {
 
     @Test
     void dontUpdatePersonIfCnpjIsNotUnique() {
-        var countryState = new CountryState("Pernambuco", "PE");
-        countryState.setId(1L);
-        var city = new City("Petrolina", countryState);
-        city.setId(1L);
-        var address = new Address(
-            "Rua Teste",
-            "10000-000",
-            "Teste",
-            10,
-            city
-        );
-        address.setId(1L);
-        var personToBeUpdated = new Person(
-            "asdasd019201",
-            "Lôbo",
-            "Solitário",
-            "lobo.solitario@gmail.com",
-            "111.111.111-34",
-            "33.333.333/0001-33",
-            "(22) 22222-2222",
-            address
-        );
-        personToBeUpdated.setId(1L);
+        var person = new Person();
+        person.setId(1L);
         var personUpdateRequestDTO = new PersonUpdateRequestDTO();
         personUpdateRequestDTO.setCnpj("22.222.222/0001-22");
-        when(personRepository.existsByCnpjAndIdNot(personUpdateRequestDTO.getCnpj(), personToBeUpdated.getId())).thenReturn(true);
+        when(personRepository.existsByCnpjAndIdNot(personUpdateRequestDTO.getCnpj(), person.getId())).thenReturn(true);
 
         assertThrowsExactly(
             BusinessException.class,
-            () -> personService.throwIfCnpjIsNotUnique(personUpdateRequestDTO, personToBeUpdated.getId())
+            () -> personService.throwIfCnpjIsNotUnique(personUpdateRequestDTO, person.getId())
         );
     }
 
     @Test
     void updatePersonIfCnpjIsUnique() {
-        var countryState = new CountryState("Pernambuco", "PE");
-        countryState.setId(1L);
-        var city = new City("Petrolina", countryState);
-        city.setId(1L);
-        var address = new Address(
-            "Rua Teste",
-            "10000-000",
-            "Teste",
-            10,
-            city
-        );
-        address.setId(1L);
-        var personToBeUpdated = new Person(
-            "asdasd019201",
-            "Lôbo",
-            "Solitário",
-            "lobo.solitario@gmail.com",
-            "111.111.111-34",
-            "33.333.333/0001-33",
-            "(22) 22222-2222",
-            address
-        );
-        personToBeUpdated.setId(1L);
+        var person = new Person();
+        person.setId(1L);
         var personUpdateRequestDTO = new PersonUpdateRequestDTO();
         personUpdateRequestDTO.setCnpj("11.111.111/0001-11");
-        when(personRepository.existsByCnpjAndIdNot(personUpdateRequestDTO.getCnpj(), personToBeUpdated.getId())).thenReturn(false);
+        when(personRepository.existsByCnpjAndIdNot(personUpdateRequestDTO.getCnpj(), person.getId())).thenReturn(false);
 
-        assertDoesNotThrow(() -> personService.throwIfCnpjIsNotUnique(personUpdateRequestDTO, personToBeUpdated.getId()));
+        assertDoesNotThrow(() -> personService.throwIfCnpjIsNotUnique(personUpdateRequestDTO, person.getId()));
     }
 
     @Test
