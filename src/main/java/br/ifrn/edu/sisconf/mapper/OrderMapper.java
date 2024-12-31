@@ -13,6 +13,7 @@ public interface OrderMapper {
     Order toEntity(OrderRequestDTO orderRequestDTO);
 
     @Mapping(target = "customerId", source = "customer.id")
+    @Mapping(target = "foods", source = "orderFoods")
     OrderResponseDTO toResponseDTO(Order order);
 
     List<OrderResponseDTO> toDTOList(List<Order> orders);

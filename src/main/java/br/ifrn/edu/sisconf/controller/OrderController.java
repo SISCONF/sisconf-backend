@@ -4,7 +4,9 @@ import br.ifrn.edu.sisconf.domain.dtos.OrderRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrderResponseDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrderUpdateRequestDTO;
 import br.ifrn.edu.sisconf.service.OrderService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,13 +19,9 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    public OrderController(OrderService orderService) {
-        this.orderService = orderService;
-    }
-
     @PostMapping
-    public ResponseEntity<OrderResponseDTO> createOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
-        return ResponseEntity.ok(orderService.createOrder(orderRequestDTO));
+    public ResponseEntity<OrderResponseDTO> createOrder(@Valid @RequestBody OrderRequestDTO orderRequestDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(orderRequestDTO));
     }
 
     @GetMapping

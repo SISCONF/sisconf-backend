@@ -1,21 +1,22 @@
 package br.ifrn.edu.sisconf.domain.dtos;
 
-import br.ifrn.edu.sisconf.domain.enums.OrderStatus;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderRequestDTO {
-    private BigDecimal totalPrice;
-    private OrderStatus status = OrderStatus.WAITING;
+    @NotNull(message = "O ID do cliente é obrigatório.")
     private Long customerId;
-    private LocalDateTime orderDate = LocalDateTime.now();
+
+    @NotEmpty(message = "A lista de IDs de frutas e verduras não pode estar vazia.")
+    private List<Long> foodIds;
 }
