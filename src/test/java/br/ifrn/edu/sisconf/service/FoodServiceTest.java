@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import br.ifrn.edu.sisconf.domain.dtos.FoodRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.FoodResponseDTO;
 import br.ifrn.edu.sisconf.domain.enums.FoodCategory;
 import br.ifrn.edu.sisconf.exception.BusinessException;
+import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.FoodMapper;
 import br.ifrn.edu.sisconf.repository.FoodRepository;
 
@@ -161,4 +163,39 @@ public class FoodServiceTest {
 
         verify(foodRepository, never()).save(food);
     }
+
+    @Test
+    public void listAllFoods() {
+        Food food = new Food();
+        List<Food> foods = List.of(food);
+        FoodResponseDTO foodResponseDTO = new FoodResponseDTO();
+        List<FoodResponseDTO> foodResponseDTOs = List.of(foodResponseDTO);
+
+        when(foodRepository.findAll()).thenReturn(foods);
+        when(foodMapper.toDTOList(foods)).thenReturn(foodResponseDTOs);
+        
+        assertEquals(1, foodResponseDTOs.size());
+    }
+
+    @Test
+    public void deleteFoodByIdSuccessfully() {
+        Food food = new Food();
+        food.setId(1L);
+
+        when(foodRepository.existsById(food.getId())).thenReturn(true);
+        
+        foodService.delete(food.getId());
+
+        verify(foodRepository).deleteById(food.getId());
+    }
+
+    @Test
+    public void throwErrorWhenDeletingUnexistingFood() {
+        Long id = 1L;
+        
+        assertThrowsExactly(ResourceNotFoundException.class, () -> foodService.delete(id));
+
+        verify(foodRepository, never()).deleteById(id);
+    }
 }
+
