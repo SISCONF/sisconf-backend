@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -196,6 +197,33 @@ public class FoodServiceTest {
         assertThrowsExactly(ResourceNotFoundException.class, () -> foodService.delete(id));
 
         verify(foodRepository, never()).deleteById(id);
+    }
+
+    @Test
+    public void successfullyGetFoodWithRequestId() {
+        Food food = new Food();
+        food.setId(10L);
+
+        FoodResponseDTO foodResponseDTO = new FoodResponseDTO();
+        foodResponseDTO.setId(10L);
+
+        when(foodRepository.findById(food.getId())).thenReturn(Optional.of(food));
+        when(foodMapper.toResponseDTO(food)).thenReturn(foodResponseDTO);
+
+        FoodResponseDTO fetchedFood = foodService.getFood(food.getId());
+
+        assertEquals(foodResponseDTO, fetchedFood);
+        verify(foodRepository).findById(food.getId());
+    }
+
+    @Test
+    public void throwErrorWhenTryingToFetchUnexistingFood() {
+        Long id = 3L;
+
+        when(foodRepository.findById(id)).thenReturn(Optional.empty());
+        assertThrowsExactly(ResourceNotFoundException.class, () -> foodService.getFood(id));
+
+        verify(foodRepository).findById(id);
     }
 }
 
