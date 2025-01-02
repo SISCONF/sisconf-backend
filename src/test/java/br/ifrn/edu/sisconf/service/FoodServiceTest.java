@@ -103,41 +103,20 @@ public class FoodServiceTest {
     }
 
     @Test
-    public void createNonDuplicateFoodSuccessfully() {
+    public void createFoodSuccessfully() {
         FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
         foodRequestDTO.setName("Laranja");
         foodRequestDTO.setUnitPrice(new BigDecimal(0.01));
         foodRequestDTO.setCategory(FoodCategory.FRUIT);
 
         Food food = new Food();
-        food.setUnitPrice(new BigDecimal(0.01));
         food.setName("Laranja");
         food.setCategory(FoodCategory.FRUIT);
-
-        FoodResponseDTO foodResponseDTO = new FoodResponseDTO();
-        foodResponseDTO.setUnitPrice(new BigDecimal(0.01));
-        foodResponseDTO.setName("Laranja");
-        foodResponseDTO.setCategory(FoodCategory.FRUIT);
-
-        when(foodRepository.existsByNameAndCategory(foodRequestDTO.getName(), foodRequestDTO.getCategory())).thenReturn(false);
-        when(foodMapper.toEntity(foodRequestDTO)).thenReturn(food);
-        when(foodMapper.toResponseDTO(food)).thenReturn(foodResponseDTO);
-
-        FoodResponseDTO createdFood = foodService.createFood(foodRequestDTO);
-
-        verify(foodRepository).save(food);
-        assertEquals(foodResponseDTO, createdFood);
-    }
-
-    @Test
-    public void createFoodWithPriceGreaterThanZeroSuccessfully() {
-        FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
-        foodRequestDTO.setUnitPrice(new BigDecimal(0.01));
-
-        Food food = new Food();
         food.setUnitPrice(new BigDecimal(0.01));
         
         FoodResponseDTO foodResponseDTO = new FoodResponseDTO();
+        foodResponseDTO.setName("Laranja");
+        foodResponseDTO.setCategory(FoodCategory.FRUIT);
         foodResponseDTO.setUnitPrice(new BigDecimal(0.01));
 
         when(foodRepository.existsByNameAndCategory(foodRequestDTO.getName(), foodRequestDTO.getCategory())).thenReturn(false);
