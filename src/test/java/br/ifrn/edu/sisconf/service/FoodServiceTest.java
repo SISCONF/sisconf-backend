@@ -3,6 +3,7 @@ package br.ifrn.edu.sisconf.service;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -58,7 +59,7 @@ public class FoodServiceTest {
     }
 
     @Test
-    public void foodHasNonUniqueNameAndCategoryInCreation() {
+    public void duplicateFoodInExistsByNameAndCategoryThrowsError() {
         FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
         foodRequestDTO.setName("Maçã");
         foodRequestDTO.setCategory(FoodCategory.FRUIT);
@@ -68,7 +69,7 @@ public class FoodServiceTest {
     }
 
     @Test
-    public void foodHasUniqueNameAndCategoryInCreation() {
+    public void uniqueFoodInExistsByNameAndCategory() {
         FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
         foodRequestDTO.setName("Banana");
         foodRequestDTO.setCategory(FoodCategory.FRUIT);
@@ -78,7 +79,7 @@ public class FoodServiceTest {
     }
 
     @Test
-    public void FoodWithNonUniqueNameAndCategoryInUpdate() {
+    public void nonDuplicateFoodInExistsByNameAndCategoryAndIdNotThrowsError() {
         Food food = new Food();
         food.setId(1L);
 
@@ -92,7 +93,7 @@ public class FoodServiceTest {
     }
 
     @Test
-    public void FoodWithUniqueNameAndCategoryInUpdate() {
+    public void nonDuplicateFoodInExistsByNameAndCategoryAndIdNot() {
         Food food = new Food();
         food.setId(1L);
 
@@ -133,7 +134,7 @@ public class FoodServiceTest {
     }
 
     @Test
-    public void failedFoodCreationBecauseOfInvalidPrice() {
+    public void createFoodWithInvalidPriceThrowsError() {
         BigDecimal unitPrice = new BigDecimal(0);
         FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
         foodRequestDTO.setUnitPrice(unitPrice);
@@ -148,7 +149,7 @@ public class FoodServiceTest {
     }
 
     @Test
-    public void failedFoodCreationBecauseOfExistingFood() {
+    public void createDuplicateFoodThrowsError() {
         FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
         foodRequestDTO.setName("Laranja");
         foodRequestDTO.setCategory(FoodCategory.FRUIT);
@@ -191,7 +192,7 @@ public class FoodServiceTest {
     }
 
     @Test
-    public void throwErrorWhenDeletingUnexistingFood() {
+    public void deleteUnexistingFoodThrowsError() {
         Long id = 1L;
         
         assertThrowsExactly(ResourceNotFoundException.class, () -> foodService.delete(id));
@@ -200,7 +201,7 @@ public class FoodServiceTest {
     }
 
     @Test
-    public void successfullyGetFoodWithRequestId() {
+    public void getFoodWithRequestIdSuccessfully() {
         Food food = new Food();
         food.setId(1L);
 
@@ -217,7 +218,7 @@ public class FoodServiceTest {
     }
 
     @Test
-    public void throwErrorWhenTryingToFetchUnexistingFood() {
+    public void getUnexistingFoodThrowsError() {
         Long id = 1L;
 
         when(foodRepository.findById(id)).thenReturn(Optional.empty());
@@ -257,5 +258,55 @@ public class FoodServiceTest {
         assertEquals(foodResponseDTO, updatedFood);
     }
 
-}
+    @Test
+    public void updateFoodWithNonUniqueNameInCategoryThrowsError() {
+        FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
+        foodRequestDTO.setName("Cebola");
+        foodRequestDTO.setCategory(FoodCategory.VEGETABLE);
 
+        Food food = new Food();
+        food.setId(1L);
+        food.setName("Maçã");
+        food.setCategory(FoodCategory.FRUIT);
+
+        when(foodRepository.findById(1L)).thenReturn(Optional.of(food));
+        when(foodRepository.existsByNameAndCategoryAndIdNot(foodRequestDTO.getName(), foodRequestDTO.getCategory(), 1L)).thenReturn(true);
+
+        assertThrowsExactly(BusinessException.class, () -> foodService.throwIfFoodAlreadyExists(foodRequestDTO, 1L));
+
+        verify(foodMapper, never()).updateEntityFromDTO(foodRequestDTO, food);
+        verify(foodRepository, never()).save(food);
+    }
+
+    @Test
+    public void updateFoodWithInvalidUnitPriceThrowsError() {
+        FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
+        foodRequestDTO.setUnitPrice(new BigDecimal(0));
+
+        Food food = new Food();
+        food.setId(1L);
+        food.setUnitPrice(new BigDecimal(0.01));    
+
+        when(foodRepository.findById(1L)).thenReturn(Optional.of(food));
+        when(foodRepository.existsByNameAndCategoryAndIdNot(foodRequestDTO.getName(), foodRequestDTO.getCategory(), 1L)).thenReturn(false);
+
+        assertThrowsExactly(BusinessException.class, () -> foodService.throwIfInvalidUnitPrice(foodRequestDTO));
+        
+        verify(foodMapper, never()).updateEntityFromDTO(foodRequestDTO, food);
+        verify(foodRepository, never()).save(food);
+    }
+
+    @Test
+    public void updateUnexistingFoodThrowsError() {
+        FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
+        foodRequestDTO.setName("Abacaxi");
+        foodRequestDTO.setCategory(FoodCategory.FRUIT);
+        foodRequestDTO.setUnitPrice(new BigDecimal(0.01));
+
+        when(foodRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrowsExactly(ResourceNotFoundException.class, () -> foodService.update(1L, foodRequestDTO));
+
+        verify(foodRepository, never()).save(any(Food.class));
+    }
+}
