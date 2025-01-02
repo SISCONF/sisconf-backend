@@ -25,5 +25,6 @@ public interface FoodMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "stocks", ignore = true)
     void updateEntityFromDTO(FoodRequestDTO dto, @MappingTarget Food food);
 }
