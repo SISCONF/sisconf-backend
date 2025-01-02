@@ -202,10 +202,10 @@ public class FoodServiceTest {
     @Test
     public void successfullyGetFoodWithRequestId() {
         Food food = new Food();
-        food.setId(10L);
+        food.setId(1L);
 
         FoodResponseDTO foodResponseDTO = new FoodResponseDTO();
-        foodResponseDTO.setId(10L);
+        foodResponseDTO.setId(1L);
 
         when(foodRepository.findById(food.getId())).thenReturn(Optional.of(food));
         when(foodMapper.toResponseDTO(food)).thenReturn(foodResponseDTO);
@@ -218,7 +218,7 @@ public class FoodServiceTest {
 
     @Test
     public void throwErrorWhenTryingToFetchUnexistingFood() {
-        Long id = 3L;
+        Long id = 1L;
 
         when(foodRepository.findById(id)).thenReturn(Optional.empty());
         assertThrowsExactly(ResourceNotFoundException.class, () -> foodService.getFood(id));
@@ -226,6 +226,36 @@ public class FoodServiceTest {
         verify(foodRepository).findById(id);
     }
 
+    @Test
+    public void updateExistingFoodSuccessfully() {
+        Food food = new Food();
+        food.setId(1L);
+        food.setName("Maçã");
+        food.setCategory(FoodCategory.FRUIT);
+        food.setUnitPrice(new BigDecimal(0.01));
+
+        FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
+        foodRequestDTO.setName("Cenoura");
+        foodRequestDTO.setCategory(FoodCategory.VEGETABLE);
+        foodRequestDTO.setUnitPrice(new BigDecimal(0.01));
+
+        FoodResponseDTO foodResponseDTO = new FoodResponseDTO();
+        foodResponseDTO.setId(1L);
+        foodResponseDTO.setName("Cenoura");
+        foodResponseDTO.setCategory(FoodCategory.VEGETABLE);
+        foodResponseDTO.setUnitPrice(new BigDecimal(0.01));
+
+        when(foodRepository.findById(food.getId())).thenReturn(Optional.of(food));
+        when(foodRepository.existsByNameAndCategoryAndIdNot(foodRequestDTO.getName(), foodRequestDTO.getCategory(), food.getId())).thenReturn(false);
+        when(foodMapper.toResponseDTO(food)).thenReturn(foodResponseDTO);
+        when(foodRepository.save(food)).thenReturn(food);
+
+        FoodResponseDTO updatedFood = foodService.update(food.getId(), foodRequestDTO);
+        
+        verify(foodMapper).updateEntityFromDTO(foodRequestDTO, food);
+        verify(foodRepository).save(food);
+        assertEquals(foodResponseDTO, updatedFood);
+    }
 
 }
 
