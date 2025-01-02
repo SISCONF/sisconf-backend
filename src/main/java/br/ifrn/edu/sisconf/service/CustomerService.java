@@ -9,7 +9,7 @@ import br.ifrn.edu.sisconf.domain.dtos.PersonCreateRequestDTO;
 import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationRecord;
 import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationResponse;
 import br.ifrn.edu.sisconf.dto.keycloak.UserUpdateRecord;
-import br.ifrn.edu.sisconf.exception.BusinessException;
+import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.CustomerMapper;
 import br.ifrn.edu.sisconf.repository.CustomerRepository;
 import br.ifrn.edu.sisconf.service.keycloak.KeycloakUserService;
@@ -24,9 +24,6 @@ public class CustomerService {
     private CustomerRepository customerRepository;
 
     @Autowired
-    private CityService cityService;
-
-    @Autowired
     private PersonService personService;
 
     @Autowired
@@ -36,7 +33,7 @@ public class CustomerService {
     private CustomerMapper customerMapper;
 
     public Customer getCustomerById(Long id) {
-        return customerRepository.findById(id).orElseThrow(() -> new BusinessException("Usuário com esse ID não existe"));
+        return customerRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Usuário com esse ID não existe"));
     }
 
     public List<CustomerResponseDTO> getAll() {
@@ -74,7 +71,7 @@ public class CustomerService {
 
     public CustomerResponseDTO update(CustomerUpdateRequestDTO customerUpdateRequestDTO, Long id) {
         if (!customerRepository.existsById(id)) {
-            throw new BusinessException("Usuário com esse ID não existe");
+            throw new ResourceNotFoundException("Usuário com esse ID não existe");
         }
         var customer = getCustomerById(id);
         personService.validatePersonUpdate(customerUpdateRequestDTO.getPerson(), customer.getPerson().getId());
