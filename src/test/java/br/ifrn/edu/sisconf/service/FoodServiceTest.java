@@ -12,11 +12,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import br.ifrn.edu.sisconf.domain.Food;
 import br.ifrn.edu.sisconf.domain.dtos.FoodRequestDTO;
@@ -27,6 +27,7 @@ import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.FoodMapper;
 import br.ifrn.edu.sisconf.repository.FoodRepository;
 
+@ExtendWith(MockitoExtension.class)
 public class FoodServiceTest {
     @InjectMocks
     private FoodService foodService;    
@@ -36,11 +37,6 @@ public class FoodServiceTest {
 
     @Mock
     private FoodMapper foodMapper;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     public void foodPriceIsNotGreaterThanZero() {
@@ -107,7 +103,7 @@ public class FoodServiceTest {
     }
 
     @Test
-    public void createFoodSuccessfully() {
+    public void createNonDuplicateFoodSuccessfully() {
         FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
         foodRequestDTO.setName("Laranja");
         foodRequestDTO.setUnitPrice(new BigDecimal(0.01));
@@ -122,6 +118,27 @@ public class FoodServiceTest {
         foodResponseDTO.setUnitPrice(new BigDecimal(0.01));
         foodResponseDTO.setName("Laranja");
         foodResponseDTO.setCategory(FoodCategory.FRUIT);
+
+        when(foodRepository.existsByNameAndCategory(foodRequestDTO.getName(), foodRequestDTO.getCategory())).thenReturn(false);
+        when(foodMapper.toEntity(foodRequestDTO)).thenReturn(food);
+        when(foodMapper.toResponseDTO(food)).thenReturn(foodResponseDTO);
+
+        FoodResponseDTO createdFood = foodService.createFood(foodRequestDTO);
+
+        verify(foodRepository).save(food);
+        assertEquals(foodResponseDTO, createdFood);
+    }
+
+    @Test
+    public void createFoodWithPriceGreaterThanZeroSuccessfully() {
+        FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
+        foodRequestDTO.setUnitPrice(new BigDecimal(0.01));
+
+        Food food = new Food();
+        food.setUnitPrice(new BigDecimal(0.01));
+        
+        FoodResponseDTO foodResponseDTO = new FoodResponseDTO();
+        foodResponseDTO.setUnitPrice(new BigDecimal(0.01));
 
         when(foodRepository.existsByNameAndCategory(foodRequestDTO.getName(), foodRequestDTO.getCategory())).thenReturn(false);
         when(foodMapper.toEntity(foodRequestDTO)).thenReturn(food);
@@ -228,7 +245,7 @@ public class FoodServiceTest {
     }
 
     @Test
-    public void updateExistingFoodSuccessfully() {
+    public void updateExistingFoodWithNonDuplicateNameAndCategorySuccessfully() {
         Food food = new Food();
         food.setId(1L);
         food.setName("Maçã");
@@ -244,6 +261,31 @@ public class FoodServiceTest {
         foodResponseDTO.setId(1L);
         foodResponseDTO.setName("Cenoura");
         foodResponseDTO.setCategory(FoodCategory.VEGETABLE);
+        foodResponseDTO.setUnitPrice(new BigDecimal(0.01));
+
+        when(foodRepository.findById(food.getId())).thenReturn(Optional.of(food));
+        when(foodRepository.existsByNameAndCategoryAndIdNot(foodRequestDTO.getName(), foodRequestDTO.getCategory(), food.getId())).thenReturn(false);
+        when(foodMapper.toResponseDTO(food)).thenReturn(foodResponseDTO);
+        when(foodRepository.save(food)).thenReturn(food);
+
+        FoodResponseDTO updatedFood = foodService.update(food.getId(), foodRequestDTO);
+        
+        verify(foodMapper).updateEntityFromDTO(foodRequestDTO, food);
+        verify(foodRepository).save(food);
+        assertEquals(foodResponseDTO, updatedFood);
+    }
+
+    @Test
+    public void updateExistingFoodWithValidUnitPriceSuccessfully() {
+        Food food = new Food();
+        food.setId(1L);
+        food.setUnitPrice(new BigDecimal(0.01));
+
+        FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
+        foodRequestDTO.setUnitPrice(new BigDecimal(0.01));
+
+        FoodResponseDTO foodResponseDTO = new FoodResponseDTO();
+        foodResponseDTO.setId(1L);
         foodResponseDTO.setUnitPrice(new BigDecimal(0.01));
 
         when(foodRepository.findById(food.getId())).thenReturn(Optional.of(food));
