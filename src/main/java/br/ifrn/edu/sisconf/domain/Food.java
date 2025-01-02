@@ -2,14 +2,14 @@ package br.ifrn.edu.sisconf.domain;
 
 import br.ifrn.edu.sisconf.domain.enums.FoodCategory;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
-@Data
 @Getter
 @Setter
 @NoArgsConstructor
@@ -25,4 +25,8 @@ public class Food extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(length = 9, nullable = false)
     private FoodCategory category;
+
+    @OneToMany(mappedBy = "food", targetEntity = StockFood.class)
+    private List<Stock> stocks = new ArrayList<>();
+
 }
