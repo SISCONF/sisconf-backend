@@ -137,8 +137,6 @@ public class FoodServiceTest {
         Food food = new Food();
         food.setUnitPrice(unitPrice);
 
-        when(foodMapper.toEntity(foodRequestDTO)).thenReturn(food);
-
         assertThrowsExactly(BusinessException.class, () -> foodService.throwIfInvalidUnitPrice(foodRequestDTO));
 
         verify(foodRepository, never()).save(food);
@@ -149,16 +147,16 @@ public class FoodServiceTest {
         FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
         foodRequestDTO.setName("Laranja");
         foodRequestDTO.setCategory(FoodCategory.FRUIT);
+        foodRequestDTO.setUnitPrice(new BigDecimal(0.01));
 
         Food food = new Food();
         food.setName("Laranja");
         food.setCategory(FoodCategory.FRUIT);
+        food.setUnitPrice(new BigDecimal(0.01));
 
         when(foodRepository.existsByNameAndCategory(foodRequestDTO.getName(), foodRequestDTO.getCategory())).thenReturn(true);
-        when(foodMapper.toEntity(foodRequestDTO)).thenReturn(food);
 
-        assertThrowsExactly(BusinessException.class, () -> foodService.throwIfFoodAlreadyExists(foodRequestDTO, null));
-
+        assertThrowsExactly(BusinessException.class, () -> foodService.createFood(foodRequestDTO));
         verify(foodRepository, never()).save(food);
     }
 
@@ -172,7 +170,10 @@ public class FoodServiceTest {
         when(foodRepository.findAll()).thenReturn(foods);
         when(foodMapper.toDTOList(foods)).thenReturn(foodResponseDTOs);
         
-        assertEquals(1, foodResponseDTOs.size());
+        List<FoodResponseDTO> allFoods = foodService.listAllFoods();        
+
+        assertEquals(foodResponseDTOs, allFoods);
+        verify(foodRepository).findAll();
     }
 
     @Test
@@ -284,16 +285,18 @@ public class FoodServiceTest {
         FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
         foodRequestDTO.setName("Cebola");
         foodRequestDTO.setCategory(FoodCategory.VEGETABLE);
+        foodRequestDTO.setUnitPrice(new BigDecimal(0.01));
 
         Food food = new Food();
         food.setId(1L);
         food.setName("Maçã");
         food.setCategory(FoodCategory.FRUIT);
+        food.setUnitPrice(new BigDecimal(0.01));
 
         when(foodRepository.findById(1L)).thenReturn(Optional.of(food));
         when(foodRepository.existsByNameAndCategoryAndIdNot(foodRequestDTO.getName(), foodRequestDTO.getCategory(), 1L)).thenReturn(true);
 
-        assertThrowsExactly(BusinessException.class, () -> foodService.throwIfFoodAlreadyExists(foodRequestDTO, 1L));
+        assertThrowsExactly(BusinessException.class, () -> foodService.update(food.getId(), foodRequestDTO));
 
         verify(foodMapper, never()).updateEntityFromDTO(foodRequestDTO, food);
         verify(foodRepository, never()).save(food);
@@ -309,9 +312,8 @@ public class FoodServiceTest {
         food.setUnitPrice(new BigDecimal(0.01));    
 
         when(foodRepository.findById(1L)).thenReturn(Optional.of(food));
-        when(foodRepository.existsByNameAndCategoryAndIdNot(foodRequestDTO.getName(), foodRequestDTO.getCategory(), 1L)).thenReturn(false);
 
-        assertThrowsExactly(BusinessException.class, () -> foodService.throwIfInvalidUnitPrice(foodRequestDTO));
+        assertThrowsExactly(BusinessException.class, () -> foodService.update(food.getId(), foodRequestDTO));
         
         verify(foodMapper, never()).updateEntityFromDTO(foodRequestDTO, food);
         verify(foodRepository, never()).save(food);
@@ -320,7 +322,7 @@ public class FoodServiceTest {
     @Test
     public void updateUnexistingFoodThrowsError() {
         FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
-        foodRequestDTO.setName("Abacaxi");
+        foodRequestDTO.setName("Laranja");
         foodRequestDTO.setCategory(FoodCategory.FRUIT);
         foodRequestDTO.setUnitPrice(new BigDecimal(0.01));
 
