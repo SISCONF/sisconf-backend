@@ -39,5 +39,5 @@ public class Order extends BaseEntity {
     private LocalDateTime orderDate;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, targetEntity = OrderFood.class)
-    private List<OrderFood> orderFoods;
+    private List<OrderFood> orderFoods = new ArrayList<>();;
 }

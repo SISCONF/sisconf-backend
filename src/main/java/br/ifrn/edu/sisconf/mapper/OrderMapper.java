@@ -8,7 +8,7 @@ import org.mapstruct.*;
 
 import java.util.List;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = OrderFoodMapper.class)
 public interface OrderMapper {
     Order toEntity(OrderRequestDTO orderRequestDTO);
 

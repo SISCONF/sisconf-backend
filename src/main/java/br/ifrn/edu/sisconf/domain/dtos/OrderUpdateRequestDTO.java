@@ -1,6 +1,8 @@
 package br.ifrn.edu.sisconf.domain.dtos;
 
 import br.ifrn.edu.sisconf.domain.enums.OrderStatus;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,5 +16,8 @@ import java.util.List;
 @AllArgsConstructor
 public class OrderUpdateRequestDTO {
     private OrderStatus status;
-    private List<Long> foodIds;
+
+    @NotEmpty(message = "As frutas/legumes e suas quantidades devem ser informadas.")
+    @Valid
+    private List<OrderFoodRequestDTO> foodsQuantities;
 }

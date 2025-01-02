@@ -22,6 +22,6 @@ public class OrderResponseDTO {
     private OrderStatus status;
     private LocalDateTime orderDate;
     private Long customerId;
-    private List<FoodResponseDTO> foods;
+    private List<OrderFoodResponseDTO> foods;
 
 }

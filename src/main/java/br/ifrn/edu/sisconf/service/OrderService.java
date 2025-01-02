@@ -4,11 +4,11 @@ import br.ifrn.edu.sisconf.domain.Customer;
 import br.ifrn.edu.sisconf.domain.Food;
 import br.ifrn.edu.sisconf.domain.Order;
 import br.ifrn.edu.sisconf.domain.OrderFood;
+import br.ifrn.edu.sisconf.domain.dtos.OrderFoodRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrderRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrderResponseDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrderUpdateRequestDTO;
 import br.ifrn.edu.sisconf.domain.enums.OrderStatus;
-import br.ifrn.edu.sisconf.exception.BusinessException;
 import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.OrderMapper;
 import br.ifrn.edu.sisconf.repository.CustomerRepository;
@@ -42,14 +42,26 @@ public class OrderService {
         Customer customer = customerRepository.findById(orderRequestDTO.getCustomerId())
                 .orElseThrow(() -> new  ResourceNotFoundException("Cliente não encontrado"));
 
-        List<Food> foods = foodRepository.findAllById(orderRequestDTO.getFoodIds());
+        List<Long> foodIds = orderRequestDTO.getFoodsQuantities().stream()
+                .map(OrderFoodRequestDTO::getId)
+                .collect(Collectors.toList());
+
+        List<Food> foods = foodRepository.findAllById(foodIds);
         if (foods.isEmpty()) {
             throw new ResourceNotFoundException("Nenhuma comida válida encontrada");
         }
 
-        BigDecimal totalPrice = foods.stream()
-                .map(Food::getUnitPrice)
+        BigDecimal totalPrice = orderRequestDTO.getFoodsQuantities().stream()
+                .map(orderFoodRequest -> {
+                    Food food = foods.stream()
+                            .filter(f -> f.getId().equals(orderFoodRequest.getId()))
+                            .findFirst()
+                            .orElseThrow(() -> new ResourceNotFoundException("Comida não encontrada para ID: " + orderFoodRequest.getId()));
+                    return food.getUnitPrice().multiply(BigDecimal.valueOf(orderFoodRequest.getQuantity()));
+                })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+
 
         Order order = mapper.toEntity(orderRequestDTO);
         order.setCustomer(customer);
@@ -58,13 +70,19 @@ public class OrderService {
         order.setStatus(OrderStatus.WAITING);
         order.setOrderDate(LocalDateTime.now());
 
-        List<OrderFood> orderFoods = foods.stream().map(food -> {
-            OrderFood orderFood = new OrderFood();
-            orderFood.setFood(food);
-            orderFood.setOrder(order);
-            orderFood.setQuantity(1);
-            return orderFood;
-        }).collect(Collectors.toList());
+        List<OrderFood> orderFoods = orderRequestDTO.getFoodsQuantities().stream()
+                .map(orderFoodRequest -> {
+                    Food food = foods.stream()
+                            .filter(f -> f.getId().equals(orderFoodRequest.getId()))
+                            .findFirst()
+                            .orElseThrow(() -> new ResourceNotFoundException("Comida não encontrada para ID: " + orderFoodRequest.getId()));
+                    OrderFood orderFood = new OrderFood();
+                    orderFood.setFood(food);
+                    orderFood.setOrder(order);
+                    orderFood.setQuantity(orderFoodRequest.getQuantity());
+                    return orderFood;
+                })
+                .collect(Collectors.toList());
 
         order.getOrderFoods().addAll(orderFoods);
 
