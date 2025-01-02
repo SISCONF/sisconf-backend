@@ -58,7 +58,7 @@ public class FoodServiceTest {
     }
 
     @Test
-    public void creatingFoodWithNonUniqueNameAndCategory() {
+    public void foodHasNonUniqueNameAndCategoryInCreation() {
         FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
         foodRequestDTO.setName("Maçã");
         foodRequestDTO.setCategory(FoodCategory.FRUIT);
@@ -68,7 +68,7 @@ public class FoodServiceTest {
     }
 
     @Test
-    public void creatingFoodWithUniqueNameAndCategory() {
+    public void foodHasUniqueNameAndCategoryInCreation() {
         FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
         foodRequestDTO.setName("Banana");
         foodRequestDTO.setCategory(FoodCategory.FRUIT);
@@ -78,7 +78,7 @@ public class FoodServiceTest {
     }
 
     @Test
-    public void updatingFoodWithNonUniqueNameAndCategory() {
+    public void FoodWithNonUniqueNameAndCategoryInUpdate() {
         Food food = new Food();
         food.setId(1L);
 
@@ -92,7 +92,7 @@ public class FoodServiceTest {
     }
 
     @Test
-    public void updatingFoodWithUniqueNameAndCategory() {
+    public void FoodWithUniqueNameAndCategoryInUpdate() {
         Food food = new Food();
         food.setId(1L);
 
@@ -106,21 +106,21 @@ public class FoodServiceTest {
     }
 
     @Test
-    public void createFoodWithSuccessfully() {
+    public void createFoodSuccessfully() {
         FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
         foodRequestDTO.setName("Laranja");
+        foodRequestDTO.setUnitPrice(new BigDecimal(0.01));
         foodRequestDTO.setCategory(FoodCategory.FRUIT);
-        foodRequestDTO.setUnitPrice(new BigDecimal(1));
 
         Food food = new Food();
+        food.setUnitPrice(new BigDecimal(0.01));
         food.setName("Laranja");
-        food.setUnitPrice(new BigDecimal(1));
         food.setCategory(FoodCategory.FRUIT);
 
         FoodResponseDTO foodResponseDTO = new FoodResponseDTO();
+        foodResponseDTO.setUnitPrice(new BigDecimal(0.01));
         foodResponseDTO.setName("Laranja");
         foodResponseDTO.setCategory(FoodCategory.FRUIT);
-        foodResponseDTO.setUnitPrice(new BigDecimal(1));
 
         when(foodRepository.existsByNameAndCategory(foodRequestDTO.getName(), foodRequestDTO.getCategory())).thenReturn(false);
         when(foodMapper.toEntity(foodRequestDTO)).thenReturn(food);
@@ -225,5 +225,7 @@ public class FoodServiceTest {
 
         verify(foodRepository).findById(id);
     }
+
+
 }
 
