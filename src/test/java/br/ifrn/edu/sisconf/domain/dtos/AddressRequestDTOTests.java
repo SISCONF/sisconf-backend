@@ -90,4 +90,69 @@ public class AddressRequestDTOTests {
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Rua deve ser preenchida")));
     }
+
+    @Test
+    public void shouldCreateUpdateAddressWhenNeighbourhood1CharLong() {
+        var addressRequestDTO = new AddressRequestDTO();
+        addressRequestDTO.setNeighbourhood("b");
+
+        Set<ConstraintViolation<AddressRequestDTO>> violations = validator.validate(addressRequestDTO);
+        assertFalse(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("Bairro não pode ser vazio")));
+        assertFalse(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("Bairro deve ter no máximo 128 caracteres")));
+    }
+
+    @Test
+    public void shouldCreateUpdateWhenNeighbourhood128CharsLong() {
+        var addressRequestDTO = new AddressRequestDTO();
+        addressRequestDTO.setNeighbourhood(
+            "Residencial das Palmeiras " +
+            "Altas e Horizontes " +
+            "Verdejantes do Vale " +
+            "Encantado em Celebração às " +
+            "Belezas Naturais da Região " +
+            "Serrana"
+        );
+
+        Set<ConstraintViolation<AddressRequestDTO>> violations = validator.validate(addressRequestDTO);
+        assertFalse(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("Bairro deve ter no máximo 128 caracteres")));
+    }
+
+    @Test
+    public void shouldNotCreateUpdateAddressWhenNeighbourhood129CharsLong() {
+        var addressRequestDTO = new AddressRequestDTO();
+        addressRequestDTO.setNeighbourhood(
+            "Jardim dos Lírios Brancos e " +
+            "Rosas Vermelhas do Bosque " +
+            "Encantado em Homenagem " +
+            "à História Cultural e " +
+            "Artística de Nossa CidadeLinda"
+        );
+
+        Set<ConstraintViolation<AddressRequestDTO>> violations = validator.validate(addressRequestDTO);
+        assertTrue(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("Bairro deve ter no máximo 128 caracteres")));
+    }
+
+    @Test
+    public void shouldNotCreateUpdateAddressWhenNeighbourhoodBlank() {
+        var addressRequestDTO = new AddressRequestDTO();
+        addressRequestDTO.setNeighbourhood("");
+
+        Set<ConstraintViolation<AddressRequestDTO>> violations = validator.validate(addressRequestDTO);
+        assertTrue(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("Bairro não pode ser vazio")));
+    }
+
+    @Test
+    public void shouldNotCreateUpdateAddressWhenNeighbourhoodNull() {
+        var addressRequestDTO = new AddressRequestDTO();
+        addressRequestDTO.setNeighbourhood(null);
+
+        Set<ConstraintViolation<AddressRequestDTO>> violations = validator.validate(addressRequestDTO);
+        assertTrue(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("Bairro não pode ser vazio")));
+    }
 }
