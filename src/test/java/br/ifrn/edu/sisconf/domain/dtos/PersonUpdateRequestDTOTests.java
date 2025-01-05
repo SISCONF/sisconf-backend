@@ -195,4 +195,34 @@ public class PersonUpdateRequestDTOTests {
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("CPF não pode ser vazio")));
     }
+
+    @Test
+    public void shouldCreateUpdatePersonWithValidCNPJFormat() {
+        var createUpdatePersonRequestDTO = new PersonUpdateRequestDTO();
+        createUpdatePersonRequestDTO.setCnpj("11.111.111/1111-11");
+
+        Set<ConstraintViolation<PersonUpdateRequestDTO>> violations = validator.validate(createUpdatePersonRequestDTO);
+        assertFalse(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("CNPJ deve seguir o formato XX.XXX.XXX/XXXX-XX")));
+    }
+
+    @Test
+    public void shouldNotCreateUpdatePersonWithInvalidCNPJFormat() {
+        var createUpdatePersonRequestDTO = new PersonUpdateRequestDTO();
+        createUpdatePersonRequestDTO.setCnpj("112340912");
+
+        Set<ConstraintViolation<PersonUpdateRequestDTO>> violations = validator.validate(createUpdatePersonRequestDTO);
+        assertTrue(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("CNPJ deve seguir o formato XX.XXX.XXX/XXXX-XX")));
+    }
+
+    @Test
+    public void shouldNotCreateUpdatePersonWithValidCNPJFormatButContainingNonNumbers() {
+        var createUpdatePersonRequestDTO = new PersonUpdateRequestDTO();
+        createUpdatePersonRequestDTO.setCnpj("33.as@.456/3333-33");
+
+        Set<ConstraintViolation<PersonUpdateRequestDTO>> violations = validator.validate(createUpdatePersonRequestDTO);
+        assertTrue(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("CNPJ deve seguir o formato XX.XXX.XXX/XXXX-XX")));
+    }
 }

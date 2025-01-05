@@ -28,7 +28,7 @@ public class PersonUpdateRequestDTO {
     @Pattern(regexp = "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}", message = "CPF deve seguir o formato XXX.XXX.XXX-XX")
     private String cpf;
 
-    @Pattern(regexp = "\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}")
+    @Pattern(regexp = "\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}", message = "CNPJ deve seguir o formato XX.XXX.XXX/XXXX-XX")
     private String cnpj;
 
     @NotBlank(message = "Phone não pode ser vazio")
