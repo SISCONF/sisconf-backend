@@ -21,12 +21,6 @@ public class FoodService {
     @Autowired
     private FoodMapper mapper;
 
-    public void throwIfInvalidUnitPrice(FoodRequestDTO createFoodDto) {
-        if (createFoodDto.getUnitPrice().signum() != 1) {
-            throw new BusinessException("O preço unitário não pode ser 0, nem negativo.");
-        }
-    }
-
     public void throwIfFoodAlreadyExists(FoodRequestDTO createFoodDto, Long foodId) {
         if (foodId == null) {
             if (foodRepository.existsByNameAndCategory(createFoodDto.getName(), createFoodDto.getCategory())) {
@@ -40,7 +34,6 @@ public class FoodService {
     }
 
     public FoodResponseDTO createFood(FoodRequestDTO createFoodDto) {
-        throwIfInvalidUnitPrice(createFoodDto);
         throwIfFoodAlreadyExists(createFoodDto, null);
         var food = mapper.toEntity(createFoodDto);
         foodRepository.save(food);
@@ -69,7 +62,6 @@ public class FoodService {
     public FoodResponseDTO update(Long id, FoodRequestDTO foodDto) {
         Food food = foodRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comida não econtrada."));
-        throwIfInvalidUnitPrice(foodDto);
         throwIfFoodAlreadyExists(foodDto, id);
         mapper.updateEntityFromDTO(foodDto, food);
         var updatedFood = foodRepository.save(food);

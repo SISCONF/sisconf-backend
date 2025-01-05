@@ -39,22 +39,6 @@ public class FoodServiceTest {
     private FoodMapper foodMapper;
 
     @Test
-    public void foodPriceIsNotGreaterThanZero() {
-        BigDecimal unitPrice = new BigDecimal(0);
-        FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
-        foodRequestDTO.setUnitPrice(unitPrice);
-        assertThrowsExactly(BusinessException.class, () -> foodService.throwIfInvalidUnitPrice(foodRequestDTO));
-    }
-
-    @Test
-    public void foodPriceIsGreaterThanZero() {
-        BigDecimal unitPrice = new BigDecimal(0.01);
-        FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
-        foodRequestDTO.setUnitPrice(unitPrice);
-        assertDoesNotThrow(() -> foodService.throwIfInvalidUnitPrice(foodRequestDTO));
-    }
-
-    @Test
     public void duplicateFoodInExistsByNameAndCategoryThrowsError() {
         FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
         foodRequestDTO.setName("Maçã");
@@ -127,19 +111,6 @@ public class FoodServiceTest {
 
         verify(foodRepository).save(food);
         assertEquals(foodResponseDTO, createdFood);
-    }
-
-    @Test
-    public void createFoodWithInvalidPriceThrowsError() {
-        BigDecimal unitPrice = new BigDecimal(0);
-        FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
-        foodRequestDTO.setUnitPrice(unitPrice);
-        Food food = new Food();
-        food.setUnitPrice(unitPrice);
-
-        assertThrowsExactly(BusinessException.class, () -> foodService.throwIfInvalidUnitPrice(foodRequestDTO));
-
-        verify(foodRepository, never()).save(food);
     }
 
     @Test
@@ -298,23 +269,6 @@ public class FoodServiceTest {
 
         assertThrowsExactly(BusinessException.class, () -> foodService.update(food.getId(), foodRequestDTO));
 
-        verify(foodMapper, never()).updateEntityFromDTO(foodRequestDTO, food);
-        verify(foodRepository, never()).save(food);
-    }
-
-    @Test
-    public void updateFoodWithInvalidUnitPriceThrowsError() {
-        FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
-        foodRequestDTO.setUnitPrice(new BigDecimal(0));
-
-        Food food = new Food();
-        food.setId(1L);
-        food.setUnitPrice(new BigDecimal(0.01));    
-
-        when(foodRepository.findById(1L)).thenReturn(Optional.of(food));
-
-        assertThrowsExactly(BusinessException.class, () -> foodService.update(food.getId(), foodRequestDTO));
-        
         verify(foodMapper, never()).updateEntityFromDTO(foodRequestDTO, food);
         verify(foodRepository, never()).save(food);
     }
