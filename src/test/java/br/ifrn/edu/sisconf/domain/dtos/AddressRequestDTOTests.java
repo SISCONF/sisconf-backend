@@ -155,4 +155,46 @@ public class AddressRequestDTOTests {
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Bairro não pode ser vazio")));
     }
+
+    @Test
+    public void shouldCreateUpdateAddressWhenCEPValid() {
+        var addressRequestDTO = new AddressRequestDTO();
+        addressRequestDTO.setZipCode("59911-111");
+
+        Set<ConstraintViolation<AddressRequestDTO>> violations = validator.validate(addressRequestDTO);
+        assertFalse(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("O CEP deve ser preenchido")));
+        assertFalse(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("CEP precisa estar no formato XXXXX-XXX")));
+    }
+
+    @Test
+    public void shouldNotCreateUpdateAddressWhenCEPContainsNonNumbers() {
+        var addressRequestDTO = new AddressRequestDTO();
+        addressRequestDTO.setZipCode("59aaa-122");
+
+        Set<ConstraintViolation<AddressRequestDTO>> violations = validator.validate(addressRequestDTO);
+        assertTrue(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("CEP precisa estar no formato XXXXX-XXX")));
+    }
+
+    @Test
+    public void shouldNotCreateUpdateAddressWhenCEPFormatInvalid() {
+        var addressRequestDTO = new AddressRequestDTO();
+        addressRequestDTO.setZipCode("20112312");
+
+        Set<ConstraintViolation<AddressRequestDTO>> violations = validator.validate(addressRequestDTO);
+        assertTrue(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("CEP precisa estar no formato XXXXX-XXX")));
+    }
+
+    @Test
+    public void shouldNotCreateUpdateAddressWhenCEPNull() {
+        var addressRequestDTO = new AddressRequestDTO();
+        addressRequestDTO.setZipCode(null);
+
+        Set<ConstraintViolation<AddressRequestDTO>> violations = validator.validate(addressRequestDTO);
+        assertTrue(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("O CEP deve ser preenchido")));
+    }
 }
