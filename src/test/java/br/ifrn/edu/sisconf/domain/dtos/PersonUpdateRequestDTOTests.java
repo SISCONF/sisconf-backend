@@ -143,4 +143,56 @@ public class PersonUpdateRequestDTOTests {
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Sobrenome deve ter até 255 caracteres")));
     }
+
+    @Test
+    public void shouldUpdateCreatePersonWithValidCPFFormat() {
+        var createUpdatePersonRequestDTO = new PersonUpdateRequestDTO();
+        createUpdatePersonRequestDTO.setCpf("111.111.111-11");
+
+        Set<ConstraintViolation<PersonUpdateRequestDTO>> violations = validator.validate(createUpdatePersonRequestDTO);
+        assertFalse(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("CPF não pode ser vazio")));
+        assertFalse(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("CPF deve seguir o formato XXX.XXX.XXX-XX")));
+    }
+
+    @Test
+    public void shouldNotUpdateCreatePersonWithInvalidCPFFormat() {
+        var createUpdatePersonRequestDTO = new PersonUpdateRequestDTO();
+        createUpdatePersonRequestDTO.setCpf("23412234");
+
+        Set<ConstraintViolation<PersonUpdateRequestDTO>> violations = validator.validate(createUpdatePersonRequestDTO);
+        assertTrue(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("CPF deve seguir o formato XXX.XXX.XXX-XX")));
+    }
+
+    @Test
+    public void shouldNotUpdateCreatePersonWithCPFContainingNonNumbers() {
+        var createUpdatePersonRequestDTO = new PersonUpdateRequestDTO();
+        createUpdatePersonRequestDTO.setCpf("333.abc.345-12");
+
+        Set<ConstraintViolation<PersonUpdateRequestDTO>> violations = validator.validate(createUpdatePersonRequestDTO);
+        assertTrue(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("CPF deve seguir o formato XXX.XXX.XXX-XX")));
+    }
+
+    @Test
+    public void shouldNotUpdateCreatePersonWithNullCPF() {
+        var createUpdatePersonRequestDTO = new PersonUpdateRequestDTO();
+        createUpdatePersonRequestDTO.setCpf(null);
+
+        Set<ConstraintViolation<PersonUpdateRequestDTO>> violations = validator.validate(createUpdatePersonRequestDTO);
+        assertTrue(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("CPF não pode ser vazio")));
+    }
+
+    @Test
+    public void shouldNotUpdateCreatePersonWithBlankCPF() {
+        var createUpdatePersonRequestDTO = new PersonUpdateRequestDTO();
+        createUpdatePersonRequestDTO.setCpf("");
+
+        Set<ConstraintViolation<PersonUpdateRequestDTO>> violations = validator.validate(createUpdatePersonRequestDTO);
+        assertTrue(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("CPF não pode ser vazio")));
+    }
 }
