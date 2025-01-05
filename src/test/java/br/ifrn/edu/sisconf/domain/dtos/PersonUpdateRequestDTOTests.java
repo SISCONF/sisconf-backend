@@ -225,4 +225,56 @@ public class PersonUpdateRequestDTOTests {
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("CNPJ deve seguir o formato XX.XXX.XXX/XXXX-XX")));
     }
+
+    @Test
+    public void shouldCreateUpdatePersonWithValidPhone() {
+        var createUpdatePersonRequestDTO = new PersonUpdateRequestDTO();
+        createUpdatePersonRequestDTO.setPhone("(11) 91111-1111");
+
+        Set<ConstraintViolation<PersonUpdateRequestDTO>> violations = validator.validate(createUpdatePersonRequestDTO);
+        assertFalse(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("Phone deve seguir formato (XX) XXXXX-XXXX")));
+        assertFalse(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("Phone não pode ser vazio")));
+    }
+
+    @Test
+    public void shouldNotCreateUpdatePersonWithInvalidPhoneFormat() {
+        var createUpdatePersonRequestDTO = new PersonUpdateRequestDTO();
+        createUpdatePersonRequestDTO.setPhone("1232435");
+
+        Set<ConstraintViolation<PersonUpdateRequestDTO>> violations = validator.validate(createUpdatePersonRequestDTO);
+        assertTrue(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("Phone deve seguir formato (XX) XXXXX-XXXX")));
+    }
+
+    @Test
+    public void shouldNotCreateUpdatePersonWithValidPhoneFormatButContainingNonNumbers() {
+        var createUpdatePersonRequestDTO = new PersonUpdateRequestDTO();
+        createUpdatePersonRequestDTO.setPhone("(22) 9ae31-3333");
+
+        Set<ConstraintViolation<PersonUpdateRequestDTO>> violations = validator.validate(createUpdatePersonRequestDTO);
+        assertTrue(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("Phone deve seguir formato (XX) XXXXX-XXXX")));
+    }
+
+    @Test
+    public void shouldNotCreateUpdatePersonWhenPhoneNull() {
+        var createUpdatePersonRequestDTO = new PersonUpdateRequestDTO();
+        createUpdatePersonRequestDTO.setPhone(null);
+
+        Set<ConstraintViolation<PersonUpdateRequestDTO>> violations = validator.validate(createUpdatePersonRequestDTO);
+        assertTrue(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("Phone não pode ser vazio")));
+    }
+
+    @Test
+    public void shouldNotCreateUpdatePersonWhenPhoneBlank() {
+        var createUpdatePersonRequestDTO = new PersonUpdateRequestDTO();
+        createUpdatePersonRequestDTO.setPhone("");
+
+        Set<ConstraintViolation<PersonUpdateRequestDTO>> violations = validator.validate(createUpdatePersonRequestDTO);
+        assertTrue(violations.stream()
+            .anyMatch(violation -> violation.getMessage().equals("Phone não pode ser vazio")));
+    }
 }
