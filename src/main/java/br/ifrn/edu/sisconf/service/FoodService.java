@@ -1,5 +1,10 @@
 package br.ifrn.edu.sisconf.service;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import br.ifrn.edu.sisconf.domain.Food;
 import br.ifrn.edu.sisconf.domain.dtos.FoodRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.FoodResponseDTO;
@@ -7,10 +12,6 @@ import br.ifrn.edu.sisconf.exception.BusinessException;
 import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.FoodMapper;
 import br.ifrn.edu.sisconf.repository.FoodRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class FoodService {

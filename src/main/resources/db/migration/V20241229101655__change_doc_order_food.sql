@@ -1,0 +1,1 @@
+ALTER TABLE orders_group ALTER COLUMN doc_url DROP NOT NULL;
