@@ -20,6 +20,6 @@ public class PersonCreateRequestDTO extends PersonUpdateRequestDTO {
     private String password2;
 
     @NotBlank(message = "Email não pode ser vazio")
-    @Email
+    @Email(message = "Email deve seguir o formato de emails")
     private String email;
 }
