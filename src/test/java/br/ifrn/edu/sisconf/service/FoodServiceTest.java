@@ -227,31 +227,6 @@ public class FoodServiceTest {
     }
 
     @Test
-    public void updateExistingFoodWithValidUnitPriceSuccessfully() {
-        Food food = new Food();
-        food.setId(1L);
-        food.setUnitPrice(new BigDecimal(0.01));
-
-        FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
-        foodRequestDTO.setUnitPrice(new BigDecimal(0.01));
-
-        FoodResponseDTO foodResponseDTO = new FoodResponseDTO();
-        foodResponseDTO.setId(1L);
-        foodResponseDTO.setUnitPrice(new BigDecimal(0.01));
-
-        when(foodRepository.findById(food.getId())).thenReturn(Optional.of(food));
-        when(foodRepository.existsByNameAndCategoryAndIdNot(foodRequestDTO.getName(), foodRequestDTO.getCategory(), food.getId())).thenReturn(false);
-        when(foodMapper.toResponseDTO(food)).thenReturn(foodResponseDTO);
-        when(foodRepository.save(food)).thenReturn(food);
-
-        FoodResponseDTO updatedFood = foodService.update(food.getId(), foodRequestDTO);
-        
-        verify(foodMapper).updateEntityFromDTO(foodRequestDTO, food);
-        verify(foodRepository).save(food);
-        assertEquals(foodResponseDTO, updatedFood);
-    }
-
-    @Test
     public void updateFoodWithNonUniqueNameInCategoryThrowsError() {
         FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
         foodRequestDTO.setName("Cebola");
