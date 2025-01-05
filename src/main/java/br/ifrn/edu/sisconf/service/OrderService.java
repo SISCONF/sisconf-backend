@@ -1,5 +1,15 @@
 package br.ifrn.edu.sisconf.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import br.ifrn.edu.sisconf.domain.Customer;
 import br.ifrn.edu.sisconf.domain.Food;
 import br.ifrn.edu.sisconf.domain.Order;
@@ -14,14 +24,6 @@ import br.ifrn.edu.sisconf.mapper.OrderMapper;
 import br.ifrn.edu.sisconf.repository.CustomerRepository;
 import br.ifrn.edu.sisconf.repository.FoodRepository;
 import br.ifrn.edu.sisconf.repository.OrderRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -36,34 +38,38 @@ public class OrderService {
     private FoodRepository foodRepository;
 
     @Autowired
-    private OrderMapper mapper;
+    private OrderMapper orderMapper;
 
-    public OrderResponseDTO createOrder(OrderRequestDTO orderRequestDTO) {
-        Customer customer = customerRepository.findById(orderRequestDTO.getCustomerId())
-                .orElseThrow(() -> new  ResourceNotFoundException("Cliente não encontrado"));
-
-        List<Long> foodIds = orderRequestDTO.getFoodsQuantities().stream()
-                .map(OrderFoodRequestDTO::getId)
-                .collect(Collectors.toList());
+    private Map<Long, Food> fetchAndValidateFoods(List<OrderFoodRequestDTO> foodsQuantities) {
+        List<Long> foodIds = foodsQuantities.stream()
+            .map(OrderFoodRequestDTO::getFoodId)
+            .distinct()
+            .collect(Collectors.toList());
 
         List<Food> foods = foodRepository.findAllById(foodIds);
-        if (foods.isEmpty()) {
-            throw new ResourceNotFoundException("Nenhuma comida válida encontrada");
+
+        if (foods.size() != foodIds.size()) {
+            throw new ResourceNotFoundException("IDs de comidas inválidos: " + 
+                foodIds.stream().filter(id -> foods.stream().noneMatch(f -> f.getId().equals(id))).collect(Collectors.toList()));
         }
 
+        return foods.stream().collect(Collectors.toMap(Food::getId, food -> food));
+    }
+
+    public OrderResponseDTO createOrder(Long customerId, OrderRequestDTO orderRequestDTO) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
+
+        Map<Long, Food> foodMap = fetchAndValidateFoods(orderRequestDTO.getFoodsQuantities());
+
         BigDecimal totalPrice = orderRequestDTO.getFoodsQuantities().stream()
-                .map(orderFoodRequest -> {
-                    Food food = foods.stream()
-                            .filter(f -> f.getId().equals(orderFoodRequest.getId()))
-                            .findFirst()
-                            .orElseThrow(() -> new ResourceNotFoundException("Comida não encontrada para ID: " + orderFoodRequest.getId()));
-                    return food.getUnitPrice().multiply(BigDecimal.valueOf(orderFoodRequest.getQuantity()));
-                })
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+            .map(orderFoodRequest -> {
+                Food food = foodMap.get(orderFoodRequest.getFoodId());
+                return food.getUnitPrice().multiply(BigDecimal.valueOf(orderFoodRequest.getQuantity()));
+            })
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-
-
-        Order order = mapper.toEntity(orderRequestDTO);
+        Order order = orderMapper.toEntity(orderRequestDTO);
         order.setCustomer(customer);
         order.setCode(UUID.randomUUID());
         order.setTotalPrice(totalPrice);
@@ -71,41 +77,69 @@ public class OrderService {
         order.setOrderDate(LocalDateTime.now());
 
         List<OrderFood> orderFoods = orderRequestDTO.getFoodsQuantities().stream()
-                .map(orderFoodRequest -> {
-                    Food food = foods.stream()
-                            .filter(f -> f.getId().equals(orderFoodRequest.getId()))
-                            .findFirst()
-                            .orElseThrow(() -> new ResourceNotFoundException("Comida não encontrada para ID: " + orderFoodRequest.getId()));
-                    OrderFood orderFood = new OrderFood();
-                    orderFood.setFood(food);
-                    orderFood.setOrder(order);
-                    orderFood.setQuantity(orderFoodRequest.getQuantity());
-                    return orderFood;
-                })
-                .collect(Collectors.toList());
+            .map(orderFoodRequest -> {
+                Food food = foodMap.get(orderFoodRequest.getFoodId());
+                OrderFood orderFood = new OrderFood();
+                orderFood.setFood(food);
+                orderFood.setOrder(order);
+                orderFood.setQuantity(orderFoodRequest.getQuantity());
+                return orderFood;
+            })
+            .collect(Collectors.toList());
 
         order.getOrderFoods().addAll(orderFoods);
 
-        return mapper.toResponseDTO(orderRepository.save(order));
+        return orderMapper.toResponseDTO(orderRepository.save(order));
     }
 
     public OrderResponseDTO getOrderById(Long id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new  ResourceNotFoundException("Pedido com ID não encontrado"));
-        return mapper.toResponseDTO(order);
+        return orderMapper.toResponseDTO(order);
     }
 
     public List<OrderResponseDTO> getAllOrders() {
         List<Order> orders = orderRepository.findAll();
-        return mapper.toDTOList(orders);
+        return orderMapper.toDTOList(orders);
     }
 
     public OrderResponseDTO updateOrder(Long id, OrderUpdateRequestDTO orderUpdateRequestDTO) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado"));
 
-        mapper.updateEntityFromDTO(orderUpdateRequestDTO, order);
-        return mapper.toResponseDTO(orderRepository.save(order));
+        Map<Long, Food> foodMap = fetchAndValidateFoods(orderUpdateRequestDTO.getFoodsQuantities());
+
+        for (OrderFoodRequestDTO orderFoodRequest : orderUpdateRequestDTO.getFoodsQuantities()) {
+            Food food = foodMap.get(orderFoodRequest.getFoodId());
+            
+            // Verifica se o alimento já está no pedido
+            boolean foodExistsInOrder = order.getOrderFoods().stream()
+                    .anyMatch(orderFood -> orderFood.getFood().getId().equals(food.getId()));
+
+            if (foodExistsInOrder) {
+                // Se o alimento já existe, atualize a quantidade
+                order.getOrderFoods().stream()
+                    .filter(orderFood -> orderFood.getFood().getId().equals(food.getId()))
+                    .forEach(orderFood -> orderFood.setQuantity(orderFood.getQuantity() + orderFoodRequest.getQuantity()));
+            } else {
+                // Caso contrário, adicione um novo alimento
+                OrderFood orderFood = new OrderFood();
+                orderFood.setFood(food);
+                orderFood.setOrder(order);
+                orderFood.setQuantity(orderFoodRequest.getQuantity());
+                order.getOrderFoods().add(orderFood);
+            }
+        }
+
+        BigDecimal totalPrice = order.getOrderFoods().stream()
+            .map(orderFood -> orderFood.getFood().getUnitPrice().multiply(BigDecimal.valueOf(orderFood.getQuantity())))
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        order.setTotalPrice(totalPrice);
+
+        orderMapper.updateEntityFromDTO(orderUpdateRequestDTO, order);
+ 
+        return orderMapper.toResponseDTO(orderRepository.save(order));
     }
 
     public void deleteOrder(Long id) {

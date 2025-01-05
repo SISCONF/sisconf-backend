@@ -5,14 +5,14 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;;
+import lombok.Setter;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderFoodRequestDTO {
-    private Long id;
+    private Long foodId;
 
     @NotNull(message = "A quantidade não deve ser nula.")
     @Min(value = 1, message = "A quantidade deve ser pelo menos 1.")
