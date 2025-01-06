@@ -43,6 +43,4 @@ public class FoodRequestDTOTests {
         assertFalse(violations.stream().anyMatch(violation -> violation.getMessage().equals("O preço unitário é obrigatório")));
         assertTrue(violations.stream().anyMatch(violation -> violation.getMessage().equals("O preço da comida deve ser maior do que 0")));
     }
-
-
 }
