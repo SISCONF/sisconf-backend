@@ -20,7 +20,6 @@ import org.mockito.MockitoAnnotations;
 
 import br.ifrn.edu.sisconf.domain.Customer;
 import br.ifrn.edu.sisconf.domain.dtos.CustomerResponseDTO;
-import br.ifrn.edu.sisconf.exception.BusinessException;
 import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.CustomerMapper;
 import br.ifrn.edu.sisconf.repository.CustomerRepository;
@@ -32,6 +31,9 @@ public class CustomerServiceTest {
 
     @Mock
     private CustomerMapper customerMapper;
+
+    @Mock
+    private PersonService personService;
 
     @Mock
     private KeycloakUserService keycloakUserService;
@@ -47,10 +49,10 @@ public class CustomerServiceTest {
     @Test
     void shouldThrowWhenCustomerIdDoesNotExist() {
         final Long id = 2L;
-        when(customerRepository.findById(id)).thenThrow(BusinessException.class);
+        when(customerRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrowsExactly(
-            BusinessException.class,
+            ResourceNotFoundException.class,
             () -> customerService.getById(id)
         );
     }
@@ -69,7 +71,7 @@ public class CustomerServiceTest {
 
     @Test
     void shouldReturnCustomersList() {
-        var customer = Instancio.create(Customer.class);
+        var customer = Instancio.create(Customer.class); // Doesn't matter which data is contained in it
         when(customerRepository.findAll()).thenReturn(List.of(customer));
         when(customerMapper.toDTOList(List.of(customer))).thenReturn(
             List.of(new CustomerResponseDTO(customer))
@@ -94,7 +96,9 @@ public class CustomerServiceTest {
     @Test
     void shouldNotRemoveWhenClientWithIdDoesNotExist() {
         final Long unexistingId = -1L;
-        when(customerRepository.findById(unexistingId)).thenThrow(ResourceNotFoundException.class);
+        when(customerRepository.findById(unexistingId)).thenThrow(
+            ResourceNotFoundException.class
+        );
 
         assertThrowsExactly(
             ResourceNotFoundException.class, 

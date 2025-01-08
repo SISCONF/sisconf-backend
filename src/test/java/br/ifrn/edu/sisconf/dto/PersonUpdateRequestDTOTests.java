@@ -1,8 +1,10 @@
-package br.ifrn.edu.sisconf.domain.dtos;
+package br.ifrn.edu.sisconf.dto;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import br.ifrn.edu.sisconf.domain.dtos.PersonCreateRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.PersonUpdateRequestDTO;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
