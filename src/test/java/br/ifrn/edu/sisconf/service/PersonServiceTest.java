@@ -10,9 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import br.ifrn.edu.sisconf.domain.Address;
-import br.ifrn.edu.sisconf.domain.City;
-import br.ifrn.edu.sisconf.domain.CountryState;
 import br.ifrn.edu.sisconf.domain.Person;
 import br.ifrn.edu.sisconf.domain.dtos.PersonCreateRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.PersonUpdateRequestDTO;
