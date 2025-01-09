@@ -17,9 +17,6 @@ jobs:
           cache: maven
 
       - name: Application building
-        uses: hoverkraft-tech/compose-action@v2.0.1
-        with:
-          compose-file: "./docker-compose.yml"
         env:
           KC_BOOTSTRAP_ADMIN_USERNAME: ${{secrets.KC_BOOTSTRAP_ADMIN_USERNAME}}
           KC_BOOTSTRAP_ADMIN_PASSWORD: ${{secrets.KC_BOOTSTRAP_ADMIN_PASSWORD}}
@@ -37,7 +34,8 @@ jobs:
           SPRING_DATA_SOURCE_DRIVER_CLASS_NAME: ${{secrets.SPRING_DATA_SOURCE_DRIVER_CLASS_NAME}}
           SPRING_JPA_HIBERNATE_DIALECT: ${{secrets.SPRING_JPA_HIBERNATE_DIALECT}}
           SPRING_JPA_HIBERNATE_DDL_AUTO: ${{secrets.SPRING_JPA_HIBERNATE_DDL_AUTO}}
+        run: docker-compose -f docker-compose.yml up -d
 
       - name: Application testing
         run: |
-          docker compose exec sisconf-backend-sisconf-1 mvn test
+          docker compose exec sisconf-prod mvn test

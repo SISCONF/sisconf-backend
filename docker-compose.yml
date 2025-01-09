@@ -20,6 +20,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
 
   sisconf:
+    container_name: sisconf-prod
     build:
       context: ./
       dockerfile: ./compose/prod/Dockerfile
