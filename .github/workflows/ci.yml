@@ -16,10 +16,11 @@ jobs:
           distribution: "temurin"
           cache: maven
 
-      - name: Application testing
-        run: mvn -B test --file pom.xml
-
       - name: Application building
+        uses: hoverkraft-tech/compose-action@v2.0.1
+        with:
+          compose-file: "./docker-compose.yml"
+
+      - name: Application testing
         run: |
-          mvn clean
-          mvn -B package --file pom.xml
+          docker compose exec sisconf-backend-sisconf-1 mvn test
