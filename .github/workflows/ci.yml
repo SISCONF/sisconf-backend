@@ -8,11 +8,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - name: JDK Setup
         uses: actions/setup-java@v4
         with:
           java-version: "21 "
           distribution: "temurin"
           cache: maven
-      - name: Application testing and installation
-        run: mvn clean install -DskipTests
+
+      - name: Application testing
+        run: mvn -B test --file pom.xml
+
+      - name: Application building
+        run: |
+          mvn clean
+          mvn -B package --file pom.xml
