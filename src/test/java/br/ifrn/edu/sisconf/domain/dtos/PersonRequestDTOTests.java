@@ -1,4 +1,4 @@
-package br.ifrn.edu.sisconf.dto;
+package br.ifrn.edu.sisconf.domain.dtos;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -8,11 +8,14 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import br.ifrn.edu.sisconf.domain.dtos.Person.CreatePersonGroup;
 import br.ifrn.edu.sisconf.domain.dtos.Person.PersonRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Person.UpdatePersonGroup;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import jakarta.validation.groups.Default;
 
 public class PersonRequestDTOTests {
     private Validator validator;
@@ -28,7 +31,11 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setEmail("teste@gmail.com");
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO, 
+            CreatePersonGroup.class, Default.class
+        );
+
         assertFalse(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals(
                 "Email não pode ser vazio"
@@ -48,7 +55,11 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setEmail("teste3");
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO, 
+            CreatePersonGroup.class, Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals(
                 "Email deve seguir o formato de emails"
@@ -62,7 +73,11 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setEmail(null);
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class, Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Email não pode ser vazio")));
     }
@@ -72,7 +87,11 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setPassword("abcd1234");
         
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class, Default.class
+        );
+
         assertFalse(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Senha não pode ser vazia")));
         assertFalse(violations.stream()
@@ -88,7 +107,11 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setPassword("");
         
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class, Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Senha não pode ser vazia")));
     }
@@ -98,7 +121,11 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setPassword("abc1234");
         
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class, Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals(
                 "Senha deve ter de 8 a 16 caracteres"
@@ -112,7 +139,11 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setPassword("abcdefgh123456789");
         
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class, Default.class
+        );
+        
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals(
                 "Senha deve ter de 8 a 16 caracteres"
@@ -126,7 +157,11 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setPassword("abcdefgh12345678");
         
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class, Default.class
+        );
+
         assertFalse(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals(
                 "Senha deve ter de 8 a 16 caracteres"
@@ -140,7 +175,11 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setPassword(null);
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class, Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Senha não pode ser vazia")));
     }
@@ -150,7 +189,11 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setPassword2("abcd1234");
         
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class, Default.class
+        );
+
         assertFalse(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals(
                 "Confirmar senha não pode ser vazia"
@@ -170,7 +213,10 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setPassword2("");
         
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class, Default.class
+        );
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals(
                 "Confirmar senha não pode ser vazia"
@@ -184,7 +230,11 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setPassword2("abc1234");
         
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class, Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals(
                 "Confirmar senha deve ter de 8 a 16 caracteres"
@@ -198,7 +248,11 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setPassword2("abcdefgh123456789");
         
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class, Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals(
                 "Confirmar senha deve ter de 8 a 16 caracteres"
@@ -212,7 +266,10 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setPassword2("abcdefgh12345678");
         
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class, Default.class
+        );
         assertFalse(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals(
                 "Confirmar senha deve ter de 8 a 16 caracteres"
@@ -226,7 +283,11 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setPassword2(null);
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class, Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals(
                 "Confirmar senha não pode ser vazia"
@@ -240,7 +301,13 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setFirstName("");
         
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Nome não pode ser vazio")));
     }
@@ -250,7 +317,13 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setFirstName(null);
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Nome não pode ser vazio")));
     }
@@ -266,7 +339,13 @@ public class PersonRequestDTOTests {
             " Defender of the Realm, Lord of them"
         );
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Nome deve ter até 255 caracteres")));
     }
@@ -276,7 +355,13 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setFirstName("g");
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertFalse(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Nome deve ter até 255 caracteres")));
         assertFalse(violations.stream()
@@ -293,7 +378,13 @@ public class PersonRequestDTOTests {
             ", Protector of the Great Seal, Defender of the Realm, Lord of the"
         );
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertFalse(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Nome deve ter até 255 caracteres")));
         assertFalse(violations.stream()
@@ -305,7 +396,13 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setLastName("k");
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertFalse(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Sobrenome não pode ser vazio")));
         assertFalse(violations.stream()
@@ -323,7 +420,13 @@ public class PersonRequestDTOTests {
             " Seal, Defender of the Realm, and Lord of t"
         );
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertFalse(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Sobrenome não pode ser vazio")));
         assertFalse(violations.stream()
@@ -335,7 +438,13 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setLastName("");
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Sobrenome não pode ser vazio")));
     }
@@ -345,7 +454,13 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setLastName(null);
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Sobrenome não pode ser vazio")));
     }
@@ -361,7 +476,13 @@ public class PersonRequestDTOTests {
             " Seal, Defender of the Realm, and Lord of th"
         );
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Sobrenome deve ter até 255 caracteres")));
     }
@@ -371,7 +492,13 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setCpf("111.111.111-11");
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertFalse(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("CPF não pode ser vazio")));
         assertFalse(violations.stream()
@@ -383,7 +510,13 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setCpf("23412234");
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("CPF deve seguir o formato XXX.XXX.XXX-XX")));
     }
@@ -393,7 +526,13 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setCpf("333.abc.345-12");
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("CPF deve seguir o formato XXX.XXX.XXX-XX")));
     }
@@ -403,7 +542,13 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setCpf(null);
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("CPF não pode ser vazio")));
     }
@@ -413,7 +558,13 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setCpf("");
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("CPF não pode ser vazio")));
     }
@@ -423,7 +574,13 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setCnpj("11.111.111/1111-11");
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertFalse(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("CNPJ deve seguir o formato XX.XXX.XXX/XXXX-XX")));
     }
@@ -433,7 +590,13 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setCnpj("112340912");
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("CNPJ deve seguir o formato XX.XXX.XXX/XXXX-XX")));
     }
@@ -443,7 +606,13 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setCnpj("33.as@.456/3333-33");
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("CNPJ deve seguir o formato XX.XXX.XXX/XXXX-XX")));
     }
@@ -453,7 +622,13 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setPhone("(11) 91111-1111");
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertFalse(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Phone deve seguir formato (XX) XXXXX-XXXX")));
         assertFalse(violations.stream()
@@ -465,7 +640,13 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setPhone("1232435");
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Phone deve seguir formato (XX) XXXXX-XXXX")));
     }
@@ -475,7 +656,13 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setPhone("(22) 9ae31-3333");
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
+
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Phone deve seguir formato (XX) XXXXX-XXXX")));
     }
@@ -485,7 +672,12 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setPhone(null);
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Phone não pode ser vazio")));
     }
@@ -495,7 +687,12 @@ public class PersonRequestDTOTests {
         var personRequestDTO = new PersonRequestDTO();
         personRequestDTO.setPhone("");
 
-        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(personRequestDTO);
+        Set<ConstraintViolation<PersonRequestDTO>> violations = validator.validate(
+            personRequestDTO,
+            CreatePersonGroup.class,
+            UpdatePersonGroup.class,
+            Default.class
+        );
         assertTrue(violations.stream()
             .anyMatch(violation -> violation.getMessage().equals("Phone não pode ser vazio")));
     }

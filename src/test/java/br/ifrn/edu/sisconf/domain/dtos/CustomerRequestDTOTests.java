@@ -1,4 +1,4 @@
-package br.ifrn.edu.sisconf.dto;
+package br.ifrn.edu.sisconf.domain.dtos;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -10,11 +10,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import br.ifrn.edu.sisconf.domain.dtos.Customer.CustomerRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Person.CreatePersonGroup;
+import br.ifrn.edu.sisconf.domain.dtos.Person.UpdatePersonGroup;
 import br.ifrn.edu.sisconf.util.CustomerTestUtil;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import jakarta.validation.groups.Default;
 
 public class CustomerRequestDTOTests {
     private Validator validator;
@@ -31,7 +34,10 @@ public class CustomerRequestDTOTests {
         customerCreateRequestDTO.setCategory(null);
 
         Set<ConstraintViolation<CustomerRequestDTO>> violations = validator.validate(
-            customerCreateRequestDTO
+            customerCreateRequestDTO,
+            CreatePersonGroup.class, 
+            UpdatePersonGroup.class,
+            Default.class
         );
         
         assertEquals(1, violations.stream().toList().size());
@@ -45,7 +51,10 @@ public class CustomerRequestDTOTests {
     public void shouldCreateUpdateCustomerWhenCategoryValid() {
         var customerCreateRequestDTO = CustomerTestUtil.createValidCustomerCreateRequestDTO();
         Set<ConstraintViolation<CustomerRequestDTO>> violations = validator.validate(
-            customerCreateRequestDTO
+            customerCreateRequestDTO,
+            CreatePersonGroup.class, 
+            UpdatePersonGroup.class,
+            Default.class
         );
         
         assertEquals(0, violations.stream().toList().size());

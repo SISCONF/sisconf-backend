@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.groups.Default;
 
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class EntrepreneurController {
 
     @PostMapping
     public ResponseEntity<EntrepreneurResponseDTO> save(
-        @Validated({CreatePersonGroup.class, CreateEntrepreneurGroup.class}) 
+        @Validated({CreatePersonGroup.class, CreateEntrepreneurGroup.class, Default.class}) 
         @RequestBody EntrepreneurRequestDTO entrepreneurRequestDTO
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(entrepreneurService.save(entrepreneurRequestDTO));
@@ -41,7 +42,7 @@ public class EntrepreneurController {
     @PutMapping("/{id}")
     public ResponseEntity<EntrepreneurResponseDTO> update(
         @PathVariable Long id,
-        @Validated({UpdatePersonGroup.class, CreateEntrepreneurGroup.class}) 
+        @Validated({UpdatePersonGroup.class, CreateEntrepreneurGroup.class, Default.class}) 
         @RequestBody EntrepreneurRequestDTO entrepreneurRequestDTO
     ) {
         return ResponseEntity.ok(entrepreneurService.update(id, entrepreneurRequestDTO));
