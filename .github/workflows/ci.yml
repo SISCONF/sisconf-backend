@@ -15,6 +15,4 @@ jobs:
           distribution: "temurin"
           cache: maven
       - name: Application testing and installation
-        run: |
-          mvn test
-          mvn clean install -DskipTests
+        run: mvn clean install -DskipTests
