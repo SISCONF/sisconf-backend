@@ -11,6 +11,21 @@ import br.ifrn.edu.sisconf.domain.dtos.Customer.CustomerResponseDTO;
 import br.ifrn.edu.sisconf.domain.enums.CustomerCategory;
 
 public class CustomerTestUtil {
+    public static Customer createValidCustomer() {
+        return new Customer(
+            CustomerCategory.MARKETER,
+            PersonTestUtil.createValidPerson(null),
+            null
+        );
+    }
+
+    public static CustomerRequestDTO toValidRequestDTO(Customer customer) {
+        return new CustomerRequestDTO(
+            customer.getCategory(),
+            PersonTestUtil.toValidRequestDTO(customer.getPerson())
+        );
+    } 
+
     public static CustomerRequestDTO createValidCustomerCreateRequestDTO() {
         return new CustomerRequestDTO(
             CustomerCategory.MARKETER,

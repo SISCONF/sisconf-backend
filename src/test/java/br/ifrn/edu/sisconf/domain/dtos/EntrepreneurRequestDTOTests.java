@@ -33,7 +33,7 @@ public class EntrepreneurRequestDTOTests {
             "Inteligentes em " +
             "Desenvolvimento " +
             "Sustentável e Tecnologia " +
-            "Integrada"
+            "Integr"
         );
 
         Set<ConstraintViolation<EntrepreneurRequestDTO>> violations = validator.validate(
@@ -103,7 +103,7 @@ public class EntrepreneurRequestDTOTests {
             "e Desenvolvimento " +
             "Sustentável com Inovação e " +
             "Tecnologia de Ponta para um " +
-            "Futuro Melhor"
+            "Futuro"
         );
 
         Set<ConstraintViolation<EntrepreneurRequestDTO>> violations = validator.validate(

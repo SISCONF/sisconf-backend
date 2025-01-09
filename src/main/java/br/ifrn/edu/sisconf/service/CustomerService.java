@@ -32,7 +32,7 @@ public class CustomerService {
     private CustomerMapper customerMapper;
 
     public Customer getCustomerById(Long id) {
-        return customerRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Usuário com esse ID não existe"));
+        return customerRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Cliente com esse ID não existe"));
     }
 
     public List<CustomerResponseDTO> getAll() {
@@ -70,9 +70,6 @@ public class CustomerService {
     }
 
     public CustomerResponseDTO update(CustomerRequestDTO customerRequestDTO, Long id) {
-        if (!customerRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Usuário com esse ID não existe");
-        }
         var customer = getCustomerById(id);
         personService.validatePersonUpdate(customerRequestDTO.getPerson(), customer.getPerson().getId());
 
