@@ -20,6 +20,23 @@ jobs:
         uses: hoverkraft-tech/compose-action@v2.0.1
         with:
           compose-file: "./docker-compose.yml"
+        env:
+          KC_BOOTSTRAP_ADMIN_USERNAME: ${{secrets.KC_BOOTSTRAP_ADMIN_USERNAME}}
+          KC_BOOTSTRAP_ADMIN_PASSWORD: ${{secrets.KC_BOOTSTRAP_ADMIN_PASSWORD}}
+          POSTGRES_USER: ${{secrets.POSTGRES_USER}}
+          POSTGRES_PASSWORD: ${{secrets.POSTGRES_PASSWORD}}
+          POSTGRES_DB: ${{secrets.POSTGRES_DB}}
+          KEYCLOAK_SERVER_URL: ${{secrets.KEYCLOAK_SERVER_URL}}
+          KEYCLOAK_REALM: ${{secrets.KEYCLOAK_REALM}}
+          KEYCLOAK_CLIENT_ID: ${{secrets.KEYCLOAK_CLIENT_ID}}
+          KEYCLOAK_CLIENT_SECRET: ${{secrets.KEYCLOAK_CLIENT_SECRET}}
+          SPRING_APPLICATION_NAME: ${{secrets.SPRING_APPLICATION_NAME}}
+          SPRING_DATA_SOURCE_URL: ${{secrets.SPRING_DATA_SOURCE_URL}}
+          SPRING_DATA_SOURCE_USERNAME: ${{secrets.SPRING_DATA_SOURCE_USERNAME}}
+          SPRING_DATA_SOURCE_PASSWORD: ${{secrets.SPRING_DATA_SOURCE_PASSWORD}}
+          SPRING_DATA_SOURCE_DRIVER_CLASS_NAME: ${{secrets.SPRING_DATA_SOURCE_DRIVER_CLASS_NAME}}
+          SPRING_JPA_HIBERNATE_DIALECT: ${{secrets.SPRING_JPA_HIBERNATE_DIALECT}}
+          SPRING_JPA_HIBERNATE_DDL_AUTO: ${{secrets.SPRING_JPA_HIBERNATE_DDL_AUTO}}
 
       - name: Application testing
         run: |
