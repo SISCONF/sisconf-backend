@@ -1,5 +1,7 @@
 package br.ifrn.edu.sisconf.util;
 
+import br.ifrn.edu.sisconf.domain.Person;
+import br.ifrn.edu.sisconf.domain.dtos.PersonResponseDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Person.PersonRequestDTO;
 import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationRecord;
 
@@ -29,6 +31,20 @@ public class PersonTestUtil {
             personRequestDTO.getPassword(),
             personRequestDTO.getEmail(),
             group
+        );
+    }
+
+    public static PersonResponseDTO toResponseDTO(Person person) {
+        return new PersonResponseDTO(
+            person.getId(),
+            person.getKeycloakId(),
+            person.getFirstName(),
+            person.getLastName(),
+            person.getEmail(),
+            person.getCpf(),
+            person.getCnpj(),
+            person.getPhone(),
+            AddressTestUtil.toResponseDTO(person.getAddress())
         );
     }
 }

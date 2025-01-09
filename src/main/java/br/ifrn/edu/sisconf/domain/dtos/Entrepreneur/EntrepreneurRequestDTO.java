@@ -16,7 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class EntrepreneurRequestDTO {
     @NotBlank(message = "O Nome da Empresa não pode ser vazio")
-    @Size(min = 1, max = 128, message = "O Nome da Empresa deve conter de 1 a 128 caracteres")
+    @Size(max = 128, message = "O Nome da Empresa deve conter de 1 a 128 caracteres")
     private String businessName;
 
     @NotNull(message = "Pessoa não pode ser vazia")
