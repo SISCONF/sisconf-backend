@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import br.ifrn.edu.sisconf.domain.Customer;
-import br.ifrn.edu.sisconf.domain.dtos.CustomerResponseDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Customer.CustomerResponseDTO;
 import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.CustomerMapper;
 import br.ifrn.edu.sisconf.repository.CustomerRepository;

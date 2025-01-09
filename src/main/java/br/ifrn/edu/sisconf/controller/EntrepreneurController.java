@@ -1,13 +1,15 @@
 package br.ifrn.edu.sisconf.controller;
 
-import br.ifrn.edu.sisconf.domain.dtos.EntrepreneurCreateRequestDTO;
-import br.ifrn.edu.sisconf.domain.dtos.EntrepreneurResponseDTO;
-import br.ifrn.edu.sisconf.domain.dtos.EntrepreneurUpdateRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Entrepreneur.CreateEntrepreneurGroup;
+import br.ifrn.edu.sisconf.domain.dtos.Entrepreneur.EntrepreneurRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Entrepreneur.EntrepreneurResponseDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Person.CreatePersonGroup;
+import br.ifrn.edu.sisconf.domain.dtos.Person.UpdatePersonGroup;
 import br.ifrn.edu.sisconf.service.EntrepreneurService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,13 +31,20 @@ public class EntrepreneurController {
     }
 
     @PostMapping
-    public ResponseEntity<EntrepreneurResponseDTO> save(@Valid @RequestBody EntrepreneurCreateRequestDTO entrepreneurCreateRequestDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(entrepreneurService.save(entrepreneurCreateRequestDTO));
+    public ResponseEntity<EntrepreneurResponseDTO> save(
+        @Validated({CreatePersonGroup.class, CreateEntrepreneurGroup.class}) 
+        @RequestBody EntrepreneurRequestDTO entrepreneurRequestDTO
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(entrepreneurService.save(entrepreneurRequestDTO));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EntrepreneurResponseDTO> update(@PathVariable Long id, @Valid @RequestBody EntrepreneurUpdateRequestDTO entrepreneurUpdateRequestDTO) {
-        return ResponseEntity.ok(entrepreneurService.update(id, entrepreneurUpdateRequestDTO));
+    public ResponseEntity<EntrepreneurResponseDTO> update(
+        @PathVariable Long id,
+        @Validated({UpdatePersonGroup.class, CreateEntrepreneurGroup.class}) 
+        @RequestBody EntrepreneurRequestDTO entrepreneurRequestDTO
+    ) {
+        return ResponseEntity.ok(entrepreneurService.update(id, entrepreneurRequestDTO));
     }
 
     @DeleteMapping("/{id}")

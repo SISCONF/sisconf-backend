@@ -2,10 +2,9 @@ package br.ifrn.edu.sisconf.service;
 
 import br.ifrn.edu.sisconf.constants.KeycloakConstants;
 import br.ifrn.edu.sisconf.domain.Customer;
-import br.ifrn.edu.sisconf.domain.dtos.CustomerCreateRequestDTO;
-import br.ifrn.edu.sisconf.domain.dtos.CustomerResponseDTO;
-import br.ifrn.edu.sisconf.domain.dtos.CustomerUpdateRequestDTO;
-import br.ifrn.edu.sisconf.domain.dtos.PersonCreateRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Customer.CustomerRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Customer.CustomerResponseDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Person.PersonRequestDTO;
 import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationRecord;
 import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationResponse;
 import br.ifrn.edu.sisconf.dto.keycloak.UserUpdateRecord;
@@ -46,19 +45,20 @@ public class CustomerService {
         return customerMapper.toResponseDTO(customer);
     }
 
-    public CustomerResponseDTO save(CustomerCreateRequestDTO customerCreateRequestDTO) {
-        PersonCreateRequestDTO personCreateRequestDTO = customerCreateRequestDTO.getPerson();
-        personService.validatePersonCreation(personCreateRequestDTO);
+    public CustomerResponseDTO save(CustomerRequestDTO customerRequestDTO) {
+        PersonRequestDTO personRequestDTO = customerRequestDTO.getPerson();
+        personService.validatePersonCreation(personRequestDTO);
 
-        var customer = customerMapper.toEntity(customerCreateRequestDTO);
+        var customer = customerMapper.toEntity(customerRequestDTO);
         UserRegistrationRecord userRegistrationRecord = new UserRegistrationRecord(
-                personCreateRequestDTO.getFirstName(),
-                personCreateRequestDTO.getLastName(),
-                personCreateRequestDTO.getPassword(),
-                personCreateRequestDTO.getEmail(),
+                personRequestDTO.getFirstName(),
+                personRequestDTO.getLastName(),
+                personRequestDTO.getPassword(),
+                personRequestDTO.getEmail(),
                 KeycloakConstants.CLIENT_GROUP_NAME
         );
-        UserRegistrationResponse userRegistrationResponse = keycloakUserService.create(userRegistrationRecord);
+        UserRegistrationResponse userRegistrationResponse = keycloakUserService
+            .create(userRegistrationRecord);
         customer.getPerson().setKeycloakId(userRegistrationResponse.keycloakId());
         try {
             customerRepository.save(customer);
@@ -69,22 +69,22 @@ public class CustomerService {
         }
     }
 
-    public CustomerResponseDTO update(CustomerUpdateRequestDTO customerUpdateRequestDTO, Long id) {
+    public CustomerResponseDTO update(CustomerRequestDTO customerRequestDTO, Long id) {
         if (!customerRepository.existsById(id)) {
             throw new ResourceNotFoundException("Usuário com esse ID não existe");
         }
         var customer = getCustomerById(id);
-        personService.validatePersonUpdate(customerUpdateRequestDTO.getPerson(), customer.getPerson().getId());
+        personService.validatePersonUpdate(customerRequestDTO.getPerson(), customer.getPerson().getId());
 
         var userUpdateRecord = new UserUpdateRecord(
                 customer.getPerson().getKeycloakId(),
-                customerUpdateRequestDTO.getPerson().getFirstName(),
-                customerUpdateRequestDTO.getPerson().getLastName()
+                customerRequestDTO.getPerson().getFirstName(),
+                customerRequestDTO.getPerson().getLastName()
         );
         keycloakUserService.update(userUpdateRecord);
 
         try {
-            customerMapper.updateEntityFromDTO(customerUpdateRequestDTO, customer);
+            customerMapper.updateEntityFromDTO(customerRequestDTO, customer);
             var updatedCustomer = customerRepository.save(customer);
             return customerMapper.toResponseDTO(updatedCustomer);
         } catch (Exception exception) {

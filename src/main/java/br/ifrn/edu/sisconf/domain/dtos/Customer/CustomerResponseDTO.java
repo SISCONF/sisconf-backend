@@ -1,6 +1,8 @@
-package br.ifrn.edu.sisconf.domain.dtos;
+package br.ifrn.edu.sisconf.domain.dtos.Customer;
 
 import br.ifrn.edu.sisconf.domain.Customer;
+import br.ifrn.edu.sisconf.domain.dtos.AddressResponseDTO;
+import br.ifrn.edu.sisconf.domain.dtos.PersonResponseDTO;
 import br.ifrn.edu.sisconf.domain.enums.CustomerCategory;
 import lombok.*;
 

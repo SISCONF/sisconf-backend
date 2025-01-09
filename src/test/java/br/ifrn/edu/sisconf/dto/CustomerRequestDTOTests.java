@@ -9,14 +9,14 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import br.ifrn.edu.sisconf.domain.dtos.CustomerCreateRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Customer.CustomerRequestDTO;
 import br.ifrn.edu.sisconf.util.CustomerTestUtil;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
-public class CustomerBaseRequestDTOTests {
+public class CustomerRequestDTOTests {
     private Validator validator;
 
     @BeforeEach
@@ -30,7 +30,7 @@ public class CustomerBaseRequestDTOTests {
         var customerCreateRequestDTO = CustomerTestUtil.createValidCustomerCreateRequestDTO();
         customerCreateRequestDTO.setCategory(null);
 
-        Set<ConstraintViolation<CustomerCreateRequestDTO>> violations = validator.validate(
+        Set<ConstraintViolation<CustomerRequestDTO>> violations = validator.validate(
             customerCreateRequestDTO
         );
         
@@ -44,7 +44,7 @@ public class CustomerBaseRequestDTOTests {
     @Test
     public void shouldCreateUpdateCustomerWhenCategoryValid() {
         var customerCreateRequestDTO = CustomerTestUtil.createValidCustomerCreateRequestDTO();
-        Set<ConstraintViolation<CustomerCreateRequestDTO>> violations = validator.validate(
+        Set<ConstraintViolation<CustomerRequestDTO>> violations = validator.validate(
             customerCreateRequestDTO
         );
         

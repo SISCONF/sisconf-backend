@@ -1,7 +1,6 @@
 package br.ifrn.edu.sisconf.service;
 
-import br.ifrn.edu.sisconf.domain.dtos.PersonCreateRequestDTO;
-import br.ifrn.edu.sisconf.domain.dtos.PersonUpdateRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Person.PersonRequestDTO;
 import br.ifrn.edu.sisconf.exception.BusinessException;
 import br.ifrn.edu.sisconf.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +14,7 @@ public class PersonService {
     @Autowired
     private CityService cityService;
 
-    public void throwIfCpfIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO, Long id) {
-        String cpf = personCreateRequestDTO.getCpf();
+    public void throwIfCpfIsNotUnique(String cpf, Long id) {
         var errorMsg = String.format("Usuário com CPF %s já existe", cpf);
         if (id != null) {
             if (personRepository.existsByCpfAndIdNot(cpf, id)) {
@@ -29,22 +27,23 @@ public class PersonService {
         }
     }
 
-    public void throwIfPasswordsDontMatch(PersonCreateRequestDTO personCreateRequestDTO) {
-        if (!personCreateRequestDTO.getPassword().equals(personCreateRequestDTO.getPassword2())) {
+    public void throwIfPasswordsDontMatch(
+        String password,
+        String password2
+    ) {
+        if (!password.equals(password2)) {
             throw new BusinessException("As senhas precisam ser iguais");
         }
     }
 
-    public void throwIfEmailIsNotUnique(PersonCreateRequestDTO personCreateRequestDTO) {
-        String email = personCreateRequestDTO.getEmail();
+    public void throwIfEmailIsNotUnique(String email) {
         if (personRepository.existsByEmail(email)) {
             var errorMsg = String.format("Usuário com e-mail %s já existe", email);
             throw new BusinessException(errorMsg);
         }
     }
 
-    public void throwIfCnpjIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO, Long id) {
-        String cnpj = personCreateRequestDTO.getCnpj();
+    public void throwIfCnpjIsNotUnique(String cnpj, Long id) {
         var errorMsg = String.format("Empresa com CNPJ %s já existe", cnpj);
         if (id != null) {
             if (personRepository.existsByCnpjAndIdNot(cnpj, id)) {
@@ -57,8 +56,7 @@ public class PersonService {
         }
     }
 
-    public void throwIfPhoneIsNotUnique(PersonUpdateRequestDTO personCreateRequestDTO, Long id) {
-        String phone = personCreateRequestDTO.getPhone();
+    public void throwIfPhoneIsNotUnique(String phone, Long id) {
         var errorMsg = String.format("Usuário com telefone %s já existe", phone);
         if (id != null) {
             if (personRepository.existsByPhoneAndIdNot(phone, id)) {
@@ -71,17 +69,20 @@ public class PersonService {
         }
     }
 
-    public void validatePersonCreation(PersonCreateRequestDTO personCreateRequestDTO) {
-        this.throwIfCpfIsNotUnique(personCreateRequestDTO, null);
-        this.throwIfEmailIsNotUnique(personCreateRequestDTO);
-        this.throwIfPasswordsDontMatch(personCreateRequestDTO);
-        this.throwIfPhoneIsNotUnique(personCreateRequestDTO, null);
-        cityService.getById(personCreateRequestDTO.getAddress().getCity());
+    public void validatePersonCreation(PersonRequestDTO personRequestDTO) {
+        this.throwIfCpfIsNotUnique(personRequestDTO.getCpf(), null);
+        this.throwIfEmailIsNotUnique(personRequestDTO.getEmail());
+        this.throwIfPasswordsDontMatch(
+            personRequestDTO.getPassword(),
+            personRequestDTO.getPassword2()
+        );
+        this.throwIfPhoneIsNotUnique(personRequestDTO.getPhone(), null);
+        cityService.getById(personRequestDTO.getAddress().getCity());
     }
 
-    public void validatePersonUpdate(PersonUpdateRequestDTO personUpdateRequestDTO, Long id) {
-        this.throwIfCpfIsNotUnique(personUpdateRequestDTO, id);
-        this.throwIfPhoneIsNotUnique(personUpdateRequestDTO, id);
-        cityService.getById(personUpdateRequestDTO.getAddress().getCity());
+    public void validatePersonUpdate(PersonRequestDTO personRequestDTO, Long id) {
+        this.throwIfCpfIsNotUnique(personRequestDTO.getCpf(), id);
+        this.throwIfPhoneIsNotUnique(personRequestDTO.getPhone(), id);
+        cityService.getById(personRequestDTO.getAddress().getCity());
     }
 }

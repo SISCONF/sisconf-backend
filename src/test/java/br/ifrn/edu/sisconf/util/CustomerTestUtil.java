@@ -5,20 +5,20 @@ import br.ifrn.edu.sisconf.domain.City;
 import br.ifrn.edu.sisconf.domain.Customer;
 import br.ifrn.edu.sisconf.domain.Person;
 import br.ifrn.edu.sisconf.domain.dtos.AddressResponseDTO;
-import br.ifrn.edu.sisconf.domain.dtos.CustomerCreateRequestDTO;
-import br.ifrn.edu.sisconf.domain.dtos.CustomerResponseDTO;
 import br.ifrn.edu.sisconf.domain.dtos.PersonResponseDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Customer.CustomerRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Customer.CustomerResponseDTO;
 import br.ifrn.edu.sisconf.domain.enums.CustomerCategory;
 
 public class CustomerTestUtil {
-    public static CustomerCreateRequestDTO createValidCustomerCreateRequestDTO() {
-        return new CustomerCreateRequestDTO(
+    public static CustomerRequestDTO createValidCustomerCreateRequestDTO() {
+        return new CustomerRequestDTO(
             CustomerCategory.MARKETER,
             PersonTestUtil.createValidPersonCreateRequestDTO(null)
         );
     }
 
-    public static Customer createCustomerFromDto(CustomerCreateRequestDTO customerCreateRequestDTO) {
+    public static Customer createCustomerFromDto(CustomerRequestDTO customerCreateRequestDTO) {
         var customer = new Customer(
             customerCreateRequestDTO.getCategory(),
             new Person(
