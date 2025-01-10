@@ -37,7 +37,7 @@ jobs:
           SPRING_DATA_SOURCE_DRIVER_CLASS_NAME: ${{secrets.SPRING_DATA_SOURCE_DRIVER_CLASS_NAME}}
           SPRING_JPA_HIBERNATE_DIALECT: ${{secrets.SPRING_JPA_HIBERNATE_DIALECT}}
           SPRING_JPA_HIBERNATE_DDL_AUTO: ${{secrets.SPRING_JPA_HIBERNATE_DDL_AUTO}}
-        run: docker-compose -f docker-compose.yml up -d
+        run: docker compose -f docker-compose.yml up -d
 
       - name: Application testing
         run: |
