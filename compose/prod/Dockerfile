@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jdk-alpine as build
+FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /workspace/app
 
 # Copiar apenas os arquivos de dependência primeiro
@@ -13,9 +13,5 @@ RUN ./mvnw dependency:go-offline -B
 # Copiar código fonte e buildar
 COPY src src
 RUN ./mvnw package -DskipTests
-
-FROM eclipse-temurin:21-jdk-alpine
-WORKDIR /workspace/app
-COPY --from=build . .
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
