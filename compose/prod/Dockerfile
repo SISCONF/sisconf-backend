@@ -13,5 +13,6 @@ RUN ./mvnw dependency:go-offline -B
 # Copiar código fonte e buildar
 COPY src src
 RUN ./mvnw package -DskipTests
+RUN cp /workspace/app/target/*.jar app.jar
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
