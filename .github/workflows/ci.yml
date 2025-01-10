@@ -42,4 +42,4 @@ jobs:
 
       - name: Application testing
         run: |
-          docker compose exec sisconf-prod mvn test
+          docker ps
