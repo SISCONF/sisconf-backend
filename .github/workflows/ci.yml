@@ -36,3 +36,7 @@ jobs:
       - name: Application testing
         run: |
           docker exec sisconf-prod /workspace/app/mvnw test
+
+      - name: Post Application Building and Testing
+        run: |
+          docker compose -f docker-compose.yml down
