@@ -18,5 +18,6 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /workspace/app
 COPY --from=build /workspace/app/target/*.jar app.jar
 COPY --from=build /workspace/app/mvnw /workspace/app/
+COPY --from=build /workspace/app/.mvn /workspace/app/.mvn
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
