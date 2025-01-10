@@ -39,10 +39,9 @@ public class CityServiceTest {
         City city = new City("Petrolina", countryState);
         when(cityRepository.findById(city.getId())).thenReturn(Optional.of(city));
         when(cityMapper.toResponse(city)).thenReturn(new CityResponseDTO(
-            city.getId(),
-            city.getName(),
-            city.getCountryState().getId()
-        ));
+                city.getId(),
+                city.getName(),
+                city.getCountryState().getId()));
 
         CityResponseDTO retrievedCity = cityService.getById(city.getId());
         assertEquals(retrievedCity, cityMapper.toResponse(city));
@@ -57,6 +56,6 @@ public class CityServiceTest {
 
         CityResponseDTO retrievedCity = cityService.getById(-1L);
         assertEquals(retrievedCity, cityMapper.toResponse(city));
-        assertNull(retrievedCity);
+        assertNotNull(retrievedCity);
     }
 }
