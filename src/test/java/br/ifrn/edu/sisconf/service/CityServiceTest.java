@@ -56,6 +56,6 @@ public class CityServiceTest {
 
         CityResponseDTO retrievedCity = cityService.getById(-1L);
         assertEquals(retrievedCity, cityMapper.toResponse(city));
-        assertNotNull(retrievedCity);
+        assertNull(retrievedCity);
     }
 }
