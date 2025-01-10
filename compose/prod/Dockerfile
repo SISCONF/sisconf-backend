@@ -14,7 +14,7 @@ RUN ./mvnw dependency:go-offline -B
 COPY src src
 RUN ./mvnw package -DskipTests
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /workspace/app
 COPY --from=build . .
 
