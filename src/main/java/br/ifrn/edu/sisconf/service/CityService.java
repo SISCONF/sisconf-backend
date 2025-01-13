@@ -1,7 +1,7 @@
 package br.ifrn.edu.sisconf.service;
 
 import br.ifrn.edu.sisconf.domain.dtos.CityResponseDTO;
-import br.ifrn.edu.sisconf.exception.BusinessException;
+import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.CityMapper;
 import br.ifrn.edu.sisconf.repository.CityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ public class CityService {
     private CityMapper cityMapper;
 
     public CityResponseDTO getById(Long id) {
-        var city = cityRepository.findById(id).orElseThrow(() -> new BusinessException(String.format("Cidade com id %d não encontrada", id)));
+        var city = cityRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Cidade com id %d não encontrada", id)));
         return cityMapper.toResponse(city);
     }
 }

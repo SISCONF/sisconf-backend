@@ -1,14 +1,16 @@
 package br.ifrn.edu.sisconf.controller;
 
-import br.ifrn.edu.sisconf.domain.dtos.CustomerCreateRequestDTO;
-import br.ifrn.edu.sisconf.domain.dtos.CustomerResponseDTO;
-import br.ifrn.edu.sisconf.domain.dtos.CustomerUpdateRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Customer.CustomerRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Customer.CustomerResponseDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Person.CreatePersonGroup;
+import br.ifrn.edu.sisconf.domain.dtos.Person.UpdatePersonGroup;
 import br.ifrn.edu.sisconf.service.CustomerService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.groups.Default;
 
 import java.util.List;
 
@@ -19,8 +21,13 @@ public class CustomerController {
     private CustomerService customerService;
 
     @PostMapping
-    public ResponseEntity<CustomerResponseDTO> save(@Valid @RequestBody CustomerCreateRequestDTO customerCreateRequestDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(customerService.save(customerCreateRequestDTO));
+    public ResponseEntity<CustomerResponseDTO> save(
+        @Validated({CreatePersonGroup.class, Default.class}) 
+        @RequestBody CustomerRequestDTO customerCreateRequestDTO
+    ) {
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(customerService.save(customerCreateRequestDTO));
     }
 
     @GetMapping("/{id}")
@@ -34,8 +41,11 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CustomerResponseDTO> update(@PathVariable Long id, @Valid @RequestBody CustomerUpdateRequestDTO customerUpdateRequestDTO) {
-        return ResponseEntity.ok(customerService.update(customerUpdateRequestDTO, id));
+    public ResponseEntity<CustomerResponseDTO> update(
+        @PathVariable Long id, 
+        @Validated({UpdatePersonGroup.class, Default.class}) @RequestBody CustomerRequestDTO customerRequestDTO
+    ) {
+        return ResponseEntity.ok(customerService.update(customerRequestDTO, id));
     }
 
     @DeleteMapping("/{id}")

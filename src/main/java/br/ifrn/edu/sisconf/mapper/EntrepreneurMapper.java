@@ -1,18 +1,28 @@
 package br.ifrn.edu.sisconf.mapper;
 
 import br.ifrn.edu.sisconf.domain.Entrepreneur;
-import br.ifrn.edu.sisconf.domain.dtos.EntrepreneurCreateRequestDTO;
-import br.ifrn.edu.sisconf.domain.dtos.EntrepreneurResponseDTO;
-import br.ifrn.edu.sisconf.domain.dtos.EntrepreneurUpdateRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Entrepreneur.EntrepreneurRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Entrepreneur.EntrepreneurResponseDTO;
+
 import org.mapstruct.*;
 
 import java.util.List;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {PersonMapper.class})
 public interface EntrepreneurMapper {
-    @Mapping(source = "person.address.city", target = "person.address.city.id")
     @Mapping(target = "stock", ignore = true)
-    Entrepreneur toEntity(EntrepreneurCreateRequestDTO entrepreneurCreateRequestDTO);
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "person.id", ignore = true)
+    @Mapping(target = "person.createdAt", ignore = true)
+    @Mapping(target = "person.updatedAt", ignore = true)
+    @Mapping(target = "person.keycloakId", ignore = true)
+    @Mapping(target = "person.address.id", ignore = true)
+    @Mapping(target = "person.address.createdAt", ignore = true)
+    @Mapping(target = "person.address.updatedAt", ignore = true)
+    @Mapping(target = "person.address.city.id", source = "person.address.city")
+    Entrepreneur toEntity(EntrepreneurRequestDTO entrepreneurRequestDTO);
 
     @Mapping(source = "person.address.city.id", target = "person.address.city")
     EntrepreneurResponseDTO toResponseDTO(Entrepreneur entrepreneur);
@@ -23,7 +33,14 @@ public interface EntrepreneurMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "person.address.id", ignore = true)
+    @Mapping(target = "person.address.createdAt", ignore = true)
+    @Mapping(target = "person.address.updatedAt", ignore = true)
+    @Mapping(target = "person.id", ignore = true)
+    @Mapping(target = "person.createdAt", ignore = true)
+    @Mapping(target = "person.updatedAt", ignore = true)
+    @Mapping(target = "person.keycloakId", ignore = true)
     @Mapping(target = "stock", ignore = true)
     @Mapping(source = "person.address.city", target = "person.address.city.id")
-    void updateEntityFromDTO(EntrepreneurUpdateRequestDTO entrepreneurUpdateRequestDTO, @MappingTarget Entrepreneur entrepreneur);
+    void updateEntityFromDTO(EntrepreneurRequestDTO entrepreneurRequestDTO, @MappingTarget Entrepreneur entrepreneur);
 }

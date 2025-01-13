@@ -2,11 +2,12 @@ package br.ifrn.edu.sisconf.service;
 
 import br.ifrn.edu.sisconf.constants.KeycloakConstants;
 import br.ifrn.edu.sisconf.domain.Entrepreneur;
-import br.ifrn.edu.sisconf.domain.dtos.*;
+import br.ifrn.edu.sisconf.domain.dtos.Entrepreneur.EntrepreneurRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Entrepreneur.EntrepreneurResponseDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Person.PersonRequestDTO;
 import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationRecord;
 import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationResponse;
 import br.ifrn.edu.sisconf.dto.keycloak.UserUpdateRecord;
-import br.ifrn.edu.sisconf.exception.BusinessException;
 import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.EntrepreneurMapper;
 import br.ifrn.edu.sisconf.repository.EntrepreneurRepository;
@@ -31,34 +32,16 @@ public class EntrepreneurService {
     private PersonService personService;
 
     @Autowired
-    private CityService cityService;
-
-    @Autowired
     private StockService stockService;
 
-    private void throwIfCnpjInvalid(PersonUpdateRequestDTO personUpdateRequestDTO, Long id) {
-        String cnpj = personUpdateRequestDTO.getCnpj();
-        String cnpjErrorMsg = "CNPJ não pode ser vazio";
-
-        // Two separate 'ifs' are needed because calling isEmpty implies cnpj is not null
-        if (cnpj == null) {
-            throw new BusinessException(cnpjErrorMsg);
-        }
-
-        if (cnpj.isEmpty()) {
-            throw new BusinessException(cnpjErrorMsg);
-        }
-        personService.throwIfCnpjIsNotUnique(personUpdateRequestDTO, id);
+    private void validateEntrepreneurCreation(PersonRequestDTO personRequestDTO) {
+        personService.validatePersonCreation(personRequestDTO);
+        personService.throwIfCnpjIsNotUnique(personRequestDTO.getCnpj(), null);
     }
 
-    private void validateEntrepreneurCreation(PersonCreateRequestDTO personCreateRequestDTO) {
-        personService.validatePersonCreation(personCreateRequestDTO);
-        this.throwIfCnpjInvalid(personCreateRequestDTO, null);
-    }
-
-    private void validateEntrepreneurUpdate(PersonUpdateRequestDTO personUpdateRequestDTO, Long id) {
-        personService.validatePersonUpdate(personUpdateRequestDTO, id);
-        this.throwIfCnpjInvalid(personUpdateRequestDTO, id);
+    private void validateEntrepreneurUpdate(PersonRequestDTO personRequestDTO, Long id) {
+        personService.validatePersonUpdate(personRequestDTO, id);
+        personService.throwIfCnpjIsNotUnique(personRequestDTO.getCnpj(), id);
     }
 
     public EntrepreneurResponseDTO getById(Long id) {
@@ -74,20 +57,21 @@ public class EntrepreneurService {
         return entrepreneurMapper.toDTOList(entrepreneurRepository.findAll());
     }
 
-    public EntrepreneurResponseDTO save(EntrepreneurCreateRequestDTO entrepreneurCreateRequestDTO) {
-        PersonCreateRequestDTO personCreateRequestDTO = entrepreneurCreateRequestDTO.getPerson();
-        this.validateEntrepreneurCreation(personCreateRequestDTO);
+    public EntrepreneurResponseDTO save(EntrepreneurRequestDTO entrepreneurRequestDTO) {
+        PersonRequestDTO personRequestDTO = entrepreneurRequestDTO.getPerson();
+        this.validateEntrepreneurCreation(personRequestDTO);
 
         var userRegistrationRecord = new UserRegistrationRecord(
-                personCreateRequestDTO.getFirstName(),
-                personCreateRequestDTO.getLastName(),
-                personCreateRequestDTO.getPassword(),
-                personCreateRequestDTO.getEmail(),
+                personRequestDTO.getFirstName(),
+                personRequestDTO.getLastName(),
+                personRequestDTO.getPassword(),
+                personRequestDTO.getEmail(),
                 KeycloakConstants.ENTREPRENEUR_GROUP_NAME
         );
-        UserRegistrationResponse userRegistrationResponse = keycloakUserService.create(userRegistrationRecord);
+        UserRegistrationResponse userRegistrationResponse = keycloakUserService
+            .create(userRegistrationRecord);
 
-        Entrepreneur entrepreneur = entrepreneurMapper.toEntity(entrepreneurCreateRequestDTO);
+        Entrepreneur entrepreneur = entrepreneurMapper.toEntity(entrepreneurRequestDTO);
         entrepreneur.getPerson().setKeycloakId(userRegistrationResponse.keycloakId());
         try {
             var savedEntrepreneur = entrepreneurRepository.save(entrepreneur);
@@ -99,23 +83,30 @@ public class EntrepreneurService {
         }
     }
 
-    public EntrepreneurResponseDTO update(Long id, EntrepreneurUpdateRequestDTO entrepreneurUpdateRequestDTO) {
-        PersonUpdateRequestDTO personUpdateRequestDTO = entrepreneurUpdateRequestDTO.getPerson();
+    public EntrepreneurResponseDTO update(
+        Long id, 
+        EntrepreneurRequestDTO entrepreneurRequestDTO
+    ) {
+        PersonRequestDTO personRequestDTO = entrepreneurRequestDTO.getPerson();
 
-        var entrepreneur = entrepreneurRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(
-                String.format("Empreendedor com id %d não existe", id)
-        ));
-        this.validateEntrepreneurUpdate(personUpdateRequestDTO, entrepreneur.getPerson().getId());
+        var entrepreneur = entrepreneurRepository
+            .findById(id)
+            .orElseThrow(() -> 
+                new ResourceNotFoundException(
+                    String.format("Empreendedor com id %d não existe", id)
+                )
+            );
+        this.validateEntrepreneurUpdate(personRequestDTO, entrepreneur.getPerson().getId());
 
         var userUpdateRecord = new UserUpdateRecord(
                 entrepreneur.getPerson().getKeycloakId(),
-                personUpdateRequestDTO.getFirstName(),
-                personUpdateRequestDTO.getLastName()
+                personRequestDTO.getFirstName(),
+                personRequestDTO.getLastName()
         );
         keycloakUserService.update(userUpdateRecord);
 
         try {
-            entrepreneurMapper.updateEntityFromDTO(entrepreneurUpdateRequestDTO, entrepreneur);
+            entrepreneurMapper.updateEntityFromDTO(entrepreneurRequestDTO, entrepreneur);
             var updatedEntrepreneur = entrepreneurRepository.save(entrepreneur);
             return entrepreneurMapper.toResponseDTO(updatedEntrepreneur);
         } catch (Exception exception) {
@@ -131,9 +122,13 @@ public class EntrepreneurService {
     }
 
     public void deleteById(Long id) {
-        var entrepreneur = entrepreneurRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(
-                String.format("Empreendedor com id %d não existe", id)
-        ));
+        var entrepreneur = entrepreneurRepository
+            .findById(id)
+            .orElseThrow(() -> 
+                new ResourceNotFoundException(
+                    String.format("Empreendedor com id %d não existe", id)
+                )
+            );
         stockService.deleteByEntrepreneurId(entrepreneur.getId());
         entrepreneurRepository.deleteById(id);
         keycloakUserService.deleteById(entrepreneur.getPerson().getKeycloakId());
