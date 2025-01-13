@@ -630,9 +630,9 @@ public class PersonRequestDTOTests {
         );
 
         assertFalse(violations.stream()
-            .anyMatch(violation -> violation.getMessage().equals("Phone deve seguir formato (XX) XXXXX-XXXX")));
+            .anyMatch(violation -> violation.getMessage().equals("Telefone deve seguir formato (XX) XXXXX-XXXX")));
         assertFalse(violations.stream()
-            .anyMatch(violation -> violation.getMessage().equals("Phone não pode ser vazio")));
+            .anyMatch(violation -> violation.getMessage().equals("Telefone não pode ser vazio")));
     }
 
     @Test
@@ -648,7 +648,7 @@ public class PersonRequestDTOTests {
         );
 
         assertTrue(violations.stream()
-            .anyMatch(violation -> violation.getMessage().equals("Phone deve seguir formato (XX) XXXXX-XXXX")));
+            .anyMatch(violation -> violation.getMessage().equals("Telefone deve seguir formato (XX) XXXXX-XXXX")));
     }
 
     @Test
@@ -664,7 +664,7 @@ public class PersonRequestDTOTests {
         );
 
         assertTrue(violations.stream()
-            .anyMatch(violation -> violation.getMessage().equals("Phone deve seguir formato (XX) XXXXX-XXXX")));
+            .anyMatch(violation -> violation.getMessage().equals("Telefone deve seguir formato (XX) XXXXX-XXXX")));
     }
 
     @Test
@@ -679,7 +679,7 @@ public class PersonRequestDTOTests {
             Default.class
         );
         assertTrue(violations.stream()
-            .anyMatch(violation -> violation.getMessage().equals("Phone não pode ser vazio")));
+            .anyMatch(violation -> violation.getMessage().equals("Telefone não pode ser vazio")));
     }
 
     @Test
@@ -694,6 +694,6 @@ public class PersonRequestDTOTests {
             Default.class
         );
         assertTrue(violations.stream()
-            .anyMatch(violation -> violation.getMessage().equals("Phone não pode ser vazio")));
+            .anyMatch(violation -> violation.getMessage().equals("Telefone não pode ser vazio")));
     }
 }

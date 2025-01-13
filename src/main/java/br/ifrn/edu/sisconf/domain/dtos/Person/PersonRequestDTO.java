@@ -62,12 +62,12 @@ public class PersonRequestDTO {
     private String cnpj;
 
     @NotBlank(
-        message = "Phone não pode ser vazio",
+        message = "Telefone não pode ser vazio",
         groups = {CreatePersonGroup.class, UpdatePersonGroup.class}
     )
     @Pattern(
         regexp = "\\(\\d{2}\\) 9\\d{4}-\\d{4}", 
-        message = "Phone deve seguir formato (XX) XXXXX-XXXX",
+        message = "Telefone deve seguir formato (XX) XXXXX-XXXX",
         groups = {CreatePersonGroup.class, UpdatePersonGroup.class}
     )
     private String phone;
