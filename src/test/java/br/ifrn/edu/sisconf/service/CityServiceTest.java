@@ -2,7 +2,7 @@ package br.ifrn.edu.sisconf.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +15,7 @@ import java.util.Optional;
 import br.ifrn.edu.sisconf.domain.City;
 import br.ifrn.edu.sisconf.domain.CountryState;
 import br.ifrn.edu.sisconf.domain.dtos.CityResponseDTO;
+import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.CityMapper;
 import br.ifrn.edu.sisconf.repository.CityRepository;
 
@@ -51,12 +52,12 @@ public class CityServiceTest {
 
     @Test
     void getExistingCityByInvalidId() {
-        CountryState countryState = new CountryState("Pernambuco", "PE");
-        City city = new City("Petrolina", countryState);
-        when(cityRepository.findById(-1L)).thenReturn(Optional.of(city));
+        when(cityRepository.findById(-1L)).thenReturn(Optional.empty());
 
-        CityResponseDTO retrievedCity = cityService.getById(-1L);
-        assertEquals(retrievedCity, cityMapper.toResponse(city));
-        assertNull(retrievedCity);
+        ResourceNotFoundException exception = assertThrows(
+            ResourceNotFoundException.class,
+            () -> cityService.getById(-1L)
+        );
+        assertEquals("Cidade com id -1 não encontrada", exception.getMessage());
     }
 }
