@@ -15,6 +15,10 @@ import java.util.List;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface FoodMapper {
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "stocks", ignore = true)
     Food toEntity(FoodRequestDTO createFoodDto);
 
     FoodResponseDTO toResponseDTO(Food food);
