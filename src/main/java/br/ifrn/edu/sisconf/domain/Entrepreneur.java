@@ -20,6 +20,6 @@ public class Entrepreneur extends BaseEntity {
     @JoinColumn(name = "person_id", nullable = false, unique = true)
     private Person person;
 
-    @OneToOne(mappedBy = "entrepreneur")
+    @OneToOne(mappedBy = "entrepreneur", cascade = CascadeType.ALL, orphanRemoval = true)
     private Stock stock;
 }
