@@ -158,10 +158,13 @@ public class CustomerServiceTest {
                     updateCustomerRequestDTO.getPerson().getAddress().getNeighbourhood(),
                     updateCustomerRequestDTO.getPerson().getAddress().getNumber(),
                     new City()
-                )
+                ),
+                null,
+                null
             ),
             null
         );
+        updatedCustomer.getPerson().setCustomer(updatedCustomer);
         updatedCustomer.getPerson().getAddress().getCity().setId(
             updateCustomerRequestDTO.getPerson().getAddress().getCity()
         );
