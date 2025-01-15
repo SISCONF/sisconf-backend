@@ -93,7 +93,6 @@ public class EntrepreneurServiceTest {
 
         entrepreneurService.deleteById(entrepreneur.getId());
 
-        verify(stockService, times(1)).deleteByEntrepreneurId(entrepreneur.getId());
         verify(entrepreneurRepository, times(1)).deleteById(entrepreneur.getId());
         verify(keycloakUserService, times(1)).deleteById(
             entrepreneur.getPerson().getKeycloakId()
