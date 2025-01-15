@@ -129,8 +129,7 @@ public class EntrepreneurService {
                     String.format("Empreendedor com id %d não existe", id)
                 )
             );
-        stockService.deleteByEntrepreneurId(entrepreneur.getId());
-        entrepreneurRepository.deleteById(id);
         keycloakUserService.deleteById(entrepreneur.getPerson().getKeycloakId());
+        entrepreneurRepository.deleteById(id);
     }
 }

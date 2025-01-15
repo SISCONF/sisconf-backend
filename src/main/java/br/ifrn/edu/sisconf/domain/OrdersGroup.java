@@ -2,15 +2,17 @@ package br.ifrn.edu.sisconf.domain;
 
 import br.ifrn.edu.sisconf.domain.enums.OrdersGroupStatus;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "orders_group")
