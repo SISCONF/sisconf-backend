@@ -36,7 +36,7 @@ public class StockService {
         stockRepository.deleteById(stock.getId());
     }
 
-    public StockResponseDTO get(Long entrepreneurId) {
+    public StockResponseDTO getByEntrepreneurId(Long entrepreneurId) {
         Entrepreneur entrepreneur = entrepreneurRepository.findById(entrepreneurId).orElseThrow(() -> new ResourceNotFoundException("Este empreendedor não existe"));
         Stock stock = entrepreneur.getStock();
         return stockMapper.toResponseDTO(stock);
