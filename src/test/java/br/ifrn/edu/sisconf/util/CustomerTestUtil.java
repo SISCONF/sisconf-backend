@@ -50,10 +50,13 @@ public class CustomerTestUtil {
                     customerCreateRequestDTO.getPerson().getAddress().getNeighbourhood(),
                     customerCreateRequestDTO.getPerson().getAddress().getNumber(),
                     new City()
-                )
+                ),
+                null,
+                null
             ),
             null
         );
+        customer.getPerson().setCustomer(customer);
         customer.getPerson().getAddress().getCity().setId(
             customerCreateRequestDTO.getPerson().getAddress().getCity()
         );

@@ -6,11 +6,13 @@ import br.ifrn.edu.sisconf.domain.dtos.Entrepreneur.EntrepreneurResponseDTO;
 
 public class EntrepreneurTestUtil {
     public static Entrepreneur createValidEntrepreneur() {
-        return new Entrepreneur(
+        var entrepreneur = new Entrepreneur(
             "Nome de Negócio Teste",
             PersonTestUtil.createValidPerson("12.345.678/9101-11"),
             null
         );
+        entrepreneur.getPerson().setEntrepreneur(entrepreneur);
+        return entrepreneur;
     }
 
     public static EntrepreneurRequestDTO toValidRequestDTO(Entrepreneur entrepreneur) {
