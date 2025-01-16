@@ -8,19 +8,23 @@ import br.ifrn.edu.sisconf.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 import jakarta.validation.groups.Default;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/customer")
+@PreAuthorize("isAuthenticated()")
 public class CustomerController {
     @Autowired
     private CustomerService customerService;
 
     @PostMapping
+    @PreAuthorize("permitAll()")
     public ResponseEntity<CustomerResponseDTO> save(
         @Validated({CreatePersonGroup.class, Default.class}) 
         @RequestBody CustomerRequestDTO customerCreateRequestDTO
@@ -43,7 +47,8 @@ public class CustomerController {
     @PutMapping("/{id}")
     public ResponseEntity<CustomerResponseDTO> update(
         @PathVariable Long id, 
-        @Validated({UpdatePersonGroup.class, Default.class}) @RequestBody CustomerRequestDTO customerRequestDTO
+        @Validated({UpdatePersonGroup.class, Default.class}) 
+        @RequestBody CustomerRequestDTO customerRequestDTO
     ) {
         return ResponseEntity.ok(customerService.update(customerRequestDTO, id));
     }

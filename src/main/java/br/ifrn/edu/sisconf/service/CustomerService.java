@@ -32,7 +32,12 @@ public class CustomerService {
     private CustomerMapper customerMapper;
 
     public Customer getCustomerById(Long id) {
-        return customerRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Cliente com esse ID não existe"));
+        return customerRepository
+            .findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException(
+                "Cliente com esse ID não existe"
+                )
+            );
     }
 
     public List<CustomerResponseDTO> getAll() {
