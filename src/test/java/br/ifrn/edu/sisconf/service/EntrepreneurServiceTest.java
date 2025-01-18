@@ -93,7 +93,6 @@ public class EntrepreneurServiceTest {
 
         entrepreneurService.deleteById(entrepreneur.getId());
 
-        verify(stockService, times(1)).deleteByEntrepreneurId(entrepreneur.getId());
         verify(entrepreneurRepository, times(1)).deleteById(entrepreneur.getId());
         verify(keycloakUserService, times(1)).deleteById(
             entrepreneur.getPerson().getKeycloakId()
@@ -175,10 +174,13 @@ public class EntrepreneurServiceTest {
                     updateEntrepreneurRequestDTO.getPerson().getAddress().getNeighbourhood(),
                     updateEntrepreneurRequestDTO.getPerson().getAddress().getNumber(),
                     new City()
-                )
+                ),
+                null,
+                null
             ),
             null
         );
+        updatedEntrepreneur.getPerson().setEntrepreneur(updatedEntrepreneur);
         updatedEntrepreneur.getPerson().getAddress().getCity().setId(
             updateEntrepreneurRequestDTO.getPerson().getAddress().getCity()
         );

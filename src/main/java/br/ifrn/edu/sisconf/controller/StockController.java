@@ -11,13 +11,13 @@ import br.ifrn.edu.sisconf.domain.dtos.StockResponseDTO;
 import br.ifrn.edu.sisconf.service.StockService;
 
 @RestController
-@RequestMapping("/api/entrepreneurs/{entrepreneurId}/stocks")
+@RequestMapping("/api/stocks")
 public class StockController {
     @Autowired
     private StockService stockService;
 
-    @GetMapping
+    @GetMapping("/entrepreneurs/{entrepreneurId}")
     public ResponseEntity<StockResponseDTO> get(@PathVariable Long entrepreneurId) {
-        return ResponseEntity.ok(stockService.get(entrepreneurId));
+        return ResponseEntity.ok(stockService.getByEntrepreneurId(entrepreneurId));
     }
 }

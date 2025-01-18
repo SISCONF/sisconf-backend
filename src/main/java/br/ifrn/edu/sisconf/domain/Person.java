@@ -37,4 +37,10 @@ public class Person extends BaseEntity {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id")
     private Address address;
+
+    @OneToOne(mappedBy = "person")
+    private Customer customer = null;
+
+    @OneToOne(mappedBy = "person")
+    private Entrepreneur entrepreneur = null;
 }
