@@ -1,7 +1,8 @@
-package br.ifrn.edu.sisconf.domain.dtos;
+package br.ifrn.edu.sisconf.domain.dtos.Order;
 
 import java.util.List;
 
+import br.ifrn.edu.sisconf.domain.dtos.OrderFoodRequestDTO;
 import br.ifrn.edu.sisconf.domain.enums.OrderStatus;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;

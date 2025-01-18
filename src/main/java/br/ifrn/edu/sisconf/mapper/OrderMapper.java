@@ -1,9 +1,10 @@
 package br.ifrn.edu.sisconf.mapper;
 
 import br.ifrn.edu.sisconf.domain.Order;
-import br.ifrn.edu.sisconf.domain.dtos.OrderRequestDTO;
-import br.ifrn.edu.sisconf.domain.dtos.OrderResponseDTO;
-import br.ifrn.edu.sisconf.domain.dtos.OrderUpdateRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Order.OrderRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Order.OrderResponseDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Order.OrderUpdateRequestDTO;
+
 import org.mapstruct.*;
 
 import java.util.List;
