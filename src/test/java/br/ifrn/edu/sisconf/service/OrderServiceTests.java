@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
@@ -21,10 +22,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import br.ifrn.edu.sisconf.domain.Customer;
 import br.ifrn.edu.sisconf.domain.Food;
 import br.ifrn.edu.sisconf.domain.Order;
+import br.ifrn.edu.sisconf.domain.dtos.Order.OrderRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Order.OrderResponseDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Order.OrderUpdateRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrderFoodRequestDTO;
-import br.ifrn.edu.sisconf.domain.dtos.OrderRequestDTO;
-import br.ifrn.edu.sisconf.domain.dtos.OrderResponseDTO;
-import br.ifrn.edu.sisconf.domain.dtos.OrderUpdateRequestDTO;
 import br.ifrn.edu.sisconf.domain.enums.FoodCategory;
 import br.ifrn.edu.sisconf.domain.enums.OrderStatus;
 import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
@@ -77,17 +78,16 @@ public class OrderServiceTests {
     @Test
     @DisplayName("Should return a message indicating that the user was not found")
     public void shouldThrowExceptionWhenCustomerNotFound() {
-        Long customerId = 1L;
         OrderRequestDTO orderRequestDTO = new OrderRequestDTO();
 
-        when(customerRepository.findById(customerId)).thenReturn(Optional.empty());
+        when(customerRepository.findById(customer.getId())).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> 
-            orderService.createOrder(customerId, orderRequestDTO)
+            orderService.createOrder(customer.getId(), orderRequestDTO)
         );
 
         assertEquals("Cliente não encontrado", exception.getMessage());
-        verify(customerRepository).findById(customerId);
+        verify(customerRepository).findById(customer.getId());
     }
 
     @Test
@@ -163,14 +163,90 @@ public class OrderServiceTests {
     @Test
     @DisplayName("Should delete order when it exists")
     public void shouldDeleteOrderSuccessfully() {
-        Long orderId = 1L;
+        
 
-        when(orderRepository.existsById(orderId)).thenReturn(true);
+        when(orderRepository.existsById(order.getId())).thenReturn(true);
 
-        orderService.deleteOrder(orderId);
+        orderService.deleteOrder(order.getId());
 
-        verify(orderRepository).existsById(orderId);
-        verify(orderRepository).deleteById(orderId);
+        verify(orderRepository).existsById(order.getId());
+        verify(orderRepository).deleteById(order.getId());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when order does not exist")
+    public void shouldThrowExceptionWhenOrderDoesNotExist() {
+        
+
+        when(orderRepository.existsById(order.getId())).thenReturn(false);
+
+        assertThrows(ResourceNotFoundException.class, () -> orderService.deleteOrder(order.getId()));
+
+        verify(orderRepository).existsById(order.getId());
+        verify(orderRepository, never()).deleteById(order.getId());
+    }
+
+
+    @Test
+    @DisplayName("Should update only the order status")
+    public void shouldUpdateOrderStatusOnly() {
+        OrderUpdateRequestDTO orderUpdateRequestDTO = new OrderUpdateRequestDTO();
+        orderUpdateRequestDTO.setStatus(OrderStatus.ACCEPTED);
+        orderUpdateRequestDTO.setFoodsQuantities(List.of());
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(orderRepository.save(order)).thenReturn(order);
+
+        orderService.updateOrder(order.getId(), orderUpdateRequestDTO);
+
+        assertEquals(OrderStatus.ACCEPTED, order.getStatus());
+        verify(orderRepository).findById(order.getId());
+        verify(orderRepository).save(order);
+    }
+
+    @Test
+    @DisplayName("Should add new items to the order")
+    public void shouldAddNewItemsToOrder() {
+        OrderUpdateRequestDTO orderUpdateRequestDTO = new OrderUpdateRequestDTO();
+        orderUpdateRequestDTO.setFoodsQuantities(List.of(new OrderFoodRequestDTO(food.getId(), 2)));
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(foodRepository.findAllById(List.of(food.getId()))).thenReturn(List.of(food));
+        when(orderRepository.save(order)).thenReturn(order);
+
+        orderService.updateOrder(order.getId(), orderUpdateRequestDTO);
+
+        assertEquals(1, order.getOrderFoods().size());
+        assertEquals(food, order.getOrderFoods().get(0).getFood());
+        assertEquals(2, order.getOrderFoods().get(0).getQuantity());
+
+        verify(orderRepository).findById(order.getId());
+        verify(foodRepository).findAllById(List.of(food.getId()));
+        verify(orderRepository).save(order);
+    }
+
+    @Test
+    @DisplayName("Should correctly calculate the total price when adding new items")
+    public void shouldCorrectlyCalculateTotalPriceWhenAddingNewItems() {
+        BigDecimal initialPrice = food.getUnitPrice().multiply(BigDecimal.valueOf(2));
+        BigDecimal additionalPrice = food.getUnitPrice().multiply(BigDecimal.valueOf(3));
+
+        OrderUpdateRequestDTO orderUpdateRequestDTO = new OrderUpdateRequestDTO();
+        orderUpdateRequestDTO.setFoodsQuantities(List.of(new OrderFoodRequestDTO(food.getId(), 2))); 
+        orderUpdateRequestDTO.setStatus(OrderStatus.WAITING);
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(foodRepository.findAllById(List.of(food.getId()))).thenReturn(List.of(food));
+        when(orderRepository.save(order)).thenReturn(order);
+
+        orderService.updateOrder(order.getId(), orderUpdateRequestDTO);
+
+        BigDecimal expectedTotalPrice = initialPrice.add(additionalPrice);
+        assertEquals(expectedTotalPrice, order.getTotalPrice());
+
+        verify(orderRepository).findById(order.getId());
+        verify(foodRepository).findAllById(List.of(food.getId()));
+        verify(orderRepository).save(order);
     }
 
 }
