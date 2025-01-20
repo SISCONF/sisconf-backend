@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,13 +18,18 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.dao.OptimisticLockingFailureException;
 
+import br.ifrn.edu.sisconf.constants.KeycloakConstants;
 import br.ifrn.edu.sisconf.domain.Address;
 import br.ifrn.edu.sisconf.domain.City;
 import br.ifrn.edu.sisconf.domain.Entrepreneur;
 import br.ifrn.edu.sisconf.domain.Person;
 import br.ifrn.edu.sisconf.domain.dtos.Entrepreneur.EntrepreneurRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Person.PersonRequestDTO;
+import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationRecord;
+import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationResponse;
+import br.ifrn.edu.sisconf.dto.keycloak.UserUpdateRecord;
 import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.EntrepreneurMapper;
 import br.ifrn.edu.sisconf.repository.EntrepreneurRepository;
@@ -53,6 +59,72 @@ public class EntrepreneurServiceTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void shouldCreateEntrepreneurWhenValidDTO() {
+        var entrepreneur = EntrepreneurTestUtil.createValidEntrepreneur();
+        var entrepreneurCreateRequestDTO = EntrepreneurTestUtil.toValidRequestDTO(entrepreneur);
+        var userRegistrationRecord = new UserRegistrationRecord(
+            entrepreneurCreateRequestDTO.getPerson().getFirstName(),
+            entrepreneurCreateRequestDTO.getPerson().getLastName(),
+            entrepreneurCreateRequestDTO.getPerson().getPassword(),
+            entrepreneurCreateRequestDTO.getPerson().getEmail(),
+            KeycloakConstants.ENTREPRENEUR_GROUP_NAME
+            );
+        final String keycloakId = UUID.randomUUID().toString();
+        entrepreneur.getPerson().setKeycloakId(keycloakId);
+        var userRegistrationResponse = new UserRegistrationResponse(
+            keycloakId, 
+            entrepreneurCreateRequestDTO.getPerson().getFirstName(), 
+            entrepreneurCreateRequestDTO.getPerson().getLastName(), 
+            entrepreneurCreateRequestDTO.getPerson().getEmail()
+        );
+        var expectedEntrepreneurResponseDTO = EntrepreneurTestUtil.toResponseDTO(entrepreneur);
+        when(keycloakUserService.create(userRegistrationRecord)).thenReturn(userRegistrationResponse);
+        when(entrepreneurMapper.toEntity(entrepreneurCreateRequestDTO)).thenReturn(entrepreneur);
+        when(entrepreneurRepository.save(entrepreneur)).thenReturn(entrepreneur);
+        when(entrepreneurMapper.toResponseDTO(entrepreneur)).thenReturn(expectedEntrepreneurResponseDTO);
+
+        var entrepreneurResponseDTO = entrepreneurService.save(entrepreneurCreateRequestDTO);
+
+        verify(keycloakUserService).create(userRegistrationRecord);
+        verify(entrepreneurRepository).save(entrepreneur);
+        assertEquals(expectedEntrepreneurResponseDTO, entrepreneurResponseDTO);
+        assertNotNull(entrepreneurResponseDTO);
+    }
+
+    @Test
+    public void shouldRevertEntrepreneurCreationWhenSaveFails() {
+        var entrepreneur = EntrepreneurTestUtil.createValidEntrepreneur();
+        var entrepreneurCreateRequestDTO = EntrepreneurTestUtil.toValidRequestDTO(entrepreneur);
+        var userRegistrationRecord = new UserRegistrationRecord(
+            entrepreneurCreateRequestDTO.getPerson().getFirstName(),
+            entrepreneurCreateRequestDTO.getPerson().getLastName(),
+            entrepreneurCreateRequestDTO.getPerson().getPassword(),
+            entrepreneurCreateRequestDTO.getPerson().getEmail(),
+            KeycloakConstants.ENTREPRENEUR_GROUP_NAME
+            );
+        final String keycloakId = UUID.randomUUID().toString();
+        entrepreneur.getPerson().setKeycloakId(keycloakId);
+        var userRegistrationResponse = new UserRegistrationResponse(
+            keycloakId, 
+            entrepreneurCreateRequestDTO.getPerson().getFirstName(), 
+            entrepreneurCreateRequestDTO.getPerson().getLastName(), 
+            entrepreneurCreateRequestDTO.getPerson().getEmail()
+        );
+        var expectedEntrepreneurResponseDTO = EntrepreneurTestUtil.toResponseDTO(entrepreneur);
+        when(keycloakUserService.create(userRegistrationRecord)).thenReturn(userRegistrationResponse);
+        when(entrepreneurMapper.toEntity(entrepreneurCreateRequestDTO)).thenReturn(entrepreneur);
+        when(entrepreneurRepository.save(entrepreneur)).thenThrow(OptimisticLockingFailureException.class);
+        when(entrepreneurMapper.toResponseDTO(entrepreneur)).thenReturn(expectedEntrepreneurResponseDTO);
+
+        assertThrows(
+            OptimisticLockingFailureException.class,
+            () -> entrepreneurService.save(entrepreneurCreateRequestDTO) 
+        );
+
+        verify(keycloakUserService).deleteById(keycloakId);
     }
 
     @Test
@@ -204,6 +276,72 @@ public class EntrepreneurServiceTest {
             entrepreneur
         );
         assertEquals(expectedResponseDTO, actualResponseDTO);
+    }
+
+    @Test
+    public void shouldRevertEntrepreneurChangesWhenUpdateFails() {
+        var entrepreneur = EntrepreneurTestUtil.createValidEntrepreneur();
+        entrepreneur.setId(1L);
+        var updateEntrepreneurRequestDTO = EntrepreneurTestUtil.toValidRequestDTO(entrepreneur);
+
+        updateEntrepreneurRequestDTO.getPerson().setEmail(null);
+        updateEntrepreneurRequestDTO.getPerson().setPassword(null);
+        updateEntrepreneurRequestDTO.getPerson().setPassword2(null);
+        updateEntrepreneurRequestDTO.setBusinessName("Novo Nome");
+        updateEntrepreneurRequestDTO.getPerson().setFirstName("Novo First Name");
+        updateEntrepreneurRequestDTO.getPerson().setLastName("Novo Last Name");
+        updateEntrepreneurRequestDTO.getPerson().setCpf("987.654.321-00");
+        updateEntrepreneurRequestDTO.getPerson().setCnpj("98.765.432/1000-00");
+        updateEntrepreneurRequestDTO.getPerson().setPhone("(22) 92222-2222");
+        updateEntrepreneurRequestDTO.getPerson().getAddress().setStreet("Nova Rua");
+        updateEntrepreneurRequestDTO.getPerson().getAddress().setNeighbourhood("Nova Vizinhança");
+        updateEntrepreneurRequestDTO.getPerson().getAddress().setNumber(100);
+        updateEntrepreneurRequestDTO.getPerson().getAddress().setZipCode("22222-222");
+        updateEntrepreneurRequestDTO.getPerson().getAddress().setCity(20L);
+
+        var updatedEntrepreneur = new Entrepreneur(
+            updateEntrepreneurRequestDTO.getBusinessName(),
+            new Person(
+                entrepreneur.getPerson().getKeycloakId(),
+                updateEntrepreneurRequestDTO.getPerson().getFirstName(),
+                updateEntrepreneurRequestDTO.getPerson().getLastName(),
+                entrepreneur.getPerson().getEmail(),
+                updateEntrepreneurRequestDTO.getPerson().getCpf(),
+                updateEntrepreneurRequestDTO.getPerson().getCnpj(),
+                updateEntrepreneurRequestDTO.getPerson().getPhone(),
+                new Address(
+                    updateEntrepreneurRequestDTO.getPerson().getAddress().getStreet(),
+                    updateEntrepreneurRequestDTO.getPerson().getAddress().getZipCode(),
+                    updateEntrepreneurRequestDTO.getPerson().getAddress().getNeighbourhood(),
+                    updateEntrepreneurRequestDTO.getPerson().getAddress().getNumber(),
+                    new City()
+                ),
+                null,
+                null
+            ),
+            null
+        );
+        updatedEntrepreneur.getPerson().setEntrepreneur(updatedEntrepreneur);
+        updatedEntrepreneur.getPerson().getAddress().getCity().setId(
+            updateEntrepreneurRequestDTO.getPerson().getAddress().getCity()
+        );
+        when(entrepreneurRepository.findById(entrepreneur.getId())).thenReturn(
+            Optional.of(entrepreneur)
+        );
+        when(entrepreneurRepository.save(entrepreneur)).thenThrow(OptimisticLockingFailureException.class);
+        
+        assertThrows(
+            OptimisticLockingFailureException.class,
+            () -> entrepreneurService.update(entrepreneur.getId(), updateEntrepreneurRequestDTO) 
+        );
+
+        var oldUserRecord = new UserUpdateRecord(
+            entrepreneur.getPerson().getKeycloakId(), 
+            entrepreneur.getPerson().getFirstName(), 
+            entrepreneur.getPerson().getLastName()
+        );
+
+        verify(keycloakUserService).update(oldUserRecord);
     }
 
     @Test
