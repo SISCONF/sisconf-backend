@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,12 +19,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import br.ifrn.edu.sisconf.constants.KeycloakConstants;
 import br.ifrn.edu.sisconf.domain.Address;
 import br.ifrn.edu.sisconf.domain.City;
 import br.ifrn.edu.sisconf.domain.Entrepreneur;
 import br.ifrn.edu.sisconf.domain.Person;
 import br.ifrn.edu.sisconf.domain.dtos.Entrepreneur.EntrepreneurRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Person.PersonRequestDTO;
+import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationRecord;
+import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationResponse;
 import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.EntrepreneurMapper;
 import br.ifrn.edu.sisconf.repository.EntrepreneurRepository;
@@ -53,6 +57,39 @@ public class EntrepreneurServiceTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void shouldCreateEntrepreneurWhenValidDTO() {
+        var entrepreneur = EntrepreneurTestUtil.createValidEntrepreneur();
+        var entrepreneurCreateRequestDTO = EntrepreneurTestUtil.toValidRequestDTO(entrepreneur);
+        var userRegistrationRecord = new UserRegistrationRecord(
+            entrepreneurCreateRequestDTO.getPerson().getFirstName(),
+            entrepreneurCreateRequestDTO.getPerson().getLastName(),
+            entrepreneurCreateRequestDTO.getPerson().getPassword(),
+            entrepreneurCreateRequestDTO.getPerson().getEmail(),
+            KeycloakConstants.ENTREPRENEUR_GROUP_NAME
+            );
+        final String keycloakId = UUID.randomUUID().toString();
+        entrepreneur.getPerson().setKeycloakId(keycloakId);
+        var userRegistrationResponse = new UserRegistrationResponse(
+            keycloakId, 
+            entrepreneurCreateRequestDTO.getPerson().getFirstName(), 
+            entrepreneurCreateRequestDTO.getPerson().getLastName(), 
+            entrepreneurCreateRequestDTO.getPerson().getEmail()
+        );
+        var expectedEntrepreneurResponseDTO = EntrepreneurTestUtil.toResponseDTO(entrepreneur);
+        when(keycloakUserService.create(userRegistrationRecord)).thenReturn(userRegistrationResponse);
+        when(entrepreneurMapper.toEntity(entrepreneurCreateRequestDTO)).thenReturn(entrepreneur);
+        when(entrepreneurRepository.save(entrepreneur)).thenReturn(entrepreneur);
+        when(entrepreneurMapper.toResponseDTO(entrepreneur)).thenReturn(expectedEntrepreneurResponseDTO);
+
+        var entrepreneurResponseDTO = entrepreneurService.save(entrepreneurCreateRequestDTO);
+
+        verify(keycloakUserService).create(userRegistrationRecord);
+        verify(entrepreneurRepository).save(entrepreneur);
+        assertEquals(expectedEntrepreneurResponseDTO, entrepreneurResponseDTO);
+        assertNotNull(entrepreneurResponseDTO);
     }
 
     @Test
