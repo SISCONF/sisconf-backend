@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.dao.OptimisticLockingFailureException;
 
 import br.ifrn.edu.sisconf.constants.KeycloakConstants;
 import br.ifrn.edu.sisconf.domain.Address;
@@ -90,6 +91,39 @@ public class EntrepreneurServiceTest {
         verify(entrepreneurRepository).save(entrepreneur);
         assertEquals(expectedEntrepreneurResponseDTO, entrepreneurResponseDTO);
         assertNotNull(entrepreneurResponseDTO);
+    }
+
+    @Test
+    public void shouldRevertEntrepreneurCreationWhenSaveFails() {
+        var entrepreneur = EntrepreneurTestUtil.createValidEntrepreneur();
+        var entrepreneurCreateRequestDTO = EntrepreneurTestUtil.toValidRequestDTO(entrepreneur);
+        var userRegistrationRecord = new UserRegistrationRecord(
+            entrepreneurCreateRequestDTO.getPerson().getFirstName(),
+            entrepreneurCreateRequestDTO.getPerson().getLastName(),
+            entrepreneurCreateRequestDTO.getPerson().getPassword(),
+            entrepreneurCreateRequestDTO.getPerson().getEmail(),
+            KeycloakConstants.ENTREPRENEUR_GROUP_NAME
+            );
+        final String keycloakId = UUID.randomUUID().toString();
+        entrepreneur.getPerson().setKeycloakId(keycloakId);
+        var userRegistrationResponse = new UserRegistrationResponse(
+            keycloakId, 
+            entrepreneurCreateRequestDTO.getPerson().getFirstName(), 
+            entrepreneurCreateRequestDTO.getPerson().getLastName(), 
+            entrepreneurCreateRequestDTO.getPerson().getEmail()
+        );
+        var expectedEntrepreneurResponseDTO = EntrepreneurTestUtil.toResponseDTO(entrepreneur);
+        when(keycloakUserService.create(userRegistrationRecord)).thenReturn(userRegistrationResponse);
+        when(entrepreneurMapper.toEntity(entrepreneurCreateRequestDTO)).thenReturn(entrepreneur);
+        when(entrepreneurRepository.save(entrepreneur)).thenThrow(OptimisticLockingFailureException.class);
+        when(entrepreneurMapper.toResponseDTO(entrepreneur)).thenReturn(expectedEntrepreneurResponseDTO);
+
+        assertThrows(
+            OptimisticLockingFailureException.class,
+            () -> entrepreneurService.save(entrepreneurCreateRequestDTO) 
+        );
+
+        verify(keycloakUserService).deleteById(keycloakId);
     }
 
     @Test
