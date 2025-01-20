@@ -185,6 +185,12 @@
 						<goals>
 							<goal>report</goal>
 						</goals>
+						<configuration>
+							<excludes>
+								<exclude>br/ifrn/edu/sisconf/mapper/*.class</exclude>
+								<exclude>br/ifrn/edu/sisconf/exception/*.class</exclude>
+							</excludes>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
