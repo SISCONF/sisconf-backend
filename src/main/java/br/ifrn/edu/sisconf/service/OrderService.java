@@ -14,10 +14,10 @@ import br.ifrn.edu.sisconf.domain.Customer;
 import br.ifrn.edu.sisconf.domain.Food;
 import br.ifrn.edu.sisconf.domain.Order;
 import br.ifrn.edu.sisconf.domain.OrderFood;
-import br.ifrn.edu.sisconf.domain.dtos.OrderFoodRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Order.OrderRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Order.OrderResponseDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Order.OrderUpdateRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.OrderFoodRequestDTO;
 import br.ifrn.edu.sisconf.domain.enums.OrderStatus;
 import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.OrderMapper;
@@ -56,18 +56,22 @@ public class OrderService {
         return foods.stream().collect(Collectors.toMap(Food::getId, food -> food));
     }
 
+    private BigDecimal calculateTotalPrice(List<OrderFoodRequestDTO> foodsQuantities, Map<Long, Food> foodMap) {
+        return foodsQuantities.stream()
+            .map(request -> {
+                Food food = foodMap.get(request.getFoodId());
+                BigDecimal foodTotal = food.getUnitPrice().multiply(BigDecimal.valueOf(request.getQuantity()));
+                return foodTotal;
+            })
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
     public OrderResponseDTO createOrder(Long customerId, OrderRequestDTO orderRequestDTO) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
 
         Map<Long, Food> foodMap = fetchAndValidateFoods(orderRequestDTO.getFoodsQuantities());
-
-        BigDecimal totalPrice = orderRequestDTO.getFoodsQuantities().stream()
-            .map(orderFoodRequest -> {
-                Food food = foodMap.get(orderFoodRequest.getFoodId());
-                return food.getUnitPrice().multiply(BigDecimal.valueOf(orderFoodRequest.getQuantity()));
-            })
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalPrice = calculateTotalPrice(orderRequestDTO.getFoodsQuantities(), foodMap);
 
         Order order = orderMapper.toEntity(orderRequestDTO);
         order.setCustomer(customer);
@@ -112,17 +116,14 @@ public class OrderService {
         for (OrderFoodRequestDTO orderFoodRequest : orderUpdateRequestDTO.getFoodsQuantities()) {
             Food food = foodMap.get(orderFoodRequest.getFoodId());
             
-            // Verifica se o alimento já está no pedido
             boolean foodExistsInOrder = order.getOrderFoods().stream()
                     .anyMatch(orderFood -> orderFood.getFood().getId().equals(food.getId()));
 
             if (foodExistsInOrder) {
-                // Se o alimento já existe, atualize a quantidade
                 order.getOrderFoods().stream()
                     .filter(orderFood -> orderFood.getFood().getId().equals(food.getId()))
                     .forEach(orderFood -> orderFood.setQuantity(orderFood.getQuantity() + orderFoodRequest.getQuantity()));
             } else {
-                // Caso contrário, adicione um novo alimento
                 OrderFood orderFood = new OrderFood();
                 orderFood.setFood(food);
                 orderFood.setOrder(order);
@@ -136,6 +137,7 @@ public class OrderService {
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         order.setTotalPrice(totalPrice);
+        order.setStatus(orderUpdateRequestDTO.getStatus());
 
         orderMapper.updateEntityFromDTO(orderUpdateRequestDTO, order);
  
