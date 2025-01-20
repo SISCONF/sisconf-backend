@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import br.ifrn.edu.sisconf.domain.Customer;
 import br.ifrn.edu.sisconf.domain.Food;
 import br.ifrn.edu.sisconf.domain.Order;
+import br.ifrn.edu.sisconf.domain.OrderFood;
 import br.ifrn.edu.sisconf.domain.dtos.Order.OrderRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Order.OrderResponseDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Order.OrderUpdateRequestDTO;
@@ -164,7 +165,6 @@ public class OrderServiceTests {
     @DisplayName("Should delete order when it exists")
     public void shouldDeleteOrderSuccessfully() {
         
-
         when(orderRepository.existsById(order.getId())).thenReturn(true);
 
         orderService.deleteOrder(order.getId());
@@ -176,7 +176,6 @@ public class OrderServiceTests {
     @Test
     @DisplayName("Should throw exception when order does not exist")
     public void shouldThrowExceptionWhenOrderDoesNotExist() {
-        
 
         when(orderRepository.existsById(order.getId())).thenReturn(false);
 
@@ -226,14 +225,16 @@ public class OrderServiceTests {
     }
 
     @Test
-    @DisplayName("Should correctly calculate the total price when adding new items")
-    public void shouldCorrectlyCalculateTotalPriceWhenAddingNewItems() {
-        BigDecimal initialPrice = food.getUnitPrice().multiply(BigDecimal.valueOf(2));
-        BigDecimal additionalPrice = food.getUnitPrice().multiply(BigDecimal.valueOf(3));
+    @DisplayName("Should increment quantity for existing items in order")
+    public void shouldIncrementQuantityForExistingItems() {
+        OrderFood existingOrderFood = new OrderFood();
+        existingOrderFood.setFood(food);
+        existingOrderFood.setOrder(order);
+        existingOrderFood.setQuantity(3);
+        order.getOrderFoods().add(existingOrderFood);
 
         OrderUpdateRequestDTO orderUpdateRequestDTO = new OrderUpdateRequestDTO();
-        orderUpdateRequestDTO.setFoodsQuantities(List.of(new OrderFoodRequestDTO(food.getId(), 2))); 
-        orderUpdateRequestDTO.setStatus(OrderStatus.WAITING);
+        orderUpdateRequestDTO.setFoodsQuantities(List.of(new OrderFoodRequestDTO(food.getId(), 2)));
 
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(foodRepository.findAllById(List.of(food.getId()))).thenReturn(List.of(food));
@@ -241,12 +242,31 @@ public class OrderServiceTests {
 
         orderService.updateOrder(order.getId(), orderUpdateRequestDTO);
 
-        BigDecimal expectedTotalPrice = initialPrice.add(additionalPrice);
-        assertEquals(expectedTotalPrice, order.getTotalPrice());
+        assertEquals(5, existingOrderFood.getQuantity(), "A quantidade deve ser incrementada corretamente.");
+        verify(orderRepository).findById(order.getId());
+        verify(foodRepository).findAllById(List.of(food.getId()));
+        verify(orderRepository).save(order);
+    }
+
+    @Test
+    @DisplayName("Should correctly calculate total price when adding new items")
+    public void shouldCorrectlyCalculateTotalPriceWhenAddingNewItems() {
+        OrderUpdateRequestDTO orderUpdateRequestDTO = new OrderUpdateRequestDTO();
+        orderUpdateRequestDTO.setFoodsQuantities(List.of(new OrderFoodRequestDTO(food.getId(), 2)));
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(foodRepository.findAllById(List.of(food.getId()))).thenReturn(List.of(food));
+        when(orderRepository.save(order)).thenReturn(order);
+
+        orderService.updateOrder(order.getId(), orderUpdateRequestDTO);
+
+        BigDecimal expectedTotalPrice = food.getUnitPrice().multiply(BigDecimal.valueOf(2)); 
+        assertEquals(expectedTotalPrice, order.getTotalPrice(), "O preço total deve corresponder ao valor calculado.");
 
         verify(orderRepository).findById(order.getId());
         verify(foodRepository).findAllById(List.of(food.getId()));
         verify(orderRepository).save(order);
     }
+
 
 }

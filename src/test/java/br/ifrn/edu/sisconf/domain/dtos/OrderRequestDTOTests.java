@@ -29,7 +29,8 @@ public class OrderRequestDTOTests {
         var orderRequestDTO = new OrderRequestDTO(List.of(orderFoodRequestDTO));
 
         Set<ConstraintViolation<OrderRequestDTO>> violations = validator.validate(orderRequestDTO);
-        assertFalse(violations.stream().anyMatch(violation -> violation.getMessage().equals("Um pedido tem que ter pelo menos 1 comida")));
+        
+        assertTrue(violations.isEmpty(), "O DTO não deve ter erros de validação para uma lista de alimentos válida.");
     }
 
     @Test
@@ -37,8 +38,11 @@ public class OrderRequestDTOTests {
         var orderRequestDTO = new OrderRequestDTO(List.of());
 
         Set<ConstraintViolation<OrderRequestDTO>> violations = validator.validate(orderRequestDTO);
-        assertTrue(violations.stream().anyMatch(violation -> violation.getMessage().equals("Um pedido tem que ter pelo menos 1 comida")));
+
+        assertFalse(violations.isEmpty(), "O DTO deve ter erros de validação para uma lista de alimentos vazia.");
+        assertTrue(violations.stream()
+                .anyMatch(violation -> violation.getMessage().equals("Um pedido tem que ter pelo menos 1 alimento.")),
+                "A mensagem de validação deve corresponder à restrição esperada.");
     }
 
-    
 }

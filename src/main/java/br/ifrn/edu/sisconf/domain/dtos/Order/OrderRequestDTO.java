@@ -15,7 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderRequestDTO {
-    @NotEmpty(message = "As frutas/legumes e suas quantidades devem ser informadas.")
+    @NotEmpty(message = "Um pedido tem que ter pelo menos 1 alimento.")
     @Valid
     private List<OrderFoodRequestDTO> foodsQuantities;
 }
