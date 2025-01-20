@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.dao.OptimisticLockingFailureException;
 
 import br.ifrn.edu.sisconf.domain.Address;
 import br.ifrn.edu.sisconf.domain.City;
@@ -27,6 +28,7 @@ import br.ifrn.edu.sisconf.domain.dtos.Customer.CustomerRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Customer.CustomerResponseDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Person.PersonRequestDTO;
 import br.ifrn.edu.sisconf.domain.enums.CustomerCategory;
+import br.ifrn.edu.sisconf.dto.keycloak.UserUpdateRecord;
 import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.CustomerMapper;
 import br.ifrn.edu.sisconf.repository.CustomerRepository;
@@ -188,6 +190,73 @@ public class CustomerServiceTest {
             customer
         );
         assertEquals(expectedResponseDTO, actualResponseDTO);
+    }
+
+    @Test
+    public void shouldRevertCustomerUpdateWhenSaveFails() {
+        var customer = CustomerTestUtil.createValidCustomer();
+        customer.setId(1L);
+        var updateCustomerRequestDTO = CustomerTestUtil.toValidRequestDTO(customer);
+
+        updateCustomerRequestDTO.getPerson().setEmail(null);
+        updateCustomerRequestDTO.getPerson().setPassword(null);
+        updateCustomerRequestDTO.getPerson().setPassword2(null);
+        updateCustomerRequestDTO.setCategory(CustomerCategory.OTHER);
+        updateCustomerRequestDTO.getPerson().setFirstName("Novo First Name");
+        updateCustomerRequestDTO.getPerson().setLastName("Novo Last Name");
+        updateCustomerRequestDTO.getPerson().setCpf("987.654.321-00");
+        updateCustomerRequestDTO.getPerson().setCnpj("98.765.432/1000-00");
+        updateCustomerRequestDTO.getPerson().setPhone("(22) 92222-2222");
+        updateCustomerRequestDTO.getPerson().getAddress().setStreet("Nova Rua");
+        updateCustomerRequestDTO.getPerson().getAddress().setNeighbourhood("Nova Vizinhança");
+        updateCustomerRequestDTO.getPerson().getAddress().setNumber(100);
+        updateCustomerRequestDTO.getPerson().getAddress().setZipCode("22222-222");
+        updateCustomerRequestDTO.getPerson().getAddress().setCity(20L);
+
+        var updatedCustomer = new Customer(
+            updateCustomerRequestDTO.getCategory(),
+            new Person(
+                customer.getPerson().getKeycloakId(),
+                updateCustomerRequestDTO.getPerson().getFirstName(),
+                updateCustomerRequestDTO.getPerson().getLastName(),
+                customer.getPerson().getEmail(),
+                updateCustomerRequestDTO.getPerson().getCpf(),
+                updateCustomerRequestDTO.getPerson().getCnpj(),
+                updateCustomerRequestDTO.getPerson().getPhone(),
+                new Address(
+                    updateCustomerRequestDTO.getPerson().getAddress().getStreet(),
+                    updateCustomerRequestDTO.getPerson().getAddress().getZipCode(),
+                    updateCustomerRequestDTO.getPerson().getAddress().getNeighbourhood(),
+                    updateCustomerRequestDTO.getPerson().getAddress().getNumber(),
+                    new City()
+                ),
+                null,
+                null
+            ),
+            null
+        );
+        updatedCustomer.getPerson().setCustomer(updatedCustomer);
+        updatedCustomer.getPerson().getAddress().getCity().setId(
+            updateCustomerRequestDTO.getPerson().getAddress().getCity()
+        );
+
+        when(customerRepository.findById(customer.getId())).thenReturn(
+            Optional.of(customer)
+        );
+        when(customerRepository.save(customer)).thenThrow(OptimisticLockingFailureException.class);
+
+        assertThrows(
+            OptimisticLockingFailureException.class, 
+            () -> customerService.update(updateCustomerRequestDTO, customer.getId())
+        );
+
+        var oldUserRecord = new UserUpdateRecord(
+            customer.getPerson().getKeycloakId(), 
+            customer.getPerson().getFirstName(), 
+            customer.getPerson().getLastName()
+        );
+
+        verify(keycloakUserService).update(oldUserRecord);
     }
 
     @Test
