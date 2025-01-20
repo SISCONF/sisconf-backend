@@ -93,6 +93,36 @@ public class CustomerServiceTest {
     }
 
     @Test
+    public void shouldRevertCustomerCreateWhenSaveFails() {
+        final String keycloakId = UUID.randomUUID().toString();
+        var customerCreateRequestDTO = CustomerTestUtil.createValidCustomerCreateRequestDTO();
+        var customer = CustomerTestUtil.createCustomerFromDto(customerCreateRequestDTO);
+        var userRegistrationRecord = new UserRegistrationRecord(
+            customerCreateRequestDTO.getPerson().getFirstName(), 
+            customerCreateRequestDTO.getPerson().getLastName(), 
+            customerCreateRequestDTO.getPerson().getPassword(), 
+            customerCreateRequestDTO.getPerson().getEmail(), 
+            KeycloakConstants.CLIENT_GROUP_NAME
+        );
+        var userRegistrationResponse = new UserRegistrationResponse(
+            keycloakId, 
+            customerCreateRequestDTO.getPerson().getFirstName(), 
+            customerCreateRequestDTO.getPerson().getLastName(), 
+            customerCreateRequestDTO.getPerson().getEmail()
+        );
+        when(customerMapper.toEntity(customerCreateRequestDTO)).thenReturn(customer);
+        when(keycloakUserService.create(userRegistrationRecord)).thenReturn(userRegistrationResponse);
+        when(customerRepository.save(customer)).thenThrow(OptimisticLockingFailureException.class);
+
+        assertThrows(
+            OptimisticLockingFailureException.class, 
+            () -> customerService.save(customerCreateRequestDTO)
+        );
+
+        verify(keycloakUserService).deleteById(customer.getPerson().getKeycloakId());
+    }
+
+    @Test
     void shouldThrowWhenCustomerIdDoesNotExist() {
         final Long id = 2L;
         when(customerRepository.findById(id)).thenReturn(Optional.empty());
