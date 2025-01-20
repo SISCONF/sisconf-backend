@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.ifrn.edu.sisconf.domain.dtos.OrderRequestDTO;
-import br.ifrn.edu.sisconf.domain.dtos.OrderResponseDTO;
-import br.ifrn.edu.sisconf.domain.dtos.OrderUpdateRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Order.OrderRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Order.OrderResponseDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Order.OrderUpdateRequestDTO;
 import br.ifrn.edu.sisconf.service.OrderService;
 import jakarta.validation.Valid;
 

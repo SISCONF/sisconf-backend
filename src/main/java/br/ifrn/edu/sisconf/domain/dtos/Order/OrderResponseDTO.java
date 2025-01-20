@@ -1,15 +1,16 @@
-package br.ifrn.edu.sisconf.domain.dtos;
-
-import br.ifrn.edu.sisconf.domain.enums.OrderStatus;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+package br.ifrn.edu.sisconf.domain.dtos.Order;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import br.ifrn.edu.sisconf.domain.dtos.OrderFoodResponseDTO;
+import br.ifrn.edu.sisconf.domain.enums.OrderStatus;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
