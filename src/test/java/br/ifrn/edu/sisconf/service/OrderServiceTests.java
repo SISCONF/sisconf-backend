@@ -91,7 +91,7 @@ public class OrderServiceTests {
     }
 
     @Test
-    @DisplayName("Should create a new order with success")
+    @DisplayName("Should create a new order with successfully")
     public void shouldCreateOrderWithValidInputs() {
         OrderRequestDTO orderRequestDTO = new OrderRequestDTO();
         orderRequestDTO.setFoodsQuantities(List.of(new OrderFoodRequestDTO(1L, 2)));

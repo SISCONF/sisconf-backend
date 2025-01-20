@@ -25,11 +25,11 @@ public class OrderRequestDTOTests {
 
     @Test
     public void orderRequestWithValidFoodQuantities() {
-        var foodRequestDTO = new OrderFoodRequestDTO(1L, 2);
-        var orderRequestDTO = new OrderRequestDTO(List.of(foodRequestDTO));
+        var orderFoodRequestDTO = new OrderFoodRequestDTO(1L, 2);
+        var orderRequestDTO = new OrderRequestDTO(List.of(orderFoodRequestDTO));
 
         Set<ConstraintViolation<OrderRequestDTO>> violations = validator.validate(orderRequestDTO);
-        assertFalse(violations.stream().anyMatch(violation -> violation.getMessage().equals("As frutas/legumes e suas quantidades devem ser informadas.")));
+        assertFalse(violations.stream().anyMatch(violation -> violation.getMessage().equals("Um pedido tem que ter pelo menos 1 comida")));
     }
 
     @Test
@@ -37,7 +37,7 @@ public class OrderRequestDTOTests {
         var orderRequestDTO = new OrderRequestDTO(List.of());
 
         Set<ConstraintViolation<OrderRequestDTO>> violations = validator.validate(orderRequestDTO);
-        assertTrue(violations.stream().anyMatch(violation -> violation.getMessage().equals("As frutas/legumes e suas quantidades devem ser informadas.")));
+        assertTrue(violations.stream().anyMatch(violation -> violation.getMessage().equals("Um pedido tem que ter pelo menos 1 comida")));
     }
 
     
