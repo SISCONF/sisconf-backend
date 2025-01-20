@@ -29,6 +29,7 @@ import br.ifrn.edu.sisconf.domain.dtos.Entrepreneur.EntrepreneurRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Person.PersonRequestDTO;
 import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationRecord;
 import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationResponse;
+import br.ifrn.edu.sisconf.dto.keycloak.UserUpdateRecord;
 import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.EntrepreneurMapper;
 import br.ifrn.edu.sisconf.repository.EntrepreneurRepository;
@@ -275,6 +276,72 @@ public class EntrepreneurServiceTest {
             entrepreneur
         );
         assertEquals(expectedResponseDTO, actualResponseDTO);
+    }
+
+    @Test
+    public void shouldRevertEntrepreneurChangesWhenUpdateFails() {
+        var entrepreneur = EntrepreneurTestUtil.createValidEntrepreneur();
+        entrepreneur.setId(1L);
+        var updateEntrepreneurRequestDTO = EntrepreneurTestUtil.toValidRequestDTO(entrepreneur);
+
+        updateEntrepreneurRequestDTO.getPerson().setEmail(null);
+        updateEntrepreneurRequestDTO.getPerson().setPassword(null);
+        updateEntrepreneurRequestDTO.getPerson().setPassword2(null);
+        updateEntrepreneurRequestDTO.setBusinessName("Novo Nome");
+        updateEntrepreneurRequestDTO.getPerson().setFirstName("Novo First Name");
+        updateEntrepreneurRequestDTO.getPerson().setLastName("Novo Last Name");
+        updateEntrepreneurRequestDTO.getPerson().setCpf("987.654.321-00");
+        updateEntrepreneurRequestDTO.getPerson().setCnpj("98.765.432/1000-00");
+        updateEntrepreneurRequestDTO.getPerson().setPhone("(22) 92222-2222");
+        updateEntrepreneurRequestDTO.getPerson().getAddress().setStreet("Nova Rua");
+        updateEntrepreneurRequestDTO.getPerson().getAddress().setNeighbourhood("Nova Vizinhança");
+        updateEntrepreneurRequestDTO.getPerson().getAddress().setNumber(100);
+        updateEntrepreneurRequestDTO.getPerson().getAddress().setZipCode("22222-222");
+        updateEntrepreneurRequestDTO.getPerson().getAddress().setCity(20L);
+
+        var updatedEntrepreneur = new Entrepreneur(
+            updateEntrepreneurRequestDTO.getBusinessName(),
+            new Person(
+                entrepreneur.getPerson().getKeycloakId(),
+                updateEntrepreneurRequestDTO.getPerson().getFirstName(),
+                updateEntrepreneurRequestDTO.getPerson().getLastName(),
+                entrepreneur.getPerson().getEmail(),
+                updateEntrepreneurRequestDTO.getPerson().getCpf(),
+                updateEntrepreneurRequestDTO.getPerson().getCnpj(),
+                updateEntrepreneurRequestDTO.getPerson().getPhone(),
+                new Address(
+                    updateEntrepreneurRequestDTO.getPerson().getAddress().getStreet(),
+                    updateEntrepreneurRequestDTO.getPerson().getAddress().getZipCode(),
+                    updateEntrepreneurRequestDTO.getPerson().getAddress().getNeighbourhood(),
+                    updateEntrepreneurRequestDTO.getPerson().getAddress().getNumber(),
+                    new City()
+                ),
+                null,
+                null
+            ),
+            null
+        );
+        updatedEntrepreneur.getPerson().setEntrepreneur(updatedEntrepreneur);
+        updatedEntrepreneur.getPerson().getAddress().getCity().setId(
+            updateEntrepreneurRequestDTO.getPerson().getAddress().getCity()
+        );
+        when(entrepreneurRepository.findById(entrepreneur.getId())).thenReturn(
+            Optional.of(entrepreneur)
+        );
+        when(entrepreneurRepository.save(entrepreneur)).thenThrow(OptimisticLockingFailureException.class);
+        
+        assertThrows(
+            OptimisticLockingFailureException.class,
+            () -> entrepreneurService.update(entrepreneur.getId(), updateEntrepreneurRequestDTO) 
+        );
+
+        var oldUserRecord = new UserUpdateRecord(
+            entrepreneur.getPerson().getKeycloakId(), 
+            entrepreneur.getPerson().getFirstName(), 
+            entrepreneur.getPerson().getLastName()
+        );
+
+        verify(keycloakUserService).update(oldUserRecord);
     }
 
     @Test
