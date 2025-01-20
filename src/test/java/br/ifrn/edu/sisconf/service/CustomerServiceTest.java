@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.dao.OptimisticLockingFailureException;
 
+import br.ifrn.edu.sisconf.constants.KeycloakConstants;
 import br.ifrn.edu.sisconf.domain.Address;
 import br.ifrn.edu.sisconf.domain.City;
 import br.ifrn.edu.sisconf.domain.Customer;
@@ -28,6 +30,8 @@ import br.ifrn.edu.sisconf.domain.dtos.Customer.CustomerRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Customer.CustomerResponseDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Person.PersonRequestDTO;
 import br.ifrn.edu.sisconf.domain.enums.CustomerCategory;
+import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationRecord;
+import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationResponse;
 import br.ifrn.edu.sisconf.dto.keycloak.UserUpdateRecord;
 import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.CustomerMapper;
@@ -55,6 +59,37 @@ public class CustomerServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void shouldCreateCustomerWhenDataValid() {
+        final String keycloakId = UUID.randomUUID().toString();
+        var customerCreateRequestDTO = CustomerTestUtil.createValidCustomerCreateRequestDTO();
+        var customer = CustomerTestUtil.createCustomerFromDto(customerCreateRequestDTO);
+        var userRegistrationRecord = new UserRegistrationRecord(
+            customerCreateRequestDTO.getPerson().getFirstName(), 
+            customerCreateRequestDTO.getPerson().getLastName(), 
+            customerCreateRequestDTO.getPerson().getPassword(), 
+            customerCreateRequestDTO.getPerson().getEmail(), 
+            KeycloakConstants.CLIENT_GROUP_NAME
+        );
+        var userRegistrationResponse = new UserRegistrationResponse(
+            keycloakId, 
+            customerCreateRequestDTO.getPerson().getFirstName(), 
+            customerCreateRequestDTO.getPerson().getLastName(), 
+            customerCreateRequestDTO.getPerson().getEmail()
+        );
+        var expectedCustomerResponseDTO = CustomerTestUtil.getResponseDTO(customer);
+        when(customerMapper.toEntity(customerCreateRequestDTO)).thenReturn(customer);
+        when(keycloakUserService.create(userRegistrationRecord)).thenReturn(userRegistrationResponse);
+        when(customerMapper.toResponseDTO(customer)).thenReturn(expectedCustomerResponseDTO);
+
+        var customerResponseDTO = customerService.save(customerCreateRequestDTO);
+
+        verify(keycloakUserService).create(userRegistrationRecord);
+        verify(customerRepository).save(customer);
+        assertEquals(expectedCustomerResponseDTO, customerResponseDTO);
+        assertNotNull(customerResponseDTO);
     }
 
     @Test
