@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/api/city")
+@RequestMapping("/api/cities")
 @Tag(name = "City")
 public class CityController {
     @Autowired

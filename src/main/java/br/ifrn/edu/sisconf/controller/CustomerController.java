@@ -26,7 +26,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.groups.Default;
 
 @RestController
-@RequestMapping("/api/customer")
+@RequestMapping("/api/customers")
 @PreAuthorize("isAuthenticated()")
 @Tag(name = "Customer")
 public class CustomerController {

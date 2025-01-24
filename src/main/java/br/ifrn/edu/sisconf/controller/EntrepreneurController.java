@@ -26,7 +26,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.groups.Default;
 
 @RestController
-@RequestMapping("/api/entrepreneur")
+@RequestMapping("/api/entrepreneurs")
 @Tag(name = "Entrepreneur")
 public class EntrepreneurController {
     @Autowired
