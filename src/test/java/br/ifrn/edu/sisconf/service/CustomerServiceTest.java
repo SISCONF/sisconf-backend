@@ -71,7 +71,7 @@ public class CustomerServiceTest {
             customerCreateRequestDTO.getPerson().getLastName(), 
             customerCreateRequestDTO.getPerson().getPassword(), 
             customerCreateRequestDTO.getPerson().getEmail(), 
-            KeycloakConstants.CLIENT_GROUP_NAME
+            KeycloakConstants.CUSTOMER_GROUP_NAME
         );
         var userRegistrationResponse = new UserRegistrationResponse(
             keycloakId, 
@@ -102,7 +102,7 @@ public class CustomerServiceTest {
             customerCreateRequestDTO.getPerson().getLastName(), 
             customerCreateRequestDTO.getPerson().getPassword(), 
             customerCreateRequestDTO.getPerson().getEmail(), 
-            KeycloakConstants.CLIENT_GROUP_NAME
+            KeycloakConstants.CUSTOMER_GROUP_NAME
         );
         var userRegistrationResponse = new UserRegistrationResponse(
             keycloakId, 
