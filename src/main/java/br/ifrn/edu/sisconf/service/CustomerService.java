@@ -60,7 +60,7 @@ public class CustomerService {
                 personRequestDTO.getLastName(),
                 personRequestDTO.getPassword(),
                 personRequestDTO.getEmail(),
-                KeycloakConstants.CLIENT_GROUP_NAME
+                KeycloakConstants.CUSTOMER_GROUP_NAME
         );
         UserRegistrationResponse userRegistrationResponse = keycloakUserService
             .create(userRegistrationRecord);

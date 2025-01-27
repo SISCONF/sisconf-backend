@@ -1,0 +1,2 @@
+ALTER TABLE entrepreneur DROP COLUMN person_id;
+ALTER TABLE entrepreneur ADD COLUMN person_id INT NOT NULL REFERENCES person ON DELETE CASCADE;
