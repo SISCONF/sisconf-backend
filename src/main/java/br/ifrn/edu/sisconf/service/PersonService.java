@@ -1,7 +1,9 @@
 package br.ifrn.edu.sisconf.service;
 
+import br.ifrn.edu.sisconf.domain.Person;
 import br.ifrn.edu.sisconf.domain.dtos.Person.PersonRequestDTO;
 import br.ifrn.edu.sisconf.exception.BusinessException;
+import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,12 @@ public class PersonService {
 
     @Autowired
     private CityService cityService;
+
+    public Person getByKeycloakId(String keycloakId) {
+        return personRepository.findByKeycloakId(keycloakId).orElseThrow(() -> new ResourceNotFoundException(
+            String.format("Usuário informado não existe")
+        ));
+    }
 
     public void throwIfCpfIsNotUnique(String cpf, Long id) {
         var errorMsg = String.format("Usuário com CPF %s já existe", cpf);

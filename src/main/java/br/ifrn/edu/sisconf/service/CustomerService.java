@@ -31,6 +31,15 @@ public class CustomerService {
     @Autowired
     private CustomerMapper customerMapper;
 
+    public CustomerResponseDTO getByKeycloakId(String keycloakId) {
+        var customer = customerRepository.findByPersonKeycloakId(keycloakId).orElseThrow(() ->
+            new ResourceNotFoundException(
+                "Usuário não encontrado"
+            )
+        );
+        return customerMapper.toResponseDTO(customer);
+    }
+
     public Customer getCustomerById(Long id) {
         return customerRepository
             .findById(id)

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,6 +44,15 @@ public class CustomerController {
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(customerService.save(customerCreateRequestDTO));
+    }
+
+    @GetMapping("/me")
+    @Operation(description = "Informações sobre o cliente autenticado")
+    public ResponseEntity<CustomerResponseDTO> me(
+        JwtAuthenticationToken jwtToken
+    ) {
+        String keycloakId = jwtToken.getToken().getClaimAsString("sub");
+        return ResponseEntity.status(HttpStatus.OK).body(customerService.getByKeycloakId(keycloakId));
     }
 
     @GetMapping("/{id}")
