@@ -42,6 +42,10 @@ public class StockService {
         return stockRepository.findByEntrepreneurId(entrepreneurId).orElseThrow(() -> new ResourceNotFoundException("Este estoque não existe"));
     }
 
+    public StockFood findStockFoodByStockIdAndFoodId(Long stockId, Long foodId) {
+        return stockFoodRepository.findByStockIdAndFoodId(stockId, foodId).orElseThrow(() -> new ResourceNotFoundException("Não há estoque dessa comida nesse estoque"));
+    }
+
     public void save(Entrepreneur entrepreneur) {
         Stock stock = new Stock();
         stock.setEntrepreneur(entrepreneur);
@@ -91,12 +95,22 @@ public class StockService {
             if (!foodRepository.existsById(foodItem.getFoodId())) {
                 throw new ResourceNotFoundException("Comida não encontrada");
             }
-            StockFood stockFood = stockFoodRepository.findByStockIdAndFoodId(stock.getId(), foodItem.getFoodId()).orElseThrow(() -> new ResourceNotFoundException("Não há estoque de comida nesse estoque"));
+            StockFood stockFood = findStockFoodByStockIdAndFoodId(stock.getId(), foodItem.getFoodId());
 
             stockFood.setQuantity(foodItem.getQuantity());
             stockFoodsToBeUpdated.add(stockFood);
         }
 
         stockFoodRepository.saveAll(stockFoodsToBeUpdated);
+    }
+
+    public void removeFoodFromStock(Long entrepreneurId, Long foodId) {
+        Stock stock = findStock(entrepreneurId);
+        if (!foodRepository.existsById(foodId)) {
+            throw new ResourceNotFoundException("Comida não encontrada");
+        }
+
+        StockFood stockFood = findStockFoodByStockIdAndFoodId(stock.getId(), foodId);
+        stockFoodRepository.deleteById(stockFood.getId());
     }
 }

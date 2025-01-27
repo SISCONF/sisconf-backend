@@ -2,6 +2,7 @@ package br.ifrn.edu.sisconf.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,6 +39,12 @@ public class StockController {
     @PatchMapping
     public ResponseEntity<Void> updateStockFoodQuantity(@PathVariable Long entrepreneurId, @RequestBody @Valid StockFoodRequestDTO stockFoodRequestDTO) {
         stockService.updateStockFoodQuantity(entrepreneurId, stockFoodRequestDTO);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/foods/{foodId}")
+    public ResponseEntity<Void> removeFoodFromStock(@PathVariable Long entrepreneurId, @PathVariable Long foodId) {
+        stockService.removeFoodFromStock(entrepreneurId, foodId);
         return ResponseEntity.noContent().build();
     }
 }

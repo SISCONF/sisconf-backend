@@ -14,5 +14,5 @@ import lombok.Setter;
 public class StockResponseDTO {
     private Long id;
     private Long entrepreneurId;
-    private List<StockFoodResponseDTO> foods;
+    private List<StockFoodResponseDTO> stockItems;
 }
