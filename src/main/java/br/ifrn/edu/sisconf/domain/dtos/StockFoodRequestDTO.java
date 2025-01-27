@@ -1,6 +1,8 @@
 package br.ifrn.edu.sisconf.domain.dtos;
 
-import jakarta.validation.constraints.Min;
+import java.util.List;
+
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,12 +14,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StockFoodRequestDTO {
-    @NotNull(message = "O ID da comida é obrigatório")
-    private Long foodId;
-
     @NotNull(message = "O ID do estoque é obrigatório")
     private Long stockId;
 
-    @Min(value = 1, message = "Pelo menos 1 unidade da comida deve ser adicionada")
-    private Integer quantity;
+    @NotEmpty(message = "Pelo menos uma comida tem que ser adicionada no estoque")
+    private List<StockFoodListRequestDTO> foods;
 }
