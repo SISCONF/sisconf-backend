@@ -53,7 +53,7 @@ public class StockServiceTest {
         Stock stock = new Stock();
         stock.setId(1L);
 
-        when(stockRepository.findByEntrepreneurId(entrepreneurId)).thenReturn(stock);
+        when(stockRepository.findByEntrepreneurId(entrepreneurId)).thenReturn(Optional.of(stock));
 
         stockService.deleteByEntrepreneurId(1L);
 

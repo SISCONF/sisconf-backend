@@ -1,5 +1,8 @@
 package br.ifrn.edu.sisconf.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -58,20 +61,24 @@ public class StockService {
 
     public StockResponseDTO associateFoods(Long entrepreneurId, StockFoodRequestDTO stockFoodRequestDTO) {
         Stock stock = findStock(entrepreneurId);
-        StockFood stockFood = new StockFood();
-        stockFood.setStock(stock);
         
+        List<StockFood> foodsFromStock = new ArrayList<>();
         for (StockFoodListRequestDTO foodItem : stockFoodRequestDTO.getFoods()) {
             Food food = foodRepository.findById(foodItem.getFoodId()).orElseThrow(() -> new ResourceNotFoundException("Essa comida não existe."));
             
             if (stock.getFoods().contains(food)) {
                 throw new BusinessException("Esta comida já está no estoque");
             }
+
+            StockFood stockFood = new StockFood();
+            stockFood.setStock(stock);
+
             stockFood.setFood(food);
             stockFood.setQuantity(foodItem.getQuantity());
-
-            stockFoodRepository.save(stockFood);
+            foodsFromStock.add(stockFood);
         }
+
+        stockFoodRepository.saveAll(foodsFromStock);
 
         return stockMapper.toResponseDTO(stock);
     }

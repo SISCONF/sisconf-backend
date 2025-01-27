@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -21,5 +22,11 @@ public class Stock extends BaseEntity {
     private Entrepreneur entrepreneur;
 
     @OneToMany(mappedBy = "stock", targetEntity = StockFood.class)
-    private List<Food> foods = new ArrayList<>();
+    private List<StockFood> foods = new ArrayList<>();
+
+    public List<Food> getFoods() {
+        return foods.stream()
+                .map(StockFood::getFood)
+                .collect(Collectors.toList());
+    }
 }
