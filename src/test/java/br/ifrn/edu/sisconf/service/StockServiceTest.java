@@ -64,7 +64,7 @@ public class StockServiceTest {
     public void shouldThrowErrorWhenDeletingUnexistingEntrepreneurStock() {
         Long entrepreneurId = 1L;
 
-        when(stockRepository.findByEntrepreneurId(entrepreneurId)).thenReturn(null);
+        when(stockRepository.findByEntrepreneurId(entrepreneurId)).thenReturn(Optional.empty());
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> stockService.deleteByEntrepreneurId(entrepreneurId));
 
