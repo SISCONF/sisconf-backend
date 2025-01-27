@@ -24,7 +24,7 @@ public class Stock extends BaseEntity {
     @OneToMany(mappedBy = "stock", targetEntity = StockFood.class)
     private List<StockFood> foods = new ArrayList<>();
 
-    public List<Food> getFoods() {
+    public List<Food> getFoodsEntities() {
         return foods.stream()
                 .map(StockFood::getFood)
                 .collect(Collectors.toList());

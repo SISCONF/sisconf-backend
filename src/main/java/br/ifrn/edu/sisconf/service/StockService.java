@@ -66,7 +66,7 @@ public class StockService {
         for (StockFoodListRequestDTO foodItem : stockFoodRequestDTO.getFoods()) {
             Food food = foodRepository.findById(foodItem.getFoodId()).orElseThrow(() -> new ResourceNotFoundException("Comida não encontrada."));
             
-            if (stock.getFoods().contains(food)) {
+            if (stock.getFoodsEntities().contains(food)) {
                 throw new BusinessException("Esta comida já está no estoque");
             }
 
