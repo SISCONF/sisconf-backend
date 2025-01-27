@@ -64,7 +64,7 @@ public class StockService {
         
         List<StockFood> foodsFromStock = new ArrayList<>();
         for (StockFoodListRequestDTO foodItem : stockFoodRequestDTO.getFoods()) {
-            Food food = foodRepository.findById(foodItem.getFoodId()).orElseThrow(() -> new ResourceNotFoundException("Essa comida não existe."));
+            Food food = foodRepository.findById(foodItem.getFoodId()).orElseThrow(() -> new ResourceNotFoundException("Comida não encontrada."));
             
             if (stock.getFoods().contains(food)) {
                 throw new BusinessException("Esta comida já está no estoque");
@@ -81,5 +81,22 @@ public class StockService {
         stockFoodRepository.saveAll(foodsFromStock);
 
         return stockMapper.toResponseDTO(stock);
+    }
+
+    public void updateStockFoodQuantity(Long entrepreneurId, StockFoodRequestDTO stockFoodRequestDTO) {
+        Stock stock = findStock(entrepreneurId);
+        
+        List<StockFood> stockFoodsToBeUpdated = new ArrayList<>();
+        for (StockFoodListRequestDTO foodItem : stockFoodRequestDTO.getFoods()) {
+            if (!foodRepository.existsById(foodItem.getFoodId())) {
+                throw new ResourceNotFoundException("Comida não encontrada");
+            }
+            StockFood stockFood = stockFoodRepository.findByStockIdAndFoodId(stock.getId(), foodItem.getFoodId()).orElseThrow(() -> new ResourceNotFoundException("Não há estoque de comida nesse estoque"));
+
+            stockFood.setQuantity(foodItem.getQuantity());
+            stockFoodsToBeUpdated.add(stockFood);
+        }
+
+        stockFoodRepository.saveAll(stockFoodsToBeUpdated);
     }
 }
