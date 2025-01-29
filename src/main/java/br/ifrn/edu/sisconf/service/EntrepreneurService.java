@@ -15,7 +15,6 @@ import br.ifrn.edu.sisconf.service.keycloak.KeycloakUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 public class EntrepreneurService {
@@ -50,19 +49,6 @@ public class EntrepreneurService {
                 "Empreendedor não encontrado"
             ));
         return entrepreneurMapper.toResponseDTO(entrepreneur);
-    }
-
-    public EntrepreneurResponseDTO getById(Long id) {
-        Entrepreneur entrepreneur = entrepreneurRepository
-                .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        String.format("Empreendedor com id %d não existe", id)
-                ));
-        return entrepreneurMapper.toResponseDTO(entrepreneur);
-    }
-
-    public List<EntrepreneurResponseDTO> getAll() {
-        return entrepreneurMapper.toDTOList(entrepreneurRepository.findAll());
     }
 
     public EntrepreneurResponseDTO save(EntrepreneurRequestDTO entrepreneurRequestDTO) {

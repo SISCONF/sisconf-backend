@@ -1,7 +1,5 @@
 package br.ifrn.edu.sisconf.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,14 +44,9 @@ public class EntrepreneurController {
         return ResponseEntity.status(HttpStatus.OK).body(entrepreneurResponseDTO);
     }
 
-    @GetMapping
-    @Operation(description = "Listar todos empreendedores")
-    public ResponseEntity<List<EntrepreneurResponseDTO>> getAll() {
-        return ResponseEntity.ok(entrepreneurService.getAll());
-    }
-
     @PostMapping
     @Operation(description = "Adicionar novo empreendedor")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<EntrepreneurResponseDTO> save(
         @Validated({CreatePersonGroup.class, CreateEntrepreneurGroup.class, Default.class}) 
         @RequestBody EntrepreneurRequestDTO entrepreneurRequestDTO

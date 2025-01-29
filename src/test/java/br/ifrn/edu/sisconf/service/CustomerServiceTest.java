@@ -61,6 +61,8 @@ public class CustomerServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
+    // Add /me tests
+
     @Test
     public void shouldCreateCustomerWhenDataValid() {
         final String keycloakId = UUID.randomUUID().toString();

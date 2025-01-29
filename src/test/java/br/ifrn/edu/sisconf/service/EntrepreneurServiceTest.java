@@ -8,7 +8,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -60,6 +59,8 @@ public class EntrepreneurServiceTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
     }
+
+    // Add /me tests
 
     @Test
     public void shouldCreateEntrepreneurWhenValidDTO() {
@@ -128,34 +129,6 @@ public class EntrepreneurServiceTest {
     }
 
     @Test
-    public void shouldReturnEntrepreneurGetByIdWhenIdValid() {
-        var entrepreneur = Instancio.create(Entrepreneur.class);
-        entrepreneur.setId(1L);
-        var expectedResponseDTO = EntrepreneurTestUtil.toResponseDTO(entrepreneur);
-        when(entrepreneurRepository.findById(entrepreneur.getId())).thenReturn(
-            Optional.of(entrepreneur)
-        );
-        when(entrepreneurMapper.toResponseDTO(entrepreneur)).thenReturn(
-            expectedResponseDTO
-        );
-
-        var actualResponseDTO = entrepreneurService.getById(entrepreneur.getId());
-        assertNotNull(actualResponseDTO);
-        assertEquals(expectedResponseDTO, actualResponseDTO);
-    }
-
-    @Test
-    public void shouldThrowResourceNotFoundExceptionGetByIdWhenIdInvalid() {
-        when(entrepreneurRepository.findById(-1L)).thenReturn(Optional.empty());
-        
-        ResourceNotFoundException exception = assertThrows(
-            ResourceNotFoundException.class,
-            () -> entrepreneurService.getById(-1L)
-        );
-        assertEquals("Empreendedor com id -1 não existe", exception.getMessage());
-    }
-
-    @Test
     public void shouldSuccesfullyRemoveEntrepreneurDeleteByIdWhenIdValid() {
         var entrepreneur = Instancio.create(Entrepreneur.class);
         entrepreneur.setId(1L);
@@ -187,22 +160,6 @@ public class EntrepreneurServiceTest {
         verify(keycloakUserService, never()).deleteById(
             null
         );
-    }
-
-    @Test
-    public void shouldReturnListofEntrepreneurs() {
-        var entrepreneur = Instancio.create(Entrepreneur.class);
-
-        when(entrepreneurRepository.findAll()).thenReturn(
-            List.of(entrepreneur)
-        );
-        when(entrepreneurMapper.toDTOList(List.of(entrepreneur))).thenReturn(
-            List.of(EntrepreneurTestUtil.toResponseDTO(entrepreneur))
-        );
-
-        var actualEntrepreneurList = entrepreneurService.getAll();
-
-        assertEquals(1, actualEntrepreneurList.size());
     }
 
     @Test

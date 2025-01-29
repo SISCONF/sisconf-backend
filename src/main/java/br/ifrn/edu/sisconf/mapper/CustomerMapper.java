@@ -21,6 +21,8 @@ public interface CustomerMapper {
     @Mapping(target = "person.address.id", ignore = true)
     @Mapping(target = "person.address.createdAt", ignore = true)
     @Mapping(target = "person.address.updatedAt", ignore = true)
+    @Mapping(target = "person.customer", ignore = true)
+    @Mapping(target = "person.entrepreneur", ignore = true)
     @Mapping(target = "person.address.city.id", source = "person.address.city")
     Customer toEntity(CustomerRequestDTO customerRequestDTO);
 
@@ -41,6 +43,8 @@ public interface CustomerMapper {
     @Mapping(target = "person.createdAt", ignore = true)
     @Mapping(target = "person.updatedAt", ignore = true)
     @Mapping(target = "person.keycloakId", ignore = true)
+    @Mapping(target = "person.entrepreneur", ignore = true)
+    @Mapping(target = "person.customer", ignore = true)
     @Mapping(source = "person.address.city", target = "person.address.city.id")
     void updateEntityFromDTO(CustomerRequestDTO customerUpdateRequestDTO, @MappingTarget Customer customer);
 }
