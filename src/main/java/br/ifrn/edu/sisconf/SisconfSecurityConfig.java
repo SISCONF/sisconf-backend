@@ -11,7 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-import br.ifrn.edu.sisconf.converters.JwtAuthConverter;
+import br.ifrn.edu.sisconf.security.JwtAuthConverter;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
