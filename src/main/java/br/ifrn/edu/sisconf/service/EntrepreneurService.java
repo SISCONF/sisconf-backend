@@ -44,6 +44,14 @@ public class EntrepreneurService {
         personService.throwIfCnpjIsNotUnique(personRequestDTO.getCnpj(), id);
     }
 
+    public EntrepreneurResponseDTO getByKeycloakId(String keycloakId) {
+        var entrepreneur = entrepreneurRepository.findByPersonKeycloakId(keycloakId)
+            .orElseThrow(() -> new ResourceNotFoundException(
+                "Empreendedor não encontrado"
+            ));
+        return entrepreneurMapper.toResponseDTO(entrepreneur);
+    }
+
     public EntrepreneurResponseDTO getById(Long id) {
         Entrepreneur entrepreneur = entrepreneurRepository
                 .findById(id)

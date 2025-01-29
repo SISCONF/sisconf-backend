@@ -162,7 +162,7 @@ public class CustomerServiceTest {
         var customer = Instancio.create(Customer.class);
         when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
 
-        customerService.deleteById(customer.getId());
+        customerService.deleteById(customer.getId(), customer.getPerson().getKeycloakId()); // Add test for invalid keycloakId
         verify(customerRepository, times(1)).deleteById(customer.getId());
         verify(keycloakUserService, times(1)).deleteById(
             customer.getPerson().getKeycloakId()
@@ -178,7 +178,7 @@ public class CustomerServiceTest {
 
         assertThrowsExactly(
             ResourceNotFoundException.class, 
-            () -> customerService.deleteById(unexistingId)
+            () -> customerService.deleteById(unexistingId, "") // Add test for invalid keycloakid
         );
         verify(customerRepository, never()).deleteById(unexistingId);
         verify(keycloakUserService, never()).deleteById(null);
@@ -245,7 +245,7 @@ public class CustomerServiceTest {
             expectedResponseDTO
         );
 
-        var actualResponseDTO = customerService.update(updateCustomerRequestDTO, customer.getId());
+        var actualResponseDTO = customerService.update(updateCustomerRequestDTO, customer.getId(), customer.getPerson().getKeycloakId()); // Add test for invalid keycloakId
         
         verify(keycloakUserService, times(1)).update(
             userUpdateRecord
@@ -312,7 +312,7 @@ public class CustomerServiceTest {
 
         assertThrows(
             OptimisticLockingFailureException.class, 
-            () -> customerService.update(updateCustomerRequestDTO, customer.getId())
+            () -> customerService.update(updateCustomerRequestDTO, customer.getId(), customer.getPerson().getKeycloakId()) // Add test for invalidKeycloakId
         );
 
         var oldUserRecord = new UserUpdateRecord(
@@ -335,7 +335,8 @@ public class CustomerServiceTest {
                     CustomerCategory.ENTREPRENEUR,
                     new PersonRequestDTO()
                 ),
-                -1L
+                -1L,
+                ""  // Add test for invalid KeycloakID
             )
         );
 
