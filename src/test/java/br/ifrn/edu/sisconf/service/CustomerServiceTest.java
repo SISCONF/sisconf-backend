@@ -1,5 +1,6 @@
 package br.ifrn.edu.sisconf.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -61,7 +62,32 @@ public class CustomerServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    // Add /me tests
+    @Test
+    public void shouldReturnCustomerWhenCorrespondingKeycloakId() {
+        var customer = CustomerTestUtil.createValidCustomer();
+
+        when(customerRepository.findByPersonKeycloakId(
+            customer.getPerson().getKeycloakId()
+        )).thenReturn(Optional.of(customer));
+
+        assertDoesNotThrow(() -> 
+            customerService.getByKeycloakId(customer.getPerson().getKeycloakId())
+        );
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenNoCorrespondingCustomerKeycloakId() {
+        final String keycloakId = UUID.randomUUID().toString();
+        when(customerRepository.findByPersonKeycloakId(keycloakId))
+        .thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(
+            ResourceNotFoundException.class, 
+            () -> customerService.getByKeycloakId(keycloakId)
+        );
+
+        assertEquals(exception.getMessage(), "Cliente não encontrado");
+    }
 
     @Test
     public void shouldCreateCustomerWhenDataValid() {

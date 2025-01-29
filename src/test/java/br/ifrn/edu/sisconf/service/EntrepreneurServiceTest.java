@@ -1,5 +1,6 @@
 package br.ifrn.edu.sisconf.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -60,7 +61,32 @@ public class EntrepreneurServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    // Add /me tests
+    @Test
+    public void shouldReturnEntrepreneurWhenCorrespondingKeycloakId() {
+        var entrepreneur = EntrepreneurTestUtil.createValidEntrepreneur();
+
+        when(entrepreneurRepository.findByPersonKeycloakId(
+            entrepreneur.getPerson().getKeycloakId()
+        )).thenReturn(Optional.of(entrepreneur));
+
+        assertDoesNotThrow(() -> 
+            entrepreneurService.getByKeycloakId(entrepreneur.getPerson().getKeycloakId())
+        );
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenNoCorrespondingEntrepreneurKeycloakId() {
+        final String keycloakId = UUID.randomUUID().toString();
+        when(entrepreneurRepository.findByPersonKeycloakId(keycloakId))
+        .thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(
+            ResourceNotFoundException.class, 
+            () -> entrepreneurService.getByKeycloakId(keycloakId)
+        );
+
+        assertEquals(exception.getMessage(), "Empreendedor não encontrado");
+    }
 
     @Test
     public void shouldCreateEntrepreneurWhenValidDTO() {

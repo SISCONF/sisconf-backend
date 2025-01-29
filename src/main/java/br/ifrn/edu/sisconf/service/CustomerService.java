@@ -34,7 +34,7 @@ public class CustomerService {
     public CustomerResponseDTO getByKeycloakId(String keycloakId) {
         var customer = customerRepository.findByPersonKeycloakId(keycloakId).orElseThrow(() ->
             new ResourceNotFoundException(
-                "Usuário não encontrado"
+                "Cliente não encontrado"
             )
         );
         return customerMapper.toResponseDTO(customer);
