@@ -43,7 +43,7 @@ public class StockService {
     }
 
     public StockFood findStockFoodByStockIdAndFoodId(Long stockId, Long foodId) {
-        return stockFoodRepository.findByStockIdAndFoodId(stockId, foodId).orElseThrow(() -> new ResourceNotFoundException("Não há estoque dessa comida nesse estoque"));
+        return stockFoodRepository.findByStockIdAndFoodId(stockId, foodId).orElseThrow(() -> new ResourceNotFoundException("Essa comida não está nesse estoque"));
     }
 
     public void save(Entrepreneur entrepreneur) {
