@@ -26,23 +26,26 @@ public class StockController {
     private StockService stockService;
 
     @GetMapping
-    @Operation(description = "Obter estoque do empreendedor") 
+    @Operation(description = "Obtém estoque do empreendedor") 
     public ResponseEntity<StockResponseDTO> get(@PathVariable Long entrepreneurId) {
         return ResponseEntity.ok(stockService.getByEntrepreneurId(entrepreneurId));
     }
 
     @PostMapping
+    @Operation(description = "Associa comidas ao estoque do empreendedor logado")
     public ResponseEntity<StockResponseDTO> associateFoods(@PathVariable Long entrepreneurId, @RequestBody @Valid StockFoodRequestDTO stockFoodRequestDTO) {
         return ResponseEntity.ok(stockService.associateFoods(entrepreneurId, stockFoodRequestDTO));
     }
 
     @PatchMapping
+    @Operation(description = "Atualiza a quantidade de uma comida no estoque do empreendedor logado")
     public ResponseEntity<Void> updateStockFoodQuantity(@PathVariable Long entrepreneurId, @RequestBody @Valid StockFoodRequestDTO stockFoodRequestDTO) {
         stockService.updateStockFoodQuantity(entrepreneurId, stockFoodRequestDTO);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/foods/{foodId}")
+    @Operation(description = "Remove uma comida do estoque do empreendedor logado")
     public ResponseEntity<Void> removeFoodFromStock(@PathVariable Long entrepreneurId, @PathVariable Long foodId) {
         stockService.removeFoodFromStock(entrepreneurId, foodId);
         return ResponseEntity.noContent().build();
