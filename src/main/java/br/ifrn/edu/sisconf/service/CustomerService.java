@@ -90,11 +90,10 @@ public class CustomerService {
     ) {
         var customer = getCustomerById(id);
 
-        if (customer.getPerson().getKeycloakId() != loggedCustomerKeycloakId) {
-            throw new ResourceNotFoundException(
-                "Cliente não encontrado"
-            );
-        }
+        personService.throwIfLoggedPersonIsDifferentFromPersonResource(
+            loggedCustomerKeycloakId,
+            customer.getPerson()
+        );
 
         personService.validatePersonUpdate(
             customerRequestDTO.getPerson(), 
@@ -127,11 +126,10 @@ public class CustomerService {
     public void deleteById(Long id, String loggedUserKeycloakId) {
         Customer customer = getCustomerById(id);
 
-        if (customer.getPerson().getKeycloakId() != loggedUserKeycloakId) {
-            throw new ResourceNotFoundException(
-                "Cliente não encontrado"
-            );
-        }
+        personService.throwIfLoggedPersonIsDifferentFromPersonResource(
+            loggedUserKeycloakId, 
+            customer.getPerson()
+        );
 
         customerRepository.deleteById(id);
         keycloakUserService.deleteById(customer.getPerson().getKeycloakId());
