@@ -83,9 +83,23 @@ public class CustomerService {
         }
     }
 
-    public CustomerResponseDTO update(CustomerRequestDTO customerRequestDTO, Long id) {
+    public CustomerResponseDTO update(
+        CustomerRequestDTO customerRequestDTO,
+        Long id,
+        String loggedCustomerKeycloakId
+    ) {
         var customer = getCustomerById(id);
-        personService.validatePersonUpdate(customerRequestDTO.getPerson(), customer.getPerson().getId());
+
+        if (customer.getPerson().getKeycloakId() != loggedCustomerKeycloakId) {
+            throw new ResourceNotFoundException(
+                "Cliente não encontrado"
+            );
+        }
+
+        personService.validatePersonUpdate(
+            customerRequestDTO.getPerson(), 
+            customer.getPerson().getId()
+        );
 
         var userUpdateRecord = new UserUpdateRecord(
                 customer.getPerson().getKeycloakId(),
@@ -110,8 +124,15 @@ public class CustomerService {
         }
     }
 
-    public void deleteById(Long id) {
+    public void deleteById(Long id, String loggedUserKeycloakId) {
         Customer customer = getCustomerById(id);
+
+        if (customer.getPerson().getKeycloakId() != loggedUserKeycloakId) {
+            throw new ResourceNotFoundException(
+                "Cliente não encontrado"
+            );
+        }
+
         customerRepository.deleteById(id);
         keycloakUserService.deleteById(customer.getPerson().getKeycloakId());
     }

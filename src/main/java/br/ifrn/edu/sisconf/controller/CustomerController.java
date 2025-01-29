@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.ifrn.edu.sisconf.constants.KeycloakConstants;
 import br.ifrn.edu.sisconf.domain.dtos.Customer.CustomerRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Customer.CustomerResponseDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Person.CreatePersonGroup;
@@ -59,12 +60,14 @@ public class CustomerController {
 
     @GetMapping("/{id}")
     @Operation(description = "Obter dados do cliente")
+    @PreAuthorize(KeycloakConstants.ROLE_RETRIEVE_CUSTOMER)
     public ResponseEntity<CustomerResponseDTO> getById(@PathVariable Long id){
         return ResponseEntity.ok(customerService.getById(id));
     }
 
     @GetMapping
     @Operation(description = "Listar todos clientes")
+    @PreAuthorize(KeycloakConstants.ROLE_LIST_CUSTOMERS)
     public ResponseEntity<List<CustomerResponseDTO>> getAll() {
         return ResponseEntity.ok(customerService.getAll());
     }
@@ -72,17 +75,24 @@ public class CustomerController {
     @PutMapping("/{id}")
     @Operation(description = "Atualizar dados do cliente")
     public ResponseEntity<CustomerResponseDTO> update(
-        @PathVariable Long id, 
         @Validated({UpdatePersonGroup.class, Default.class}) 
-        @RequestBody CustomerRequestDTO customerRequestDTO
+        @PathVariable Long id, 
+        @RequestBody CustomerRequestDTO customerRequestDTO,
+        @AuthenticationPrincipal SisconfUserDetails userDetails
     ) {
-        return ResponseEntity.ok(customerService.update(customerRequestDTO, id));
+        return ResponseEntity.ok(customerService.update(
+                customerRequestDTO, id, userDetails.getKeycloakId()
+            )
+        );
     }
 
     @DeleteMapping("/{id}")
     @Operation(description = "Apagar cliente")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        customerService.deleteById(id);
+    public ResponseEntity<Void> delete(
+        @PathVariable Long id,
+        @AuthenticationPrincipal SisconfUserDetails userDetails
+    ) {
+        customerService.deleteById(id, userDetails.getKeycloakId());
         return ResponseEntity.noContent().build();
     }
 }
