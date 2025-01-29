@@ -45,7 +45,7 @@ public class EntrepreneurController {
     }
 
     @PostMapping
-    @Operation(description = "Adicionar novo empreendedor")
+    @Operation(description = "Adiciona novo empreendedor")
     @PreAuthorize("permitAll()")
     public ResponseEntity<EntrepreneurResponseDTO> save(
         @Validated({CreatePersonGroup.class, CreateEntrepreneurGroup.class, Default.class}) 
@@ -57,19 +57,28 @@ public class EntrepreneurController {
     }
 
     @PutMapping("/{id}")
-    @Operation(description = "Atualizar dados de um empreendedor")
+    @Operation(description = "Atualiza dados de um empreendedor")
     public ResponseEntity<EntrepreneurResponseDTO> update(
         @PathVariable Long id,
         @Validated({UpdatePersonGroup.class, CreateEntrepreneurGroup.class, Default.class}) 
-        @RequestBody EntrepreneurRequestDTO entrepreneurRequestDTO
+        @RequestBody EntrepreneurRequestDTO entrepreneurRequestDTO,
+        @AuthenticationPrincipal SisconfUserDetails userDetails
     ) {
-        return ResponseEntity.ok(entrepreneurService.update(id, entrepreneurRequestDTO));
+        return ResponseEntity.ok(entrepreneurService.update(
+                id, 
+                entrepreneurRequestDTO,
+                userDetails.getKeycloakId()
+            )
+        );
     }
 
     @DeleteMapping("/{id}")
-    @Operation(description = "Apagar empreendedor")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        entrepreneurService.deleteById(id);
+    @Operation(description = "Apaga empreendedor")
+    public ResponseEntity<Void> delete(
+        @PathVariable Long id, 
+        @AuthenticationPrincipal SisconfUserDetails userDetails
+    ) {
+        entrepreneurService.deleteById(id, userDetails.getKeycloakId());
         return ResponseEntity.noContent().build();
     }
 }

@@ -136,7 +136,7 @@ public class EntrepreneurServiceTest {
             Optional.of(entrepreneur)
         );
 
-        entrepreneurService.deleteById(entrepreneur.getId());
+        entrepreneurService.deleteById(entrepreneur.getId(), ""); // Add keycloak valid ID
 
         verify(entrepreneurRepository, times(1)).deleteById(entrepreneur.getId());
         verify(keycloakUserService, times(1)).deleteById(
@@ -151,7 +151,7 @@ public class EntrepreneurServiceTest {
         );
         ResourceNotFoundException exception = assertThrows(
             ResourceNotFoundException.class,
-            () -> entrepreneurService.deleteById(-1L)
+            () -> entrepreneurService.deleteById(-1L, "") // Add test for invalid keycloakID
         );
 
         assertEquals("Empreendedor com id -1 não existe", exception.getMessage());
@@ -223,7 +223,7 @@ public class EntrepreneurServiceTest {
             expectedResponseDTO
         );
 
-        var actualResponseDTO = entrepreneurService.update(entrepreneur.getId(), updateEntrepreneurRequestDTO);
+        var actualResponseDTO = entrepreneurService.update(entrepreneur.getId(), updateEntrepreneurRequestDTO, ""); // keycloakID Valid add test
         
         verify(keycloakUserService, times(1)).update(
             userUpdateRecord
@@ -289,7 +289,7 @@ public class EntrepreneurServiceTest {
         
         assertThrows(
             OptimisticLockingFailureException.class,
-            () -> entrepreneurService.update(entrepreneur.getId(), updateEntrepreneurRequestDTO) 
+            () -> entrepreneurService.update(entrepreneur.getId(), updateEntrepreneurRequestDTO, "") 
         );
 
         var oldUserRecord = new UserUpdateRecord(
@@ -312,7 +312,8 @@ public class EntrepreneurServiceTest {
                 new EntrepreneurRequestDTO(
                     "Novo Nome",
                     new PersonRequestDTO()
-                )
+                ),
+                "" // Add test for invalid keycloakID
             )
         );
 

@@ -16,10 +16,15 @@ public class PersonService {
     @Autowired
     private CityService cityService;
 
-    public Person getByKeycloakId(String keycloakId) {
-        return personRepository.findByKeycloakId(keycloakId).orElseThrow(() -> new ResourceNotFoundException(
-            String.format("Usuário informado não existe")
-        ));
+    public void throwIfLoggedPersonIsDifferentFromPersonResource(
+        String loggedPersonKeycloakId,
+        Person person
+    ) {
+        if (!person.getKeycloakId().equals(loggedPersonKeycloakId)) {
+            throw new ResourceNotFoundException(
+                "Usuário não encontrado"
+            );
+        }
     }
 
     public void throwIfCpfIsNotUnique(String cpf, Long id) {

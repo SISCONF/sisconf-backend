@@ -79,8 +79,10 @@ public class EntrepreneurService {
 
     public EntrepreneurResponseDTO update(
         Long id, 
-        EntrepreneurRequestDTO entrepreneurRequestDTO
+        EntrepreneurRequestDTO entrepreneurRequestDTO,
+        String loggedEntrepreneurKeycloakId
     ) {
+
         PersonRequestDTO personRequestDTO = entrepreneurRequestDTO.getPerson();
 
         var entrepreneur = entrepreneurRepository
@@ -90,6 +92,11 @@ public class EntrepreneurService {
                     String.format("Empreendedor com id %d não existe", id)
                 )
             );
+
+        personService.throwIfLoggedPersonIsDifferentFromPersonResource(
+            loggedEntrepreneurKeycloakId, 
+            entrepreneur.getPerson()
+        );
         this.validateEntrepreneurUpdate(personRequestDTO, entrepreneur.getPerson().getId());
 
         var userUpdateRecord = new UserUpdateRecord(
@@ -115,7 +122,7 @@ public class EntrepreneurService {
         }
     }
 
-    public void deleteById(Long id) {
+    public void deleteById(Long id, String loggedEntrepreneurKeycloakId) {
         var entrepreneur = entrepreneurRepository
             .findById(id)
             .orElseThrow(() -> 
@@ -123,6 +130,10 @@ public class EntrepreneurService {
                     String.format("Empreendedor com id %d não existe", id)
                 )
             );
+        personService.throwIfLoggedPersonIsDifferentFromPersonResource(
+            loggedEntrepreneurKeycloakId, 
+            entrepreneur.getPerson()
+        );
         keycloakUserService.deleteById(entrepreneur.getPerson().getKeycloakId());
         entrepreneurRepository.deleteById(id);
     }
