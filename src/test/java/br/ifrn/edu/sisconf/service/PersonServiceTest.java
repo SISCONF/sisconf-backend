@@ -1,9 +1,13 @@
 package br.ifrn.edu.sisconf.service;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.mockito.Mockito.when;
 
+import java.util.UUID;
+
+import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -13,6 +17,7 @@ import org.mockito.MockitoAnnotations;
 import br.ifrn.edu.sisconf.domain.Person;
 import br.ifrn.edu.sisconf.domain.dtos.Person.PersonRequestDTO;
 import br.ifrn.edu.sisconf.exception.BusinessException;
+import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.PersonMapper;
 import br.ifrn.edu.sisconf.repository.PersonRepository;
 
@@ -29,6 +34,37 @@ public class PersonServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenLoggedPersonKeycloakIdIsDifferentThanPersonKeycloakId() {
+        final String loggedPersonKeycloakId = UUID.randomUUID().toString();
+        final Person person = Instancio.create(Person.class);
+
+        ResourceNotFoundException exception = assertThrowsExactly(
+            ResourceNotFoundException.class, 
+            () -> personService.throwIfLoggedPersonIsDifferentFromPersonResource(
+                loggedPersonKeycloakId, 
+                person
+            )
+        );
+        assertEquals(exception.getMessage(), "Usuário não encontrado");
+    }
+
+    @Test
+    void shouldNotThrowExceptionWhenLoggedPersonKeycloakIdIsEqualToPersonKeycloakId() {
+        final String loggedPersonKeycloakId = UUID.randomUUID().toString();
+        final Person person = Instancio.create(Person.class);
+        person.setKeycloakId(loggedPersonKeycloakId);
+
+        assertDoesNotThrow(
+            () -> {
+                personService.throwIfLoggedPersonIsDifferentFromPersonResource(
+                    loggedPersonKeycloakId, 
+                    person
+                );
+            }
+        );
     }
 
     @Test
