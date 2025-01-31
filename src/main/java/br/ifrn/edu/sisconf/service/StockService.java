@@ -2,6 +2,8 @@ package br.ifrn.edu.sisconf.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -66,17 +68,27 @@ public class StockService {
     public StockResponseDTO associateFoods(Long entrepreneurId, StockFoodRequestDTO stockFoodRequestDTO) {
         Stock stock = findStock(entrepreneurId);
         
+        List<Long> foodsIds = stockFoodRequestDTO.getFoods().stream()
+                .map(StockFoodListRequestDTO::getFoodId)
+                .collect(Collectors.toList());
+
+        List<Food> foundFoods = foodRepository.findAllById(foodsIds);
+        Map<Long, Food> foodMap = foundFoods.stream().collect(Collectors.toMap(Food::getId, food -> food));
+
+        if (foundFoods.size() != foodsIds.size()) {
+            throw new ResourceNotFoundException("Uma ou mais das comidas informadas não foi encontrada.");
+        }
+
         List<StockFood> foodsFromStock = new ArrayList<>();
         for (StockFoodListRequestDTO foodItem : stockFoodRequestDTO.getFoods()) {
-            Food food = foodRepository.findById(foodItem.getFoodId()).orElseThrow(() -> new ResourceNotFoundException("Comida não encontrada."));
+            Food food = foodMap.get(foodItem.getFoodId());
             
             if (stock.getFoodsEntities().contains(food)) {
-                throw new BusinessException("Esta comida já está no estoque");
+                throw new BusinessException("A comida com ID " + foodItem.getFoodId() + " já está no estoque.");
             }
 
             StockFood stockFood = new StockFood();
             stockFood.setStock(stock);
-
             stockFood.setFood(food);
             stockFood.setQuantity(foodItem.getQuantity());
             foodsFromStock.add(stockFood);
