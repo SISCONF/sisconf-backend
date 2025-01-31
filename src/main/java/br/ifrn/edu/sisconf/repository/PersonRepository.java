@@ -2,8 +2,6 @@ package br.ifrn.edu.sisconf.repository;
 
 import br.ifrn.edu.sisconf.domain.Person;
 
-import java.util.Optional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,5 +14,4 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
     boolean existsByCnpjAndIdNot(String cnpj, Long id);
     boolean existsByPhone(String phone);
     boolean existsByPhoneAndIdNot(String phone, Long id);
-    Optional<Person> findByKeycloakId(String keycloakId);
 }
