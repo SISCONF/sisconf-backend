@@ -48,6 +48,22 @@ public class StockService {
         return stockFoodRepository.findByStockIdAndFoodId(stockId, foodId).orElseThrow(() -> new ResourceNotFoundException("Essa comida não está nesse estoque"));
     }
 
+    public void throwIfNotEveryFoodIsFound(List<Long> foodsIds, List<Food> foundFoods) {
+        if (foodsIds.size() != foundFoods.size()) {
+            throw new ResourceNotFoundException("Uma ou mais comidas informadas não foram encontradas.");
+        }
+    }
+
+    public List<Long> getFoodsIds(StockFoodRequestDTO stockFoodRequestDTO) {
+        return stockFoodRequestDTO.getFoods().stream()
+        .map(StockFoodListRequestDTO::getFoodId)
+        .collect(Collectors.toList());
+    }
+
+    public Map<Long, Food> createFoodMap(List<Food> foods) {
+        return foods.stream().collect(Collectors.toMap(Food::getId, food -> food));
+    }
+
     public void save(Entrepreneur entrepreneur) {
         Stock stock = new Stock();
         stock.setEntrepreneur(entrepreneur);
@@ -68,16 +84,12 @@ public class StockService {
     public StockResponseDTO associateFoods(Long entrepreneurId, StockFoodRequestDTO stockFoodRequestDTO) {
         Stock stock = findStock(entrepreneurId);
         
-        List<Long> foodsIds = stockFoodRequestDTO.getFoods().stream()
-                .map(StockFoodListRequestDTO::getFoodId)
-                .collect(Collectors.toList());
+        List<Long> foodsIds = getFoodsIds(stockFoodRequestDTO);
 
         List<Food> foundFoods = foodRepository.findAllById(foodsIds);
-        Map<Long, Food> foodMap = foundFoods.stream().collect(Collectors.toMap(Food::getId, food -> food));
+        Map<Long, Food> foodMap = createFoodMap(foundFoods);
 
-        if (foundFoods.size() != foodsIds.size()) {
-            throw new ResourceNotFoundException("Uma ou mais das comidas informadas não foi encontrada.");
-        }
+        throwIfNotEveryFoodIsFound(foodsIds, foundFoods);
 
         List<StockFood> foodsFromStock = new ArrayList<>();
         for (StockFoodListRequestDTO foodItem : stockFoodRequestDTO.getFoods()) {
@@ -101,13 +113,22 @@ public class StockService {
 
     public void updateStockFoodQuantity(Long entrepreneurId, StockFoodRequestDTO stockFoodRequestDTO) {
         Stock stock = findStock(entrepreneurId);
-        
+        List<Long> foodsIds = getFoodsIds(stockFoodRequestDTO);
+        List<Food> foundFoods = foodRepository.findAllById(foodsIds);
+
+        throwIfNotEveryFoodIsFound(foodsIds, foundFoods);
+
+        List<StockFood> stockFoods = stockFoodRepository.findByStockIdAndFoodIdIn(stock.getId(), foodsIds);
+        Map<Long, StockFood> stockFoodMap = stockFoods.stream()
+                .collect(Collectors.toMap(stockFood -> stockFood.getFood().getId(), stockFood -> stockFood));
+
         List<StockFood> stockFoodsToBeUpdated = new ArrayList<>();
         for (StockFoodListRequestDTO foodItem : stockFoodRequestDTO.getFoods()) {
-            if (!foodRepository.existsById(foodItem.getFoodId())) {
-                throw new ResourceNotFoundException("Comida não encontrada");
+            StockFood stockFood = stockFoodMap.get(foodItem.getFoodId());
+
+            if (stockFood == null) {
+                throw new BusinessException("A comida com ID " + foodItem.getFoodId() + " não está no estoque.");
             }
-            StockFood stockFood = findStockFoodByStockIdAndFoodId(stock.getId(), foodItem.getFoodId());
 
             stockFood.setQuantity(foodItem.getQuantity());
             stockFoodsToBeUpdated.add(stockFood);
