@@ -1,5 +1,6 @@
 package br.ifrn.edu.sisconf.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -8,7 +9,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -59,6 +59,33 @@ public class EntrepreneurServiceTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void shouldReturnEntrepreneurWhenCorrespondingKeycloakId() {
+        var entrepreneur = EntrepreneurTestUtil.createValidEntrepreneur();
+
+        when(entrepreneurRepository.findByPersonKeycloakId(
+            entrepreneur.getPerson().getKeycloakId()
+        )).thenReturn(Optional.of(entrepreneur));
+
+        assertDoesNotThrow(() -> 
+            entrepreneurService.getByKeycloakId(entrepreneur.getPerson().getKeycloakId())
+        );
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenNoCorrespondingEntrepreneurKeycloakId() {
+        final String keycloakId = UUID.randomUUID().toString();
+        when(entrepreneurRepository.findByPersonKeycloakId(keycloakId))
+        .thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(
+            ResourceNotFoundException.class, 
+            () -> entrepreneurService.getByKeycloakId(keycloakId)
+        );
+
+        assertEquals(exception.getMessage(), "Empreendedor não encontrado");
     }
 
     @Test
@@ -128,34 +155,6 @@ public class EntrepreneurServiceTest {
     }
 
     @Test
-    public void shouldReturnEntrepreneurGetByIdWhenIdValid() {
-        var entrepreneur = Instancio.create(Entrepreneur.class);
-        entrepreneur.setId(1L);
-        var expectedResponseDTO = EntrepreneurTestUtil.toResponseDTO(entrepreneur);
-        when(entrepreneurRepository.findById(entrepreneur.getId())).thenReturn(
-            Optional.of(entrepreneur)
-        );
-        when(entrepreneurMapper.toResponseDTO(entrepreneur)).thenReturn(
-            expectedResponseDTO
-        );
-
-        var actualResponseDTO = entrepreneurService.getById(entrepreneur.getId());
-        assertNotNull(actualResponseDTO);
-        assertEquals(expectedResponseDTO, actualResponseDTO);
-    }
-
-    @Test
-    public void shouldThrowResourceNotFoundExceptionGetByIdWhenIdInvalid() {
-        when(entrepreneurRepository.findById(-1L)).thenReturn(Optional.empty());
-        
-        ResourceNotFoundException exception = assertThrows(
-            ResourceNotFoundException.class,
-            () -> entrepreneurService.getById(-1L)
-        );
-        assertEquals("Empreendedor com id -1 não existe", exception.getMessage());
-    }
-
-    @Test
     public void shouldSuccesfullyRemoveEntrepreneurDeleteByIdWhenIdValid() {
         var entrepreneur = Instancio.create(Entrepreneur.class);
         entrepreneur.setId(1L);
@@ -163,7 +162,7 @@ public class EntrepreneurServiceTest {
             Optional.of(entrepreneur)
         );
 
-        entrepreneurService.deleteById(entrepreneur.getId());
+        entrepreneurService.deleteById(entrepreneur.getId(), ""); // Add keycloak valid ID
 
         verify(entrepreneurRepository, times(1)).deleteById(entrepreneur.getId());
         verify(keycloakUserService, times(1)).deleteById(
@@ -178,7 +177,7 @@ public class EntrepreneurServiceTest {
         );
         ResourceNotFoundException exception = assertThrows(
             ResourceNotFoundException.class,
-            () -> entrepreneurService.deleteById(-1L)
+            () -> entrepreneurService.deleteById(-1L, "") // Add test for invalid keycloakID
         );
 
         assertEquals("Empreendedor com id -1 não existe", exception.getMessage());
@@ -187,22 +186,6 @@ public class EntrepreneurServiceTest {
         verify(keycloakUserService, never()).deleteById(
             null
         );
-    }
-
-    @Test
-    public void shouldReturnListofEntrepreneurs() {
-        var entrepreneur = Instancio.create(Entrepreneur.class);
-
-        when(entrepreneurRepository.findAll()).thenReturn(
-            List.of(entrepreneur)
-        );
-        when(entrepreneurMapper.toDTOList(List.of(entrepreneur))).thenReturn(
-            List.of(EntrepreneurTestUtil.toResponseDTO(entrepreneur))
-        );
-
-        var actualEntrepreneurList = entrepreneurService.getAll();
-
-        assertEquals(1, actualEntrepreneurList.size());
     }
 
     @Test
@@ -266,7 +249,7 @@ public class EntrepreneurServiceTest {
             expectedResponseDTO
         );
 
-        var actualResponseDTO = entrepreneurService.update(entrepreneur.getId(), updateEntrepreneurRequestDTO);
+        var actualResponseDTO = entrepreneurService.update(entrepreneur.getId(), updateEntrepreneurRequestDTO, ""); // keycloakID Valid add test
         
         verify(keycloakUserService, times(1)).update(
             userUpdateRecord
@@ -332,7 +315,7 @@ public class EntrepreneurServiceTest {
         
         assertThrows(
             OptimisticLockingFailureException.class,
-            () -> entrepreneurService.update(entrepreneur.getId(), updateEntrepreneurRequestDTO) 
+            () -> entrepreneurService.update(entrepreneur.getId(), updateEntrepreneurRequestDTO, "") 
         );
 
         var oldUserRecord = new UserUpdateRecord(
@@ -355,7 +338,8 @@ public class EntrepreneurServiceTest {
                 new EntrepreneurRequestDTO(
                     "Novo Nome",
                     new PersonRequestDTO()
-                )
+                ),
+                "" // Add test for invalid keycloakID
             )
         );
 

@@ -1,5 +1,6 @@
 package br.ifrn.edu.sisconf.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -62,6 +63,33 @@ public class CustomerServiceTest {
     }
 
     @Test
+    public void shouldReturnCustomerWhenCorrespondingKeycloakId() {
+        var customer = CustomerTestUtil.createValidCustomer();
+
+        when(customerRepository.findByPersonKeycloakId(
+            customer.getPerson().getKeycloakId()
+        )).thenReturn(Optional.of(customer));
+
+        assertDoesNotThrow(() -> 
+            customerService.getByKeycloakId(customer.getPerson().getKeycloakId())
+        );
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenNoCorrespondingCustomerKeycloakId() {
+        final String keycloakId = UUID.randomUUID().toString();
+        when(customerRepository.findByPersonKeycloakId(keycloakId))
+        .thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(
+            ResourceNotFoundException.class, 
+            () -> customerService.getByKeycloakId(keycloakId)
+        );
+
+        assertEquals(exception.getMessage(), "Cliente não encontrado");
+    }
+
+    @Test
     public void shouldCreateCustomerWhenDataValid() {
         final String keycloakId = UUID.randomUUID().toString();
         var customerCreateRequestDTO = CustomerTestUtil.createValidCustomerCreateRequestDTO();
@@ -71,7 +99,7 @@ public class CustomerServiceTest {
             customerCreateRequestDTO.getPerson().getLastName(), 
             customerCreateRequestDTO.getPerson().getPassword(), 
             customerCreateRequestDTO.getPerson().getEmail(), 
-            KeycloakConstants.CLIENT_GROUP_NAME
+            KeycloakConstants.CUSTOMER_GROUP_NAME
         );
         var userRegistrationResponse = new UserRegistrationResponse(
             keycloakId, 
@@ -102,7 +130,7 @@ public class CustomerServiceTest {
             customerCreateRequestDTO.getPerson().getLastName(), 
             customerCreateRequestDTO.getPerson().getPassword(), 
             customerCreateRequestDTO.getPerson().getEmail(), 
-            KeycloakConstants.CLIENT_GROUP_NAME
+            KeycloakConstants.CUSTOMER_GROUP_NAME
         );
         var userRegistrationResponse = new UserRegistrationResponse(
             keycloakId, 
@@ -162,7 +190,7 @@ public class CustomerServiceTest {
         var customer = Instancio.create(Customer.class);
         when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
 
-        customerService.deleteById(customer.getId());
+        customerService.deleteById(customer.getId(), customer.getPerson().getKeycloakId()); // Add test for invalid keycloakId
         verify(customerRepository, times(1)).deleteById(customer.getId());
         verify(keycloakUserService, times(1)).deleteById(
             customer.getPerson().getKeycloakId()
@@ -178,7 +206,7 @@ public class CustomerServiceTest {
 
         assertThrowsExactly(
             ResourceNotFoundException.class, 
-            () -> customerService.deleteById(unexistingId)
+            () -> customerService.deleteById(unexistingId, "") // Add test for invalid keycloakid
         );
         verify(customerRepository, never()).deleteById(unexistingId);
         verify(keycloakUserService, never()).deleteById(null);
@@ -245,7 +273,7 @@ public class CustomerServiceTest {
             expectedResponseDTO
         );
 
-        var actualResponseDTO = customerService.update(updateCustomerRequestDTO, customer.getId());
+        var actualResponseDTO = customerService.update(updateCustomerRequestDTO, customer.getId(), customer.getPerson().getKeycloakId()); // Add test for invalid keycloakId
         
         verify(keycloakUserService, times(1)).update(
             userUpdateRecord
@@ -312,7 +340,7 @@ public class CustomerServiceTest {
 
         assertThrows(
             OptimisticLockingFailureException.class, 
-            () -> customerService.update(updateCustomerRequestDTO, customer.getId())
+            () -> customerService.update(updateCustomerRequestDTO, customer.getId(), customer.getPerson().getKeycloakId()) // Add test for invalidKeycloakId
         );
 
         var oldUserRecord = new UserUpdateRecord(
@@ -335,7 +363,8 @@ public class CustomerServiceTest {
                     CustomerCategory.ENTREPRENEUR,
                     new PersonRequestDTO()
                 ),
-                -1L
+                -1L,
+                ""  // Add test for invalid KeycloakID
             )
         );
 

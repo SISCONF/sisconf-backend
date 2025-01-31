@@ -31,6 +31,15 @@ public class CustomerService {
     @Autowired
     private CustomerMapper customerMapper;
 
+    public CustomerResponseDTO getByKeycloakId(String keycloakId) {
+        var customer = customerRepository.findByPersonKeycloakId(keycloakId).orElseThrow(() ->
+            new ResourceNotFoundException(
+                "Cliente não encontrado"
+            )
+        );
+        return customerMapper.toResponseDTO(customer);
+    }
+
     public Customer getCustomerById(Long id) {
         return customerRepository
             .findById(id)
@@ -60,7 +69,7 @@ public class CustomerService {
                 personRequestDTO.getLastName(),
                 personRequestDTO.getPassword(),
                 personRequestDTO.getEmail(),
-                KeycloakConstants.CLIENT_GROUP_NAME
+                KeycloakConstants.CUSTOMER_GROUP_NAME
         );
         UserRegistrationResponse userRegistrationResponse = keycloakUserService
             .create(userRegistrationRecord);
@@ -74,9 +83,22 @@ public class CustomerService {
         }
     }
 
-    public CustomerResponseDTO update(CustomerRequestDTO customerRequestDTO, Long id) {
+    public CustomerResponseDTO update(
+        CustomerRequestDTO customerRequestDTO,
+        Long id,
+        String loggedCustomerKeycloakId
+    ) {
         var customer = getCustomerById(id);
-        personService.validatePersonUpdate(customerRequestDTO.getPerson(), customer.getPerson().getId());
+
+        personService.throwIfLoggedPersonIsDifferentFromPersonResource(
+            loggedCustomerKeycloakId,
+            customer.getPerson()
+        );
+
+        personService.validatePersonUpdate(
+            customerRequestDTO.getPerson(), 
+            customer.getPerson().getId()
+        );
 
         var userUpdateRecord = new UserUpdateRecord(
                 customer.getPerson().getKeycloakId(),
@@ -101,8 +123,14 @@ public class CustomerService {
         }
     }
 
-    public void deleteById(Long id) {
+    public void deleteById(Long id, String loggedUserKeycloakId) {
         Customer customer = getCustomerById(id);
+
+        personService.throwIfLoggedPersonIsDifferentFromPersonResource(
+            loggedUserKeycloakId, 
+            customer.getPerson()
+        );
+
         customerRepository.deleteById(id);
         keycloakUserService.deleteById(customer.getPerson().getKeycloakId());
     }

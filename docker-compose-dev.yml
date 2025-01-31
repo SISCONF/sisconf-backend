@@ -7,9 +7,7 @@ services:
       - ./envs/keycloak.env
     command: start-dev
     volumes:
-      - keycloak-db:/standalone/data/db
-      - keycloak-realms:/standalone/data/keycloak
-      - keycloak-events:/standalone/data/events
+      - keycloak-data:/opt/keycloak/data/
 
   postgres:
     image: postgres:16
@@ -36,8 +34,6 @@ services:
       - postgres
 
 volumes:
-  keycloak-db:
-  keycloak-realms:
-  keycloak-events:
+  keycloak-data:
   postgres-data:
   mvn-cache:

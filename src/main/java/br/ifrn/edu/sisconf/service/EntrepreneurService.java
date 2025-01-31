@@ -15,7 +15,6 @@ import br.ifrn.edu.sisconf.service.keycloak.KeycloakUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 public class EntrepreneurService {
@@ -44,17 +43,12 @@ public class EntrepreneurService {
         personService.throwIfCnpjIsNotUnique(personRequestDTO.getCnpj(), id);
     }
 
-    public EntrepreneurResponseDTO getById(Long id) {
-        Entrepreneur entrepreneur = entrepreneurRepository
-                .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        String.format("Empreendedor com id %d não existe", id)
-                ));
+    public EntrepreneurResponseDTO getByKeycloakId(String keycloakId) {
+        var entrepreneur = entrepreneurRepository.findByPersonKeycloakId(keycloakId)
+            .orElseThrow(() -> new ResourceNotFoundException(
+                "Empreendedor não encontrado"
+            ));
         return entrepreneurMapper.toResponseDTO(entrepreneur);
-    }
-
-    public List<EntrepreneurResponseDTO> getAll() {
-        return entrepreneurMapper.toDTOList(entrepreneurRepository.findAll());
     }
 
     public EntrepreneurResponseDTO save(EntrepreneurRequestDTO entrepreneurRequestDTO) {
@@ -85,8 +79,10 @@ public class EntrepreneurService {
 
     public EntrepreneurResponseDTO update(
         Long id, 
-        EntrepreneurRequestDTO entrepreneurRequestDTO
+        EntrepreneurRequestDTO entrepreneurRequestDTO,
+        String loggedEntrepreneurKeycloakId
     ) {
+
         PersonRequestDTO personRequestDTO = entrepreneurRequestDTO.getPerson();
 
         var entrepreneur = entrepreneurRepository
@@ -96,6 +92,11 @@ public class EntrepreneurService {
                     String.format("Empreendedor com id %d não existe", id)
                 )
             );
+
+        personService.throwIfLoggedPersonIsDifferentFromPersonResource(
+            loggedEntrepreneurKeycloakId, 
+            entrepreneur.getPerson()
+        );
         this.validateEntrepreneurUpdate(personRequestDTO, entrepreneur.getPerson().getId());
 
         var userUpdateRecord = new UserUpdateRecord(
@@ -121,7 +122,7 @@ public class EntrepreneurService {
         }
     }
 
-    public void deleteById(Long id) {
+    public void deleteById(Long id, String loggedEntrepreneurKeycloakId) {
         var entrepreneur = entrepreneurRepository
             .findById(id)
             .orElseThrow(() -> 
@@ -129,6 +130,10 @@ public class EntrepreneurService {
                     String.format("Empreendedor com id %d não existe", id)
                 )
             );
+        personService.throwIfLoggedPersonIsDifferentFromPersonResource(
+            loggedEntrepreneurKeycloakId, 
+            entrepreneur.getPerson()
+        );
         keycloakUserService.deleteById(entrepreneur.getPerson().getKeycloakId());
         entrepreneurRepository.deleteById(id);
     }

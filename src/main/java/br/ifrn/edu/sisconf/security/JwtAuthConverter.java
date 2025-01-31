@@ -1,4 +1,4 @@
-package br.ifrn.edu.sisconf.converters;
+package br.ifrn.edu.sisconf.security;
 
 import java.util.Collection;
 import java.util.Map;
@@ -13,8 +13,6 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtClaimNames;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +26,6 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
     private final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter =
         new JwtGrantedAuthoritiesConverter();
     
-    private final String principleAttribute = "preferred_username";
 
     @Override
     public AbstractAuthenticationToken convert(@NonNull Jwt jwt) {
@@ -36,19 +33,19 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
             jwtGrantedAuthoritiesConverter.convert(jwt).stream(), 
             extractResourceRoles(jwt).stream()
         ).collect(Collectors.toSet());
-        return new JwtAuthenticationToken(
-            jwt,
-            authorities,
-            getPrincipleClaimName(jwt)
-        );
-    }
 
-    private String getPrincipleClaimName(Jwt jwt) {
-        String claimName = JwtClaimNames.SUB;
-        if (principleAttribute != null) {
-            claimName = principleAttribute;
-        }
-        return jwt.getClaim(claimName);
+        var userDetails = new SisconfUserDetails(
+            jwt.getClaimAsString("sub"),
+            jwt.getClaimAsString("email"),
+            jwt.getClaimAsString("preferred_username"),
+            authorities
+        );
+
+        return new SisconfAuthenticationToken(
+            userDetails,
+            null,
+            authorities
+        );
     }
 
     @SuppressWarnings("unchecked")
