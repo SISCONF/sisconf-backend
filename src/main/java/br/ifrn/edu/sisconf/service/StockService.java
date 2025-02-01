@@ -22,6 +22,7 @@ import br.ifrn.edu.sisconf.repository.EntrepreneurRepository;
 import br.ifrn.edu.sisconf.repository.FoodRepository;
 import br.ifrn.edu.sisconf.repository.StockFoodRepository;
 import br.ifrn.edu.sisconf.repository.StockRepository;
+import br.ifrn.edu.sisconf.security.SisconfUserDetails;
 
 @Service
 public class StockService {
@@ -39,6 +40,9 @@ public class StockService {
 
     @Autowired
     private StockFoodRepository stockFoodRepository;
+
+    @Autowired
+    private PersonService personService;
 
     public Stock findStock(Long entrepreneurId) {
         return stockRepository.findByEntrepreneurId(entrepreneurId).orElseThrow(() -> new ResourceNotFoundException("Este estoque não existe"));
@@ -75,8 +79,9 @@ public class StockService {
         stockRepository.deleteById(stock.getId());
     }
 
-    public StockResponseDTO getByEntrepreneurId(Long entrepreneurId) {
+    public StockResponseDTO getByEntrepreneurId(Long entrepreneurId, SisconfUserDetails userDetails) {
         Entrepreneur entrepreneur = entrepreneurRepository.findById(entrepreneurId).orElseThrow(() -> new ResourceNotFoundException("Este empreendedor não existe"));
+        personService.throwIfLoggedPersonIsDifferentFromPersonResource(userDetails.getKeycloakId(), entrepreneur.getPerson());
         Stock stock = entrepreneur.getStock();
         return stockMapper.toResponseDTO(stock);
     }
