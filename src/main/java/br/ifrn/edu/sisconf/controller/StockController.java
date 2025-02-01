@@ -64,10 +64,10 @@ public class StockController {
     @Operation(description = "Remove uma comida do estoque do empreendedor logado")
     public ResponseEntity<Void> removeFoodFromStock(
         @PathVariable Long entrepreneurId, 
-        @PathVariable Long foodId,
+        @PathVariable @Valid StockFoodRequestDTO stockFoodRequestDTO,
         @AuthenticationPrincipal SisconfUserDetails userDetails
     ) {
-        stockService.removeFoodFromStock(entrepreneurId, foodId, userDetails);
+        stockService.removeFoodsFromStock(entrepreneurId, stockFoodRequestDTO, userDetails);
         return ResponseEntity.noContent().build();
     }
 }

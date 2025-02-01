@@ -72,6 +72,17 @@ public class StockService {
         return entrepreneurRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Empreendedor não encontrado."));
     }
 
+    public Map<Long, StockFood> createStockFoodMap(List<StockFood> stockFoods) {
+        return stockFoods.stream()
+                .collect(Collectors.toMap(stockFood -> stockFood.getFood().getId(), stockFood -> stockFood));
+    }
+
+    public void throwIfStockFoodIsNotFoundInStock(StockFood stockFood, StockFoodListRequestDTO foodItem) {
+        if (stockFood == null) {
+            throw new BusinessException("A comida com ID " + foodItem.getFoodId() + " não está no estoque.");
+        }
+    }
+
     public void throwIfLoggedEntrepreneurIsDifferentFromRouteId(Long id, SisconfUserDetails userDetails) {
         Entrepreneur entrepreneur = findEntrepreneurById(id);
         personService.throwIfLoggedPersonIsDifferentFromPersonResource(userDetails.getKeycloakId(), entrepreneur.getPerson());
@@ -135,16 +146,13 @@ public class StockService {
         throwIfNotEveryFoodIsFound(foodsIds, foundFoods);
 
         List<StockFood> stockFoods = stockFoodRepository.findByStockIdAndFoodIdIn(stock.getId(), foodsIds);
-        Map<Long, StockFood> stockFoodMap = stockFoods.stream()
-                .collect(Collectors.toMap(stockFood -> stockFood.getFood().getId(), stockFood -> stockFood));
+        Map<Long, StockFood> stockFoodMap = createStockFoodMap(stockFoods);
 
         List<StockFood> stockFoodsToBeUpdated = new ArrayList<>();
         for (StockFoodListRequestDTO foodItem : stockFoodRequestDTO.getFoods()) {
             StockFood stockFood = stockFoodMap.get(foodItem.getFoodId());
 
-            if (stockFood == null) {
-                throw new BusinessException("A comida com ID " + foodItem.getFoodId() + " não está no estoque.");
-            }
+            throwIfStockFoodIsNotFoundInStock(stockFood, foodItem);
 
             stockFood.setQuantity(foodItem.getQuantity());
             stockFoodsToBeUpdated.add(stockFood);
@@ -153,15 +161,27 @@ public class StockService {
         stockFoodRepository.saveAll(stockFoodsToBeUpdated);
     }
 
-    public void removeFoodFromStock(Long entrepreneurId, Long foodId, SisconfUserDetails userDetails) {
+    public void removeFoodsFromStock(Long entrepreneurId, StockFoodRequestDTO stockFoodRequestDTO, SisconfUserDetails userDetails) {
         throwIfLoggedEntrepreneurIsDifferentFromRouteId(entrepreneurId, userDetails);
-
+        
         Stock stock = findStock(entrepreneurId);
-        if (!foodRepository.existsById(foodId)) {
-            throw new ResourceNotFoundException("Comida não encontrada");
+        List<Long> foodsIds = getFoodsIds(stockFoodRequestDTO);
+        List<Food> foundFoods = foodRepository.findAllById(foodsIds);
+
+        throwIfNotEveryFoodIsFound(foodsIds, foundFoods);
+
+        List<StockFood> stockFoods = stockFoodRepository.findByStockIdAndFoodIdIn(stock.getId(), foodsIds);
+        Map<Long, StockFood> stockFoodMap = createStockFoodMap(stockFoods);
+
+        List<StockFood> stockFoodsToBeDeleted = new ArrayList<>();
+        for (StockFoodListRequestDTO foodItem : stockFoodRequestDTO.getFoods()) {
+            StockFood stockFood = stockFoodMap.get(foodItem.getFoodId());
+
+            throwIfStockFoodIsNotFoundInStock(stockFood, foodItem);
+
+            stockFoodsToBeDeleted.add(stockFood);
         }
 
-        StockFood stockFood = findStockFoodByStockIdAndFoodId(stock.getId(), foodId);
-        stockFoodRepository.deleteById(stockFood.getId());
+        stockFoodRepository.deleteAll(stockFoodsToBeDeleted);
     }
 }
