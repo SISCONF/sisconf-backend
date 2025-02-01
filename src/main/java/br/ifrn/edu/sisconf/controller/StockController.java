@@ -41,23 +41,33 @@ public class StockController {
 
     @PostMapping
     @Operation(description = "Associa comidas ao estoque do empreendedor logado")
-    public ResponseEntity<StockResponseDTO> associateFoods(@PathVariable Long entrepreneurId,
-            @RequestBody @Valid StockFoodRequestDTO stockFoodRequestDTO) {
-        return ResponseEntity.ok(stockService.associateFoods(entrepreneurId, stockFoodRequestDTO));
+    public ResponseEntity<StockResponseDTO> associateFoods(
+        @PathVariable Long entrepreneurId,
+        @RequestBody @Valid StockFoodRequestDTO stockFoodRequestDTO, 
+        @AuthenticationPrincipal SisconfUserDetails userDetails
+    ) {
+        return ResponseEntity.ok(stockService.associateFoods(entrepreneurId, stockFoodRequestDTO, userDetails));
     }
 
     @PatchMapping
     @Operation(description = "Atualiza a quantidade de uma comida no estoque do empreendedor logado")
-    public ResponseEntity<Void> updateStockFoodQuantity(@PathVariable Long entrepreneurId,
-            @RequestBody @Valid StockFoodRequestDTO stockFoodRequestDTO) {
-        stockService.updateStockFoodQuantity(entrepreneurId, stockFoodRequestDTO);
+    public ResponseEntity<Void> updateStockFoodQuantity(
+        @PathVariable Long entrepreneurId,
+        @RequestBody @Valid StockFoodRequestDTO stockFoodRequestDTO,
+        @AuthenticationPrincipal SisconfUserDetails userDetails
+    ) {
+        stockService.updateStockFoodQuantity(entrepreneurId, stockFoodRequestDTO, userDetails);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/foods/{foodId}")
     @Operation(description = "Remove uma comida do estoque do empreendedor logado")
-    public ResponseEntity<Void> removeFoodFromStock(@PathVariable Long entrepreneurId, @PathVariable Long foodId) {
-        stockService.removeFoodFromStock(entrepreneurId, foodId);
+    public ResponseEntity<Void> removeFoodFromStock(
+        @PathVariable Long entrepreneurId, 
+        @PathVariable Long foodId,
+        @AuthenticationPrincipal SisconfUserDetails userDetails
+    ) {
+        stockService.removeFoodFromStock(entrepreneurId, foodId, userDetails);
         return ResponseEntity.noContent().build();
     }
 }

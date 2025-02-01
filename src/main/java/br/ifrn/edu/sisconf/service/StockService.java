@@ -68,6 +68,15 @@ public class StockService {
         return foods.stream().collect(Collectors.toMap(Food::getId, food -> food));
     }
 
+    public Entrepreneur findEntrepreneurById(Long id) {
+        return entrepreneurRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Empreendedor não encontrado."));
+    }
+
+    public void throwIfLoggedEntrepreneurIsDifferentFromRouteId(Long id, SisconfUserDetails userDetails) {
+        Entrepreneur entrepreneur = findEntrepreneurById(id);
+        personService.throwIfLoggedPersonIsDifferentFromPersonResource(userDetails.getKeycloakId(), entrepreneur.getPerson());
+    }
+
     public void save(Entrepreneur entrepreneur) {
         Stock stock = new Stock();
         stock.setEntrepreneur(entrepreneur);
@@ -80,17 +89,17 @@ public class StockService {
     }
 
     public StockResponseDTO getByEntrepreneurId(Long entrepreneurId, SisconfUserDetails userDetails) {
-        Entrepreneur entrepreneur = entrepreneurRepository.findById(entrepreneurId).orElseThrow(() -> new ResourceNotFoundException("Este empreendedor não existe"));
+        Entrepreneur entrepreneur = findEntrepreneurById(entrepreneurId);
         personService.throwIfLoggedPersonIsDifferentFromPersonResource(userDetails.getKeycloakId(), entrepreneur.getPerson());
         Stock stock = entrepreneur.getStock();
         return stockMapper.toResponseDTO(stock);
     }
 
-    public StockResponseDTO associateFoods(Long entrepreneurId, StockFoodRequestDTO stockFoodRequestDTO) {
-        Stock stock = findStock(entrepreneurId);
-        
-        List<Long> foodsIds = getFoodsIds(stockFoodRequestDTO);
+    public StockResponseDTO associateFoods(Long entrepreneurId, StockFoodRequestDTO stockFoodRequestDTO, SisconfUserDetails userDetails) {
+        throwIfLoggedEntrepreneurIsDifferentFromRouteId(entrepreneurId, userDetails);
 
+        Stock stock = findStock(entrepreneurId);
+        List<Long> foodsIds = getFoodsIds(stockFoodRequestDTO);
         List<Food> foundFoods = foodRepository.findAllById(foodsIds);
         Map<Long, Food> foodMap = createFoodMap(foundFoods);
 
@@ -116,7 +125,9 @@ public class StockService {
         return stockMapper.toResponseDTO(stock);
     }
 
-    public void updateStockFoodQuantity(Long entrepreneurId, StockFoodRequestDTO stockFoodRequestDTO) {
+    public void updateStockFoodQuantity(Long entrepreneurId, StockFoodRequestDTO stockFoodRequestDTO, SisconfUserDetails userDetails) {
+        throwIfLoggedEntrepreneurIsDifferentFromRouteId(entrepreneurId, userDetails);
+        
         Stock stock = findStock(entrepreneurId);
         List<Long> foodsIds = getFoodsIds(stockFoodRequestDTO);
         List<Food> foundFoods = foodRepository.findAllById(foodsIds);
@@ -142,7 +153,9 @@ public class StockService {
         stockFoodRepository.saveAll(stockFoodsToBeUpdated);
     }
 
-    public void removeFoodFromStock(Long entrepreneurId, Long foodId) {
+    public void removeFoodFromStock(Long entrepreneurId, Long foodId, SisconfUserDetails userDetails) {
+        throwIfLoggedEntrepreneurIsDifferentFromRouteId(entrepreneurId, userDetails);
+
         Stock stock = findStock(entrepreneurId);
         if (!foodRepository.existsById(foodId)) {
             throw new ResourceNotFoundException("Comida não encontrada");
