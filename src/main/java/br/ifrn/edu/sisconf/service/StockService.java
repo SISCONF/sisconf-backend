@@ -12,6 +12,7 @@ import br.ifrn.edu.sisconf.domain.Entrepreneur;
 import br.ifrn.edu.sisconf.domain.Food;
 import br.ifrn.edu.sisconf.domain.Stock;
 import br.ifrn.edu.sisconf.domain.StockFood;
+import br.ifrn.edu.sisconf.domain.dtos.StockFoodDeleteRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.StockFoodListRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.StockFoodRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.StockResponseDTO;
@@ -77,9 +78,9 @@ public class StockService {
                 .collect(Collectors.toMap(stockFood -> stockFood.getFood().getId(), stockFood -> stockFood));
     }
 
-    public void throwIfStockFoodIsNotFoundInStock(StockFood stockFood, StockFoodListRequestDTO foodItem) {
+    public void throwIfStockFoodIsNotFoundInStock(StockFood stockFood, Long foodId) {
         if (stockFood == null) {
-            throw new BusinessException("A comida com ID " + foodItem.getFoodId() + " não está no estoque.");
+            throw new BusinessException("A comida com ID " + foodId + " não está no estoque.");
         }
     }
 
@@ -152,7 +153,7 @@ public class StockService {
         for (StockFoodListRequestDTO foodItem : stockFoodRequestDTO.getFoods()) {
             StockFood stockFood = stockFoodMap.get(foodItem.getFoodId());
 
-            throwIfStockFoodIsNotFoundInStock(stockFood, foodItem);
+            throwIfStockFoodIsNotFoundInStock(stockFood, foodItem.getFoodId());
 
             stockFood.setQuantity(foodItem.getQuantity());
             stockFoodsToBeUpdated.add(stockFood);
@@ -161,11 +162,11 @@ public class StockService {
         stockFoodRepository.saveAll(stockFoodsToBeUpdated);
     }
 
-    public void removeFoodsFromStock(Long entrepreneurId, StockFoodRequestDTO stockFoodRequestDTO, SisconfUserDetails userDetails) {
+    public void removeFoodsFromStock(Long entrepreneurId, StockFoodDeleteRequestDTO stockFoodDeleteRequestDTO, SisconfUserDetails userDetails) {
         throwIfLoggedEntrepreneurIsDifferentFromRouteId(entrepreneurId, userDetails);
         
         Stock stock = findStock(entrepreneurId);
-        List<Long> foodsIds = getFoodsIds(stockFoodRequestDTO);
+        List<Long> foodsIds = stockFoodDeleteRequestDTO.getFoodsIds();
         List<Food> foundFoods = foodRepository.findAllById(foodsIds);
 
         throwIfNotEveryFoodIsFound(foodsIds, foundFoods);
@@ -174,10 +175,10 @@ public class StockService {
         Map<Long, StockFood> stockFoodMap = createStockFoodMap(stockFoods);
 
         List<StockFood> stockFoodsToBeDeleted = new ArrayList<>();
-        for (StockFoodListRequestDTO foodItem : stockFoodRequestDTO.getFoods()) {
-            StockFood stockFood = stockFoodMap.get(foodItem.getFoodId());
+        for (Long foodId : stockFoodDeleteRequestDTO.getFoodsIds()) {
+            StockFood stockFood = stockFoodMap.get(foodId);
 
-            throwIfStockFoodIsNotFoundInStock(stockFood, foodItem);
+            throwIfStockFoodIsNotFoundInStock(stockFood, foodId);
 
             stockFoodsToBeDeleted.add(stockFood);
         }

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.ifrn.edu.sisconf.constants.KeycloakConstants;
+import br.ifrn.edu.sisconf.domain.dtos.StockFoodDeleteRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.StockFoodRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.StockResponseDTO;
 import br.ifrn.edu.sisconf.security.SisconfUserDetails;
@@ -60,14 +61,14 @@ public class StockController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/foods/{foodId}")
+    @DeleteMapping("/foods")
     @Operation(description = "Remove uma comida do estoque do empreendedor logado")
     public ResponseEntity<Void> removeFoodFromStock(
         @PathVariable Long entrepreneurId, 
-        @PathVariable @Valid StockFoodRequestDTO stockFoodRequestDTO,
+        @RequestBody @Valid StockFoodDeleteRequestDTO stockFoodDeleteRequestDTO,
         @AuthenticationPrincipal SisconfUserDetails userDetails
     ) {
-        stockService.removeFoodsFromStock(entrepreneurId, stockFoodRequestDTO, userDetails);
+        stockService.removeFoodsFromStock(entrepreneurId, stockFoodDeleteRequestDTO, userDetails);
         return ResponseEntity.noContent().build();
     }
 }
