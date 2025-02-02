@@ -33,7 +33,7 @@ public class CountryStateController {
 
     @GetMapping("/{id}/cities")
     @Operation(description = "Lista todas as cidades que são do estado específico")
-    public ResponseEntity<List<CityResponseDTO>> getAllCities(@PathVariable Long id) {
+    public ResponseEntity<List<CityResponseDTO>> getAllCitiesByCountrStateId(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(
             countryStateService.getAllCitiesByCountryStateId(id)
         );
