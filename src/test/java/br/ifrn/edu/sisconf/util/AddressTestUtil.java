@@ -13,7 +13,7 @@ public class AddressTestUtil {
             "10000-000",
             "Bairro Teste",
             90,
-            new City("Cidade do Teste", new CountryState("Estado do Teste", "ET"))
+            new City("Cidade do Teste", new CountryState("Estado do Teste", "ET", null))
         );
     }
 

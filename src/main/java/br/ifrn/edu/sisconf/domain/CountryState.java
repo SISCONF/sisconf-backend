@@ -1,5 +1,8 @@
 package br.ifrn.edu.sisconf.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,4 +18,7 @@ public class CountryState extends BaseEntity {
 
     @Column(length=2, unique = true, nullable = false)
     private String abbreviation;
+
+    @OneToMany(mappedBy = "countryState")
+    private List<City> cities = new ArrayList<>();
 }
