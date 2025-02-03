@@ -16,7 +16,11 @@ public class CityService {
     private CityMapper cityMapper;
 
     public CityResponseDTO getById(Long id) {
-        var city = cityRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Cidade com id %d não encontrada", id)));
+        var city = cityRepository.findById(id).orElseThrow(() -> 
+            new ResourceNotFoundException(
+                String.format("Cidade com id %d não encontrada", id)
+            )
+        );
         return cityMapper.toResponse(city);
     }
 }

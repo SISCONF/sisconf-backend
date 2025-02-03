@@ -36,7 +36,7 @@ public class CityServiceTest {
 
     @Test
     void getExistingCityById() {
-        CountryState countryState = new CountryState("Pernambuco", "PE");
+        CountryState countryState = new CountryState("Pernambuco", "PE", null);
         City city = new City("Petrolina", countryState);
         when(cityRepository.findById(city.getId())).thenReturn(Optional.of(city));
         when(cityMapper.toResponse(city)).thenReturn(new CityResponseDTO(
