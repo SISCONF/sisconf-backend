@@ -1,5 +1,6 @@
 package br.ifrn.edu.sisconf.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import br.ifrn.edu.sisconf.domain.Entrepreneur;
+import br.ifrn.edu.sisconf.domain.Person;
 import br.ifrn.edu.sisconf.domain.Stock;
 import br.ifrn.edu.sisconf.domain.dtos.StockResponseDTO;
 import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
@@ -35,6 +37,9 @@ public class StockServiceTest {
 
     @Mock
     private EntrepreneurRepository entrepreneurRepository;
+
+    @Mock
+    private PersonService personService;
 
     @Test
     public void shouldCreateStockSuccessfully() {
@@ -85,10 +90,16 @@ public class StockServiceTest {
         stockResponseDTO.setId(1L);
         stockResponseDTO.setEntrepreneurId(entrepreneurId);
 
+        Person person = new Person();
+        person.setKeycloakId("abcdef");
+        String loggedPersonKeycloakId = "abcdef";
+
         when(entrepreneurRepository.findById(entrepreneurId)).thenReturn(Optional.of(entrepreneur));
         when(stockMapper.toResponseDTO(stock)).thenReturn(stockResponseDTO);
 
-        StockResponseDTO stockResult = stockService.getByEntrepreneurId(entrepreneurId);
+        assertDoesNotThrow(() -> personService.throwIfLoggedPersonIsDifferentFromPersonResource(loggedPersonKeycloakId, person));
+
+        StockResponseDTO stockResult = stockService.getByEntrepreneurId(entrepreneurId, loggedPersonKeycloakId);
 
         assertEquals(stockResponseDTO, stockResult);
     }
@@ -96,11 +107,12 @@ public class StockServiceTest {
     @Test
     public void failedStockGetBecauseOfUnexistingEntrepreneur() {
         Long entrepreneurId = 1L;
+        String loggedPersonKeycloackId = "abcdef";
 
         when(entrepreneurRepository.findById(entrepreneurId)).thenReturn(Optional.empty());
 
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> stockService.getByEntrepreneurId(entrepreneurId));
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> stockService.getByEntrepreneurId(entrepreneurId, loggedPersonKeycloackId));
 
-        assertEquals("Este empreendedor não existe", exception.getMessage());
+        assertEquals("Empreendedor não encontrado.", exception.getMessage());
     }
 }

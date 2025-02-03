@@ -23,7 +23,6 @@ import br.ifrn.edu.sisconf.repository.EntrepreneurRepository;
 import br.ifrn.edu.sisconf.repository.FoodRepository;
 import br.ifrn.edu.sisconf.repository.StockFoodRepository;
 import br.ifrn.edu.sisconf.repository.StockRepository;
-import br.ifrn.edu.sisconf.security.SisconfUserDetails;
 
 @Service
 public class StockService {
@@ -84,9 +83,9 @@ public class StockService {
         }
     }
 
-    public void throwIfLoggedEntrepreneurIsDifferentFromRouteId(Long id, SisconfUserDetails userDetails) {
+    public void throwIfLoggedEntrepreneurIsDifferentFromRouteId(Long id, String keycloakId) {
         Entrepreneur entrepreneur = findEntrepreneurById(id);
-        personService.throwIfLoggedPersonIsDifferentFromPersonResource(userDetails.getKeycloakId(), entrepreneur.getPerson());
+        personService.throwIfLoggedPersonIsDifferentFromPersonResource(keycloakId, entrepreneur.getPerson());
     }
 
     public void save(Entrepreneur entrepreneur) {
@@ -100,15 +99,15 @@ public class StockService {
         stockRepository.deleteById(stock.getId());
     }
 
-    public StockResponseDTO getByEntrepreneurId(Long entrepreneurId, SisconfUserDetails userDetails) {
+    public StockResponseDTO getByEntrepreneurId(Long entrepreneurId, String keycloakId) {
         Entrepreneur entrepreneur = findEntrepreneurById(entrepreneurId);
-        personService.throwIfLoggedPersonIsDifferentFromPersonResource(userDetails.getKeycloakId(), entrepreneur.getPerson());
+        personService.throwIfLoggedPersonIsDifferentFromPersonResource(keycloakId, entrepreneur.getPerson());
         Stock stock = entrepreneur.getStock();
         return stockMapper.toResponseDTO(stock);
     }
 
-    public StockResponseDTO associateFoods(Long entrepreneurId, StockFoodRequestDTO stockFoodRequestDTO, SisconfUserDetails userDetails) {
-        throwIfLoggedEntrepreneurIsDifferentFromRouteId(entrepreneurId, userDetails);
+    public StockResponseDTO associateFoods(Long entrepreneurId, StockFoodRequestDTO stockFoodRequestDTO, String keycloakId) {
+        throwIfLoggedEntrepreneurIsDifferentFromRouteId(entrepreneurId, keycloakId);
 
         Stock stock = findStock(entrepreneurId);
         List<Long> foodsIds = getFoodsIds(stockFoodRequestDTO);
@@ -137,8 +136,8 @@ public class StockService {
         return stockMapper.toResponseDTO(stock);
     }
 
-    public void updateStockFoodQuantity(Long entrepreneurId, StockFoodRequestDTO stockFoodRequestDTO, SisconfUserDetails userDetails) {
-        throwIfLoggedEntrepreneurIsDifferentFromRouteId(entrepreneurId, userDetails);
+    public void updateStockFoodQuantity(Long entrepreneurId, StockFoodRequestDTO stockFoodRequestDTO, String keycloakId) {
+        throwIfLoggedEntrepreneurIsDifferentFromRouteId(entrepreneurId, keycloakId);
         
         Stock stock = findStock(entrepreneurId);
         List<Long> foodsIds = getFoodsIds(stockFoodRequestDTO);
@@ -162,8 +161,8 @@ public class StockService {
         stockFoodRepository.saveAll(stockFoodsToBeUpdated);
     }
 
-    public void removeFoodsFromStock(Long entrepreneurId, StockFoodDeleteRequestDTO stockFoodDeleteRequestDTO, SisconfUserDetails userDetails) {
-        throwIfLoggedEntrepreneurIsDifferentFromRouteId(entrepreneurId, userDetails);
+    public void removeFoodsFromStock(Long entrepreneurId, StockFoodDeleteRequestDTO stockFoodDeleteRequestDTO, String keycloakId) {
+        throwIfLoggedEntrepreneurIsDifferentFromRouteId(entrepreneurId, keycloakId);
         
         Stock stock = findStock(entrepreneurId);
         List<Long> foodsIds = stockFoodDeleteRequestDTO.getFoodsIds();

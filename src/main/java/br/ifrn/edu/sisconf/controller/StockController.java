@@ -37,7 +37,7 @@ public class StockController {
         @PathVariable Long entrepreneurId, 
         @AuthenticationPrincipal SisconfUserDetails userDetails
     ) {
-        return ResponseEntity.ok(stockService.getByEntrepreneurId(entrepreneurId, userDetails));
+        return ResponseEntity.ok(stockService.getByEntrepreneurId(entrepreneurId, userDetails.getKeycloakId()));
     }
 
     @PostMapping
@@ -47,7 +47,7 @@ public class StockController {
         @RequestBody @Valid StockFoodRequestDTO stockFoodRequestDTO, 
         @AuthenticationPrincipal SisconfUserDetails userDetails
     ) {
-        return ResponseEntity.ok(stockService.associateFoods(entrepreneurId, stockFoodRequestDTO, userDetails));
+        return ResponseEntity.ok(stockService.associateFoods(entrepreneurId, stockFoodRequestDTO, userDetails.getKeycloakId()));
     }
 
     @PatchMapping
@@ -57,7 +57,7 @@ public class StockController {
         @RequestBody @Valid StockFoodRequestDTO stockFoodRequestDTO,
         @AuthenticationPrincipal SisconfUserDetails userDetails
     ) {
-        stockService.updateStockFoodQuantity(entrepreneurId, stockFoodRequestDTO, userDetails);
+        stockService.updateStockFoodQuantity(entrepreneurId, stockFoodRequestDTO, userDetails.getKeycloakId());
         return ResponseEntity.noContent().build();
     }
 
@@ -68,7 +68,7 @@ public class StockController {
         @RequestBody @Valid StockFoodDeleteRequestDTO stockFoodDeleteRequestDTO,
         @AuthenticationPrincipal SisconfUserDetails userDetails
     ) {
-        stockService.removeFoodsFromStock(entrepreneurId, stockFoodDeleteRequestDTO, userDetails);
+        stockService.removeFoodsFromStock(entrepreneurId, stockFoodDeleteRequestDTO, userDetails.getKeycloakId());
         return ResponseEntity.noContent().build();
     }
 }
