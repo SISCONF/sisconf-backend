@@ -12,6 +12,7 @@ import br.ifrn.edu.sisconf.domain.Entrepreneur;
 import br.ifrn.edu.sisconf.domain.Food;
 import br.ifrn.edu.sisconf.domain.Stock;
 import br.ifrn.edu.sisconf.domain.StockFood;
+import br.ifrn.edu.sisconf.domain.dtos.StockFoodDeleteRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.StockFoodListRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.StockFoodRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.StockResponseDTO;
@@ -40,6 +41,9 @@ public class StockService {
     @Autowired
     private StockFoodRepository stockFoodRepository;
 
+    @Autowired
+    private PersonService personService;
+
     public Stock findStock(Long entrepreneurId) {
         return stockRepository.findByEntrepreneurId(entrepreneurId).orElseThrow(() -> new ResourceNotFoundException("Este estoque não existe"));
     }
@@ -64,6 +68,26 @@ public class StockService {
         return foods.stream().collect(Collectors.toMap(Food::getId, food -> food));
     }
 
+    public Entrepreneur findEntrepreneurById(Long id) {
+        return entrepreneurRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Empreendedor não encontrado."));
+    }
+
+    public Map<Long, StockFood> createStockFoodMap(List<StockFood> stockFoods) {
+        return stockFoods.stream()
+                .collect(Collectors.toMap(stockFood -> stockFood.getFood().getId(), stockFood -> stockFood));
+    }
+
+    public void throwIfStockFoodIsNotFoundInStock(StockFood stockFood, Long foodId) {
+        if (stockFood == null) {
+            throw new BusinessException("A comida com ID " + foodId + " não está no estoque.");
+        }
+    }
+
+    public void throwIfLoggedEntrepreneurIsDifferentFromRouteId(Long id, String keycloakId) {
+        Entrepreneur entrepreneur = findEntrepreneurById(id);
+        personService.throwIfLoggedPersonIsDifferentFromPersonResource(keycloakId, entrepreneur.getPerson());
+    }
+
     public void save(Entrepreneur entrepreneur) {
         Stock stock = new Stock();
         stock.setEntrepreneur(entrepreneur);
@@ -75,17 +99,18 @@ public class StockService {
         stockRepository.deleteById(stock.getId());
     }
 
-    public StockResponseDTO getByEntrepreneurId(Long entrepreneurId) {
-        Entrepreneur entrepreneur = entrepreneurRepository.findById(entrepreneurId).orElseThrow(() -> new ResourceNotFoundException("Este empreendedor não existe"));
+    public StockResponseDTO getByEntrepreneurId(Long entrepreneurId, String keycloakId) {
+        Entrepreneur entrepreneur = findEntrepreneurById(entrepreneurId);
+        personService.throwIfLoggedPersonIsDifferentFromPersonResource(keycloakId, entrepreneur.getPerson());
         Stock stock = entrepreneur.getStock();
         return stockMapper.toResponseDTO(stock);
     }
 
-    public StockResponseDTO associateFoods(Long entrepreneurId, StockFoodRequestDTO stockFoodRequestDTO) {
-        Stock stock = findStock(entrepreneurId);
-        
-        List<Long> foodsIds = getFoodsIds(stockFoodRequestDTO);
+    public StockResponseDTO associateFoods(Long entrepreneurId, StockFoodRequestDTO stockFoodRequestDTO, String keycloakId) {
+        throwIfLoggedEntrepreneurIsDifferentFromRouteId(entrepreneurId, keycloakId);
 
+        Stock stock = findStock(entrepreneurId);
+        List<Long> foodsIds = getFoodsIds(stockFoodRequestDTO);
         List<Food> foundFoods = foodRepository.findAllById(foodsIds);
         Map<Long, Food> foodMap = createFoodMap(foundFoods);
 
@@ -111,7 +136,9 @@ public class StockService {
         return stockMapper.toResponseDTO(stock);
     }
 
-    public void updateStockFoodQuantity(Long entrepreneurId, StockFoodRequestDTO stockFoodRequestDTO) {
+    public void updateStockFoodQuantity(Long entrepreneurId, StockFoodRequestDTO stockFoodRequestDTO, String keycloakId) {
+        throwIfLoggedEntrepreneurIsDifferentFromRouteId(entrepreneurId, keycloakId);
+        
         Stock stock = findStock(entrepreneurId);
         List<Long> foodsIds = getFoodsIds(stockFoodRequestDTO);
         List<Food> foundFoods = foodRepository.findAllById(foodsIds);
@@ -119,16 +146,13 @@ public class StockService {
         throwIfNotEveryFoodIsFound(foodsIds, foundFoods);
 
         List<StockFood> stockFoods = stockFoodRepository.findByStockIdAndFoodIdIn(stock.getId(), foodsIds);
-        Map<Long, StockFood> stockFoodMap = stockFoods.stream()
-                .collect(Collectors.toMap(stockFood -> stockFood.getFood().getId(), stockFood -> stockFood));
+        Map<Long, StockFood> stockFoodMap = createStockFoodMap(stockFoods);
 
         List<StockFood> stockFoodsToBeUpdated = new ArrayList<>();
         for (StockFoodListRequestDTO foodItem : stockFoodRequestDTO.getFoods()) {
             StockFood stockFood = stockFoodMap.get(foodItem.getFoodId());
 
-            if (stockFood == null) {
-                throw new BusinessException("A comida com ID " + foodItem.getFoodId() + " não está no estoque.");
-            }
+            throwIfStockFoodIsNotFoundInStock(stockFood, foodItem.getFoodId());
 
             stockFood.setQuantity(foodItem.getQuantity());
             stockFoodsToBeUpdated.add(stockFood);
@@ -137,13 +161,27 @@ public class StockService {
         stockFoodRepository.saveAll(stockFoodsToBeUpdated);
     }
 
-    public void removeFoodFromStock(Long entrepreneurId, Long foodId) {
+    public void removeFoodsFromStock(Long entrepreneurId, StockFoodDeleteRequestDTO stockFoodDeleteRequestDTO, String keycloakId) {
+        throwIfLoggedEntrepreneurIsDifferentFromRouteId(entrepreneurId, keycloakId);
+        
         Stock stock = findStock(entrepreneurId);
-        if (!foodRepository.existsById(foodId)) {
-            throw new ResourceNotFoundException("Comida não encontrada");
+        List<Long> foodsIds = stockFoodDeleteRequestDTO.getFoodsIds();
+        List<Food> foundFoods = foodRepository.findAllById(foodsIds);
+
+        throwIfNotEveryFoodIsFound(foodsIds, foundFoods);
+
+        List<StockFood> stockFoods = stockFoodRepository.findByStockIdAndFoodIdIn(stock.getId(), foodsIds);
+        Map<Long, StockFood> stockFoodMap = createStockFoodMap(stockFoods);
+
+        List<StockFood> stockFoodsToBeDeleted = new ArrayList<>();
+        for (Long foodId : stockFoodDeleteRequestDTO.getFoodsIds()) {
+            StockFood stockFood = stockFoodMap.get(foodId);
+
+            throwIfStockFoodIsNotFoundInStock(stockFood, foodId);
+
+            stockFoodsToBeDeleted.add(stockFood);
         }
 
-        StockFood stockFood = findStockFoodByStockIdAndFoodId(stock.getId(), foodId);
-        stockFoodRepository.deleteById(stockFood.getId());
+        stockFoodRepository.deleteAll(stockFoodsToBeDeleted);
     }
 }
