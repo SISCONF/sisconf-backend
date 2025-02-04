@@ -13,7 +13,7 @@ public class City extends BaseEntity {
     @Column(length = 255, nullable = false)
     private String name;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.REFRESH)
     @JoinColumn(name="country_state_id", nullable = false)
     private CountryState countryState;
 }
