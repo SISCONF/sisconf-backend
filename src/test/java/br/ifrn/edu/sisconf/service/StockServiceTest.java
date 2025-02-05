@@ -333,4 +333,10 @@ public class StockServiceTest {
 
         assertThrows(ResourceNotFoundException.class, () -> stockService.throwIfNotEveryFoodIsFound(foodsIds, foundFoods));
     }
+
+    @Test
+    public void shouldThrowAnExceptionWhenAFoodIsNotFoundInStockWhenLookingForIt() {
+        Long foodId = 1L;
+        assertThrows(BusinessException.class, () -> stockService.throwIfStockFoodIsNotFoundInStock(null, foodId));
+    }
 }
