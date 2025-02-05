@@ -227,4 +227,47 @@ public class StockServiceTest {
 
         assertThrows(BusinessException.class, () -> stockService.associateFoods(entrepreneur.getId(), stockFoodRequestDTO, keycloakId));
     }
+
+    @Test
+    public void shouldUpdateStockFoodQuantitySuccessfully() {
+        String keycloakId = "user-123";
+
+        Entrepreneur entrepreneur = new Entrepreneur();
+        entrepreneur.setId(1L);
+        
+        Stock stock = new Stock();
+        stock.setId(1L);
+        stock.setEntrepreneur(entrepreneur);
+        
+        Food food = new Food();
+        food.setCategory(FoodCategory.FRUIT);
+        food.setId(1L);
+        food.setName("Maçã");
+        food.setUnitPrice(BigDecimal.valueOf(12.99));
+        
+        StockFoodListRequestDTO stockFoodListRequestDTO = new StockFoodListRequestDTO();
+        stockFoodListRequestDTO.setFoodId(food.getId());
+        stockFoodListRequestDTO.setQuantity(5);
+
+        StockFoodRequestDTO stockFoodRequestDTO = new StockFoodRequestDTO();
+        stockFoodRequestDTO.setFoods(List.of(stockFoodListRequestDTO));
+
+        StockFood stockFood = new StockFood();
+        stockFood.setId(1L);
+        stockFood.setFood(food);
+        stockFood.setStock(stock);
+
+        stock.setFoods(List.of(stockFood));
+
+        when(entrepreneurRepository.findById(1L)).thenReturn(Optional.of(entrepreneur));
+        when(stockRepository.findByEntrepreneurId(entrepreneur.getId())).thenReturn(Optional.of(stock));
+        when(foodRepository.findAllById(anyList())).thenReturn(List.of(food));
+        when(stockFoodRepository.findByStockIdAndFoodIdIn(stock.getId(), List.of(food.getId()))).thenReturn(List.of(stockFood));
+
+        stockService.updateStockFoodQuantity(entrepreneur.getId(), stockFoodRequestDTO, keycloakId);
+
+        verify(stockFoodRepository).saveAll(List.of(stockFood));
+        verify(entrepreneurRepository).findById(1L);
+        verify(stockRepository).findByEntrepreneurId(1L);
+    }
 }
