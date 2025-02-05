@@ -66,6 +66,8 @@ public class CountryStateControllerTest {
             MockMvcResultMatchers.status().isOk()
         ).andExpect(
             MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2))
+        ).andExpect(
+            MockMvcResultMatchers.jsonPath("$").isArray()
         );
     }
 
