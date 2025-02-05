@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface OrderRepository extends JpaRepository<Order, Long> {
     Order findByCode(UUID code);
     List<Order> findAllByCustomerId(Long id);
+    List<Order> findAllById(List<Long> ids);
 }
