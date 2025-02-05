@@ -315,4 +315,22 @@ public class StockServiceTest {
         verify(entrepreneurRepository).findById(1L);
         verify(stockRepository).findByEntrepreneurId(1L);
     }
+
+    @Test
+    public void shouldThrowAnExceptionWhenFoundFoodsSizeIsNotTheSameAsTheProvidedIds() {
+        List<Long> foodsIds = new ArrayList<>();
+        foodsIds.add(1L);
+        foodsIds.add(2L);
+
+        Food food = new Food();
+        food.setId(1L);
+        food.setCategory(FoodCategory.FRUIT);
+        food.setName("Maçã");
+        food.setUnitPrice(BigDecimal.valueOf(9.99));
+
+        List<Food> foundFoods = new ArrayList<>();
+        foundFoods.add(food);
+
+        assertThrows(ResourceNotFoundException.class, () -> stockService.throwIfNotEveryFoodIsFound(foodsIds, foundFoods));
+    }
 }
