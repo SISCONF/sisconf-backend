@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +23,7 @@ import br.ifrn.edu.sisconf.domain.Person;
 import br.ifrn.edu.sisconf.domain.Stock;
 import br.ifrn.edu.sisconf.domain.StockFood;
 import br.ifrn.edu.sisconf.domain.dtos.FoodResponseDTO;
+import br.ifrn.edu.sisconf.domain.dtos.StockFoodDeleteRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.StockFoodListRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.StockFoodRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.StockFoodResponseDTO;
@@ -263,10 +265,53 @@ public class StockServiceTest {
         when(stockRepository.findByEntrepreneurId(entrepreneur.getId())).thenReturn(Optional.of(stock));
         when(foodRepository.findAllById(anyList())).thenReturn(List.of(food));
         when(stockFoodRepository.findByStockIdAndFoodIdIn(stock.getId(), List.of(food.getId()))).thenReturn(List.of(stockFood));
+        when(stockFoodRepository.saveAll(List.of(stockFood))).thenReturn(List.of(stockFood));
 
         stockService.updateStockFoodQuantity(entrepreneur.getId(), stockFoodRequestDTO, keycloakId);
 
         verify(stockFoodRepository).saveAll(List.of(stockFood));
+        verify(entrepreneurRepository).findById(1L);
+        verify(stockRepository).findByEntrepreneurId(1L);
+    }
+
+    @Test
+    public void shouldRemoveFoodFromStockSuccessfully() {
+        String keycloakId = "user-123";
+
+        Entrepreneur entrepreneur = new Entrepreneur();
+        entrepreneur.setId(1L);
+
+        Stock stock = new Stock();
+        stock.setId(1L);
+        stock.setEntrepreneur(entrepreneur);
+
+        Food food = new Food();
+        food.setCategory(FoodCategory.FRUIT);
+        food.setId(1L);
+        food.setName("Maçã");
+        food.setUnitPrice(BigDecimal.valueOf(12.99));
+
+        StockFood stockFood = new StockFood();
+        stockFood.setId(1L);
+        stockFood.setFood(food);
+        stockFood.setStock(stock);
+
+        List<Long> foodsIds = new ArrayList<>();
+        foodsIds.add(1L);
+
+        StockFoodDeleteRequestDTO stockFoodDeleteRequestDTO = new StockFoodDeleteRequestDTO();
+        stockFoodDeleteRequestDTO.setFoodsIds(foodsIds);
+
+        stock.setFoods(List.of(stockFood));
+
+        when(entrepreneurRepository.findById(1L)).thenReturn(Optional.of(entrepreneur));
+        when(stockRepository.findByEntrepreneurId(entrepreneur.getId())).thenReturn(Optional.of(stock));
+        when(foodRepository.findAllById(foodsIds)).thenReturn(List.of(food));
+        when(stockFoodRepository.findByStockIdAndFoodIdIn(stock.getId(), foodsIds)).thenReturn(List.of(stockFood));
+        
+        stockService.removeFoodsFromStock(entrepreneur.getId(), stockFoodDeleteRequestDTO, keycloakId);
+
+        verify(stockFoodRepository).deleteAll(List.of(stockFood));
         verify(entrepreneurRepository).findById(1L);
         verify(stockRepository).findByEntrepreneurId(1L);
     }
