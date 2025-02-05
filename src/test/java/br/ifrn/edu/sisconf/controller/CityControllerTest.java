@@ -11,8 +11,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import br.ifrn.edu.sisconf.domain.City;
 import br.ifrn.edu.sisconf.domain.CountryState;
+import br.ifrn.edu.sisconf.mapper.CityMapper;
 import br.ifrn.edu.sisconf.repository.CityRepository;
 import br.ifrn.edu.sisconf.repository.CountryStateRepository;
 
@@ -20,6 +23,12 @@ import br.ifrn.edu.sisconf.repository.CountryStateRepository;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 public class CityControllerTest {
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private CityMapper cityMapper;
+
     @Autowired
     private CityRepository cityRepository;
 
@@ -60,7 +69,11 @@ public class CityControllerTest {
 
     @Test
     public void shouldReturnCityWhenValidCityId() throws Exception {
+        String expectedJson = objectMapper.writeValueAsString(
+            cityMapper.toResponse(city)
+        );
         mockMvc.perform(MockMvcRequestBuilders.get(String.format("/api/cities/%d", city.getId())))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().json(expectedJson));
     }
 }
