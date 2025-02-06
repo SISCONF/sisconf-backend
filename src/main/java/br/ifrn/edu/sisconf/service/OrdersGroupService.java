@@ -4,6 +4,7 @@ import br.ifrn.edu.sisconf.domain.Order;
 import br.ifrn.edu.sisconf.domain.OrdersGroup;
 import br.ifrn.edu.sisconf.domain.dtos.OrdersGroup.OrdersGroupRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrdersGroup.OrdersGroupResponseDTO;
+import br.ifrn.edu.sisconf.domain.enums.OrdersGroupStatus;
 import br.ifrn.edu.sisconf.exception.BusinessException;
 import br.ifrn.edu.sisconf.mapper.OrdersGroupMapper;
 import br.ifrn.edu.sisconf.repository.OrderRepository;
@@ -11,6 +12,8 @@ import br.ifrn.edu.sisconf.repository.OrdersGroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -31,10 +34,14 @@ public class OrdersGroupService {
             throw new BusinessException("É necessário ao menos um pedido para criar um grupo");
         }
 
+        BigDecimal total = BigDecimal.ZERO;
         for (Order order : orders) {
             order.setOrdersGroup(ordersGroup);
+            total = total.add(order.getTotalPrice());
         }
         ordersGroup.setOrders(orders);
+        ordersGroup.setTotalPrice(total);
+        ordersGroup.setCurrentStatus(OrdersGroupStatus.DELIVERED);
 
         return ordersGroupMapper.toResponseDTO(ordersGroupRepository.save(ordersGroup));
     }

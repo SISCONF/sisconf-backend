@@ -12,7 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrdersGroupRequestDTO {
-    private BigDecimal totalPrice;
     private Integer itemQuantity;
     private String docUrl;
     private List<Long> ordersIds = new ArrayList<>();
