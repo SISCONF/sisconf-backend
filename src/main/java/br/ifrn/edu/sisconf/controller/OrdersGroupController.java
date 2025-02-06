@@ -5,10 +5,12 @@ import br.ifrn.edu.sisconf.domain.dtos.OrdersGroup.OrdersGroupResponseDTO;
 import br.ifrn.edu.sisconf.service.OrdersGroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,7 +23,7 @@ public class OrdersGroupController {
 
     @PostMapping
     @Operation(description = "Criar um novo grupo de pedidos")
-    public ResponseEntity<OrdersGroupResponseDTO> save(OrdersGroupRequestDTO ordersGroupRequestDTO) {
+    public ResponseEntity<OrdersGroupResponseDTO> save(@RequestBody @Valid OrdersGroupRequestDTO ordersGroupRequestDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ordersGroupService.save(ordersGroupRequestDTO));
     }
 }
