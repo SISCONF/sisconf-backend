@@ -41,16 +41,13 @@ public class OrdersGroupService {
     }
 
     public OrdersGroupResponseDTO findById(Long id) {
-        OrdersGroup ordersGroup = ordersGroupRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Grupo de id %d não encontrado", id)));
+        OrdersGroup ordersGroup = findOrdersGroupById(id);
         return ordersGroupMapper.toResponseDTO(ordersGroup);
     }
 
     @Transactional
     public OrdersGroupResponseDTO update(Long id,OrdersGroupRequestDTO ordersGroupRequestDTO) {
-       OrdersGroup ordersGroup = ordersGroupRepository.findById(id)
-               .orElseThrow(() -> new ResourceNotFoundException(String.format("Grupo de id %d não encontrado", id)));
-
+       OrdersGroup ordersGroup = findOrdersGroupById(id);
        setOrdersToOrdersGroup(ordersGroupRequestDTO, ordersGroup);
        ordersGroup = ordersGroupMapper.updateOrdersGroup(ordersGroupRequestDTO, ordersGroup);
        return ordersGroupMapper.toResponseDTO(ordersGroupRepository.save(ordersGroup));
@@ -58,8 +55,7 @@ public class OrdersGroupService {
 
     private void setOrdersToOrdersGroup(OrdersGroupRequestDTO ordersGroupRequestDTO, OrdersGroup ordersGroup) {
         List<Order> orders = ordersGroupRequestDTO.getOrdersIds().stream()
-                .map(orderId -> orderRepository.findById(orderId)
-                        .orElseThrow(() -> new ResourceNotFoundException(String.format("Pedido de id %d não encontrado", orderId))))
+                .map(this::findOrderById)
                 .collect(Collectors.toList());
 
         if (orders.isEmpty()) {
@@ -82,5 +78,15 @@ public class OrdersGroupService {
             throw new ResourceNotFoundException(String.format("Grupo de id %d não encontrado", id));
         }
         ordersGroupRepository.deleteById(id);
+    }
+
+    private OrdersGroup findOrdersGroupById(Long id) {
+        return ordersGroupRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Grupo de id %d não encontrado", id)));
+    }
+
+    private Order findOrderById(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Pedido de id %d não encontrado", orderId)));
     }
 }
