@@ -14,6 +14,13 @@ public interface OrdersGroupMapper {
 
     OrdersGroupResponseDTO toResponseDTO(OrdersGroup ordersGroup);
 
+    @Mapping(target = "totalPrice", ignore = true)
+    @Mapping(target = "orderDate", ignore = true)
+    @Mapping(target = "docUrl", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "orders", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "itemQuantity", ignore = true)
     OrdersGroup updateOrdersGroup(OrdersGroupRequestDTO ordersGroupRequestDTO, @MappingTarget OrdersGroup ordersGroup);
 }

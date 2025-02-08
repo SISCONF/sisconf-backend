@@ -23,7 +23,7 @@ public class OrdersGroupResponseDTO {
     private Long id;
     private BigDecimal totalPrice;
     private LocalDateTime orderDate;
-    private String currentStatus;
+    private OrdersGroupStatus currentStatus;
     private Integer itemQuantity;
     private String docUrl;
     private List<OrderResponseDTO> orders = new ArrayList<>();

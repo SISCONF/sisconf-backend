@@ -1,6 +1,5 @@
 package br.ifrn.edu.sisconf.domain.dtos.OrdersGroup;
-import jakarta.validation.constraints.PositiveOrZero;
-import jakarta.validation.constraints.Size;
+import br.ifrn.edu.sisconf.domain.enums.OrdersGroupStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +10,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrdersGroupRequestDTO {
-    @Size(min = 1, message = "O grupo deve possuir no mínimo um pedido")
+    private OrdersGroupStatus currentStatus;
     private List<Long> ordersIds = new ArrayList<>();
 }
