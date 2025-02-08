@@ -27,7 +27,7 @@ public class OrdersGroup extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, name = "current_status")
-    private OrdersGroupStatus currentStatus;
+    private OrdersGroupStatus currentStatus = OrdersGroupStatus.PLACED;
 
     @Column(nullable = false, name = "item_quantity")
     private Integer itemQuantity;

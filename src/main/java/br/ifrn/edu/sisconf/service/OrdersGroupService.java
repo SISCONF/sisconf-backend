@@ -1,6 +1,8 @@
 package br.ifrn.edu.sisconf.service;
 
+import br.ifrn.edu.sisconf.domain.Food;
 import br.ifrn.edu.sisconf.domain.Order;
+import br.ifrn.edu.sisconf.domain.OrderFood;
 import br.ifrn.edu.sisconf.domain.OrdersGroup;
 import br.ifrn.edu.sisconf.domain.dtos.OrdersGroup.OrdersGroupRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrdersGroup.OrdersGroupResponseDTO;
@@ -31,7 +33,10 @@ public class OrdersGroupService {
     public OrdersGroupResponseDTO save(OrdersGroupRequestDTO ordersGroupRequestDTO) {
         OrdersGroup ordersGroup = ordersGroupMapper.toEntity(ordersGroupRequestDTO);
         setOrdersToOrdersGroup(ordersGroupRequestDTO, ordersGroup);
-        ordersGroup.setCurrentStatus(OrdersGroupStatus.DELIVERED);
+        ordersGroup.setCurrentStatus(OrdersGroupStatus.PLACED);
+
+        // futuramente virá do Serviço de processamento
+        ordersGroup.setDocUrl("");
 
         return ordersGroupMapper.toResponseDTO(ordersGroupRepository.save(ordersGroup));
     }
@@ -65,6 +70,13 @@ public class OrdersGroupService {
         BigDecimal total = orders.stream()
                 .map(Order::getTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Integer foodsTotalQuantity = orders.stream()
+                .flatMap(order -> order.getOrderFoods().stream())
+                        .map(OrderFood::getQuantity)
+                                .reduce(0, Integer::sum);
+
+        ordersGroup.setItemQuantity(foodsTotalQuantity);
 
         orders.forEach(order -> order.setOrdersGroup(ordersGroup));
 

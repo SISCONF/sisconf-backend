@@ -11,10 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrdersGroupRequestDTO {
-    @PositiveOrZero(message = "Quantidade de itens não pode ser negativa")
-    private Integer itemQuantity;
-    private String status;
-    private String docUrl;
     @Size(min = 1, message = "O grupo deve possuir no mínimo um pedido")
     private List<Long> ordersIds = new ArrayList<>();
 }
