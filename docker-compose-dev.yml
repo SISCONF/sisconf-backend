@@ -16,6 +16,32 @@ services:
     env_file:
       - ./envs/postgres.env
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - aw-network
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - aw-network
+    links:
+      - postgres
+    env_file:
+      - ./envs/grafana.env
+    depends_on:
+      - prometheus
+      - postgres
+
   sisconf:
     build:
       context: ./
@@ -30,10 +56,16 @@ services:
     env_file:
       - ./envs/spring.env
     depends_on:
-      - keycloak
       - postgres
+      - keycloak
+
+networks:
+  aw-network:
+    driver: bridge
 
 volumes:
   keycloak-data:
   postgres-data:
   mvn-cache:
+  prometheus-data:
+  grafana-data:
