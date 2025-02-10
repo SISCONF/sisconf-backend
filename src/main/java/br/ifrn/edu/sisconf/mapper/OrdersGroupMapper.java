@@ -8,11 +8,15 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring", uses = {OrderMapper.class}, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface OrdersGroupMapper {
     OrdersGroup toEntity(OrdersGroupRequestDTO ordersGroupRequestDTO);
 
     OrdersGroupResponseDTO toResponseDTO(OrdersGroup ordersGroup);
+
+    List<OrdersGroupResponseDTO> toDTOList(List<OrdersGroup> ordersGroups);
 
     @Mapping(target = "totalPrice", ignore = true)
     @Mapping(target = "orderDate", ignore = true)

@@ -42,7 +42,7 @@ public class OrdersGroupService {
     }
 
     public List<OrdersGroupResponseDTO> findAll() {
-        return ordersGroupRepository.findAll().stream().map(ordersGroupMapper::toResponseDTO).toList();
+        return ordersGroupMapper.toDTOList(ordersGroupRepository.findAll());
     }
 
     public OrdersGroupResponseDTO findById(Long id) {
