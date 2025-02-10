@@ -1,5 +1,6 @@
 package br.ifrn.edu.sisconf.controller;
 
+import br.ifrn.edu.sisconf.constants.KeycloakConstants;
 import br.ifrn.edu.sisconf.domain.dtos.OrdersGroup.OrdersGroupRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrdersGroup.OrdersGroupResponseDTO;
 import br.ifrn.edu.sisconf.service.OrdersGroupService;
@@ -9,6 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("api/orders-group")
 @Tag(name = "Orders Group")
+@PreAuthorize(value = KeycloakConstants.ROLE_MANAGE_ORDERS_GROUP)
 public class OrdersGroupController {
     @Autowired
     private OrdersGroupService ordersGroupService;
