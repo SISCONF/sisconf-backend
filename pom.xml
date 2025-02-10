@@ -192,7 +192,7 @@
                     </execution>
                     <execution>
                         <id>report</id>
-                        <phase>prepare-package</phase>
+                        <phase>verify</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
@@ -213,6 +213,28 @@
                     <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
                     <reportFormat>html</reportFormat>
                 </configuration>
+            </plugin>
+
+            <!-- Plugin para executar a abertura automática do relatório -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <exec executable="xdg-open">
+                                    <arg value="${project.build.directory}/site/jacoco/index.html"/>
+                                </exec>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
