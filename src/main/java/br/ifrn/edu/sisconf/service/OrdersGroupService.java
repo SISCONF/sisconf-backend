@@ -23,12 +23,13 @@ import java.util.stream.Collectors;
 @Service
 public class OrdersGroupService {
     @Autowired
+    private OrderService orderService;
+
+    @Autowired
     private OrdersGroupRepository ordersGroupRepository;
 
     @Autowired
     private OrdersGroupMapper ordersGroupMapper;
-    @Autowired
-    private OrderRepository orderRepository;
 
     public OrdersGroupResponseDTO save(OrdersGroupRequestDTO ordersGroupRequestDTO) {
         OrdersGroup ordersGroup = ordersGroupMapper.toEntity(ordersGroupRequestDTO);
@@ -60,7 +61,7 @@ public class OrdersGroupService {
 
     private void setOrdersToOrdersGroup(OrdersGroupRequestDTO ordersGroupRequestDTO, OrdersGroup ordersGroup) {
         List<Order> orders = ordersGroupRequestDTO.getOrdersIds().stream()
-                .map(this::findOrderById)
+                .map(orderService::findOrderById)
                 .collect(Collectors.toList());
 
         if (orders.isEmpty()) {
@@ -95,10 +96,5 @@ public class OrdersGroupService {
     private OrdersGroup findOrdersGroupById(Long id) {
         return ordersGroupRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Grupo de id %d não encontrado", id)));
-    }
-
-    private Order findOrderById(Long orderId) {
-        return orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Pedido de id %d não encontrado", orderId)));
     }
 }

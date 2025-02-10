@@ -150,4 +150,9 @@ public class OrderService {
         }
         orderRepository.deleteById(id);
     }
+
+    public Order findOrderById(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Pedido de id %d não encontrado", orderId)));
+    }
 }
