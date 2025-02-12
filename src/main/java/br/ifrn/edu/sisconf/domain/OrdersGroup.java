@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,12 +21,13 @@ public class OrdersGroup extends BaseEntity {
     @Column(nullable = false, scale = 2, name = "total_price")
     private BigDecimal totalPrice;
 
+    @CreationTimestamp
     @Column(nullable = false, name = "order_date")
     private LocalDateTime orderDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, name = "current_status")
-    private OrdersGroupStatus currentStatus;
+    private OrdersGroupStatus currentStatus = OrdersGroupStatus.PLACED;
 
     @Column(nullable = false, name = "item_quantity")
     private Integer itemQuantity;
@@ -33,6 +35,6 @@ public class OrdersGroup extends BaseEntity {
     @Column(name = "doc_url", length = 255)
     private String docUrl;
 
-    @OneToMany(mappedBy = "ordersGroup")
+    @OneToMany(mappedBy = "ordersGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
 }

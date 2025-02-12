@@ -16,24 +16,6 @@ services:
     env_file:
       - ./envs/postgres.env
 
-  sisconf:
-    build:
-      context: ./
-      dockerfile: ./compose/local/Dockerfile
-    ports:
-      - '8080:8080'
-    volumes:
-      - ./target:/workspace/app/target # For live reloading
-      - ./src:/workspace/app/src # For live reloading
-      - ./pom.xml:/workspace/app/pom.xml # For efficient build
-      - mvn-cache:/root/.m2 # For caching mvn dependencies
-    env_file:
-      - ./envs/spring.env
-    depends_on:
-      - keycloak
-      - postgres
-
 volumes:
   keycloak-data:
   postgres-data:
-  mvn-cache:
