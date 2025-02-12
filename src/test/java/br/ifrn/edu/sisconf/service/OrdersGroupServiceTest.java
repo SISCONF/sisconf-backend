@@ -68,6 +68,7 @@ class OrdersGroupServiceTest {
         when(ordersGroupMapper.toResponseDTO(ordersGroup)).thenReturn(ordersGroupResponseDTO);
         when(ordersGroupRepository.findById(any())).thenReturn(Optional.of(ordersGroup));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order));
+        when(orderService.findOrderById(any())).thenReturn(order);
 
         OrdersGroupResponseDTO savedOrdersGroup = ordersGroupService.save(ordersGroupRequestDTO);
 
@@ -148,6 +149,7 @@ class OrdersGroupServiceTest {
         when(ordersGroupMapper.toResponseDTO(ordersGroup)).thenReturn(ordersGroupResponseDTO);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order));
         when(ordersGroupRepository.save(ordersGroup)).thenReturn(ordersGroup);
+        when(orderService.findOrderById(any())).thenReturn(order);
 
 
         OrdersGroupResponseDTO result = ordersGroupService.update(1L, ordersGroupRequestDTO);
