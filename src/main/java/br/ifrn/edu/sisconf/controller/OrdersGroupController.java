@@ -53,4 +53,11 @@ public class OrdersGroupController {
         ordersGroupService.delete(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @PostMapping("/{id}/generate-sheet")
+    @Operation(description = "Gera a planilha de pedidos gerais")
+    public ResponseEntity<Void> generateSheet(@PathVariable Long id) {
+        ordersGroupService.generateSheet(id);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }

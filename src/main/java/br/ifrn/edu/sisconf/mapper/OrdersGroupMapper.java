@@ -1,8 +1,11 @@
 package br.ifrn.edu.sisconf.mapper;
 
 import br.ifrn.edu.sisconf.domain.OrdersGroup;
+import br.ifrn.edu.sisconf.domain.dtos.Order.OrderSheetRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrdersGroup.OrdersGroupRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrdersGroup.OrdersGroupResponseDTO;
+import br.ifrn.edu.sisconf.domain.dtos.OrdersGroup.OrdersGroupSheetRequestDTO;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -10,7 +13,11 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {OrderMapper.class}, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(
+    componentModel = "spring",
+    uses = {OrderMapper.class, OrderSheetRequestDTO.class},
+    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
+)
 public interface OrdersGroupMapper {
     OrdersGroup toEntity(OrdersGroupRequestDTO ordersGroupRequestDTO);
 
@@ -27,4 +34,6 @@ public interface OrdersGroupMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "itemQuantity", ignore = true)
     OrdersGroup updateOrdersGroup(OrdersGroupRequestDTO ordersGroupRequestDTO, @MappingTarget OrdersGroup ordersGroup);
+
+    OrdersGroupSheetRequestDTO toOrdersGroupSheetRequestDTO(OrdersGroup ordersGroup);
 }

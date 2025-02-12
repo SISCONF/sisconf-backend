@@ -1,6 +1,5 @@
 package br.ifrn.edu.sisconf.service;
 
-import br.ifrn.edu.sisconf.domain.Food;
 import br.ifrn.edu.sisconf.domain.Order;
 import br.ifrn.edu.sisconf.domain.OrderFood;
 import br.ifrn.edu.sisconf.domain.OrdersGroup;
@@ -10,9 +9,11 @@ import br.ifrn.edu.sisconf.domain.enums.OrdersGroupStatus;
 import br.ifrn.edu.sisconf.exception.BusinessException;
 import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.OrdersGroupMapper;
-import br.ifrn.edu.sisconf.repository.OrderRepository;
 import br.ifrn.edu.sisconf.repository.OrdersGroupRepository;
+import br.ifrn.edu.sisconf.service.rabbitmq.TaskSender;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,12 @@ public class OrdersGroupService {
 
     @Autowired
     private OrdersGroupMapper ordersGroupMapper;
+
+    @Autowired
+    private TaskSender taskSender;
+
+    @Value("${rabbitmq.orders-group-sheet-queue-name}")
+    private String ORDERS_GROUP_SHEET_QUEUE_NAME;
 
     public OrdersGroupResponseDTO save(OrdersGroupRequestDTO ordersGroupRequestDTO) {
         OrdersGroup ordersGroup = ordersGroupMapper.toEntity(ordersGroupRequestDTO);
@@ -96,5 +103,13 @@ public class OrdersGroupService {
     private OrdersGroup findOrdersGroupById(Long id) {
         return ordersGroupRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Grupo de id %d não encontrado", id)));
+    }
+
+    public void generateSheet(Long id) {
+        var ordersGroup = findOrdersGroupById(id);
+        taskSender.sendTask(
+            ORDERS_GROUP_SHEET_QUEUE_NAME,
+            ordersGroupMapper.toOrdersGroupSheetRequestDTO(ordersGroup)
+        );
     }
 }

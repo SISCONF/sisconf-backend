@@ -1,0 +1,1 @@
+ALTER TABLE order_food ADD COLUMN quantity_type VARCHAR(3) NOT NULL DEFAULT 'KG';
