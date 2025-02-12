@@ -22,7 +22,7 @@ services:
     ports:
       - "9090:9090"
     networks:
-      - aw-network
+      - monitoring
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
@@ -33,11 +33,24 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - aw-network
+      - monitoring
     links:
       - postgres
     env_file:
       - ./envs/grafana.env
+    depends_on:
+      - prometheus
+      - postgres
+
+  postgresql-exporter:
+    image: prometheuscommunity/postgres-exporter
+    container_name: postgres-exporter
+    ports:
+      - "9187:9187"
+    networks:
+      - monitoring
+    env_file:
+      - ./envs/postgres.env
     depends_on:
       - prometheus
       - postgres
@@ -60,7 +73,7 @@ services:
       - keycloak
 
 networks:
-  aw-network:
+  monitoring:
     driver: bridge
 
 volumes:
@@ -69,3 +82,4 @@ volumes:
   mvn-cache:
   prometheus-data:
   grafana-data:
+  postgresql-exporter:
