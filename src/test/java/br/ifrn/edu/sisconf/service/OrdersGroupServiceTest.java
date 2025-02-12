@@ -37,6 +37,9 @@ class OrdersGroupServiceTest {
     @Mock
     private OrderRepository orderRepository;
 
+    @Mock
+    private OrderService orderService;
+
     @InjectMocks
     private OrdersGroupService ordersGroupService;
 
@@ -87,7 +90,7 @@ class OrdersGroupServiceTest {
         when(ordersGroupMapper.toEntity(ordersGroupRequestDTO)).thenReturn(ordersGroup);
         when(ordersGroupMapper.toResponseDTO(ordersGroup)).thenReturn(ordersGroupResponseDTO);
         when(ordersGroupRepository.findById(any())).thenReturn(Optional.of(ordersGroup));
-        when(orderRepository.findById(any())).thenReturn(Optional.of(order));
+        when(orderService.findOrderById(any())).thenReturn(order);
 
         assertThrows(BusinessException.class, () -> ordersGroupService.save(ordersGroupRequestDTO));
 
