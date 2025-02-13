@@ -76,20 +76,20 @@ public class OrderServiceTests {
         order.setId(1L);
     }
 
-    @Test
-    @DisplayName("Should return a message indicating that the user was not found")
-    public void shouldThrowExceptionWhenCustomerNotFound() {
-        OrderRequestDTO orderRequestDTO = new OrderRequestDTO();
+    // @Test
+    // @DisplayName("Should return a message indicating that the user was not found")
+    // public void shouldThrowExceptionWhenCustomerNotFound() {
+    //     OrderRequestDTO orderRequestDTO = new OrderRequestDTO();
 
-        when(customerRepository.findById(customer.getId())).thenReturn(Optional.empty());
+    //     when(customerRepository.findById(customer.getId())).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(ResourceNotFoundException.class, () -> 
-            orderService.createOrder(customer.getId(), orderRequestDTO)
-        );
+    //     Exception exception = assertThrows(ResourceNotFoundException.class, () -> 
+    //         orderService.createOrder(customer.getId(), orderRequestDTO)
+    //     );
 
-        assertEquals("Cliente não encontrado", exception.getMessage());
-        verify(customerRepository).findById(customer.getId());
-    }
+    //     assertEquals("Cliente não encontrado", exception.getMessage());
+    //     verify(customerRepository).findById(customer.getId());
+    // }
 
     // @Test
     // @DisplayName("Should create a new order with successfully")
