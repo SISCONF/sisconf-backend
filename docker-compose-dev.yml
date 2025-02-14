@@ -21,8 +21,6 @@ services:
     container_name: prometheus
     ports:
       - "9090:9090"
-    networks:
-      - monitoring
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
@@ -32,8 +30,6 @@ services:
     container_name: grafana
     ports:
       - "3000:3000"
-    networks:
-      - monitoring
     links:
       - postgres
     env_file:
@@ -47,34 +43,10 @@ services:
     container_name: postgres-exporter
     ports:
       - "9187:9187"
-    networks:
-      - monitoring
     env_file:
       - ./envs/postgres.env
     depends_on:
-      - prometheus
       - postgres
-
-  sisconf:
-    build:
-      context: ./
-      dockerfile: ./compose/local/Dockerfile
-    ports:
-      - '8080:8080'
-    volumes:
-      - ./target:/workspace/app/target # For live reloading
-      - ./src:/workspace/app/src # For live reloading
-      - ./pom.xml:/workspace/app/pom.xml # For efficient build
-      - mvn-cache:/root/.m2 # For caching mvn dependencies
-    env_file:
-      - ./envs/spring.env
-    depends_on:
-      - postgres
-      - keycloak
-
-networks:
-  monitoring:
-    driver: bridge
 
 volumes:
   keycloak-data:
