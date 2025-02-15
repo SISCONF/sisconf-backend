@@ -35,7 +35,7 @@ jobs:
 
       - name: Application testing
         run: |
-          docker exec sisconf-prod /workspace/app/mvnw test
+          docker exec sisconf-prod /workspace/app/mvnw test -T 1
 
       - name: Post Application Building and Testing
         run: |
