@@ -71,5 +71,9 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 
-
+    @GetMapping("/history")
+    @Operation(description = "Listar os pedidos dos mais recentes pros mais antigos")
+    public ResponseEntity<List<OrderResponseDTO>> history() {
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.history());
+    }
 }

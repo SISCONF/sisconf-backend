@@ -51,17 +51,23 @@ public class OrderService {
 
         if (foods.size() != foodIds.size()) {
             throw new ResourceNotFoundException("IDs de comidas inválidos: " + 
-                foodIds.stream().filter(id -> foods.stream().noneMatch(f -> f.getId().equals(id))).collect(Collectors.toList()));
+                foodIds.stream()
+                    .filter(id -> foods.stream().noneMatch(f -> f.getId().equals(id)))
+                    .collect(Collectors.toList()));
         }
 
         return foods.stream().collect(Collectors.toMap(Food::getId, food -> food));
     }
 
-    private BigDecimal calculateTotalPrice(List<OrderFoodRequestDTO> foodsQuantities, Map<Long, Food> foodMap) {
+    private BigDecimal calculateTotalPrice(
+        List<OrderFoodRequestDTO> foodsQuantities, 
+        Map<Long, Food> foodMap
+    ) {
         return foodsQuantities.stream()
             .map(request -> {
                 Food food = foodMap.get(request.getFoodId());
-                BigDecimal foodTotal = food.getUnitPrice().multiply(BigDecimal.valueOf(request.getQuantity()));
+                BigDecimal foodTotal = food.getUnitPrice()
+                                            .multiply(BigDecimal.valueOf(request.getQuantity()));
                 return foodTotal;
             })
             .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -124,7 +130,10 @@ public class OrderService {
             if (foodExistsInOrder) {
                 order.getOrderFoods().stream()
                     .filter(orderFood -> orderFood.getFood().getId().equals(food.getId()))
-                    .forEach(orderFood -> orderFood.setQuantity(orderFood.getQuantity() + orderFoodRequest.getQuantity()));
+                    .forEach(orderFood -> orderFood.setQuantity(
+                            orderFood.getQuantity() + orderFoodRequest.getQuantity()
+                        )
+                    );
             } else {
                 OrderFood orderFood = new OrderFood();
                 orderFood.setFood(food);
@@ -153,8 +162,16 @@ public class OrderService {
         orderRepository.deleteById(id);
     }
 
+    public List<OrderResponseDTO> history() {
+        List<Order> orders = orderRepository.findAllByOrderByOrderDateDesc();
+        return orderMapper.toDTOList(orders);
+    }
+
     public Order findOrderById(Long orderId) {
         return orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Pedido de id %d não encontrado", orderId)));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        String.format("Pedido de id %d não encontrado", orderId)
+                    )
+                );
     }
 }
