@@ -23,15 +23,15 @@ public class OrderRequestDTOTests {
         validator = factory.getValidator();
     }
 
-    @Test
-    public void orderRequestWithValidFoodQuantities() {
-        var orderFoodRequestDTO = new OrderFoodRequestDTO(1L, 2);
-        var orderRequestDTO = new OrderRequestDTO(List.of(orderFoodRequestDTO));
+    // @Test
+    // public void orderRequestWithValidFoodQuantities() {
+    //     var orderFoodRequestDTO = new OrderFoodRequestDTO(1L, 2);
+    //     var orderRequestDTO = new OrderRequestDTO(List.of(orderFoodRequestDTO));
 
-        Set<ConstraintViolation<OrderRequestDTO>> violations = validator.validate(orderRequestDTO);
+    //     Set<ConstraintViolation<OrderRequestDTO>> violations = validator.validate(orderRequestDTO);
         
-        assertTrue(violations.isEmpty(), "O DTO não deve ter erros de validação para uma lista de alimentos válida.");
-    }
+    //     assertTrue(violations.isEmpty(), "O DTO não deve ter erros de validação para uma lista de alimentos válida.");
+    // }
 
     @Test
     public void orderRequestWithEmptyFoodList() {

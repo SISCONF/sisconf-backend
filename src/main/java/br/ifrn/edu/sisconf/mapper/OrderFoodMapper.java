@@ -2,6 +2,8 @@ package br.ifrn.edu.sisconf.mapper;
 
 import br.ifrn.edu.sisconf.domain.OrderFood;
 import br.ifrn.edu.sisconf.domain.dtos.OrderFoodResponseDTO;
+import br.ifrn.edu.sisconf.domain.dtos.OrderFoodSheetRequestDTO;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -14,4 +16,7 @@ public interface OrderFoodMapper {
     @Mapping(target = "quantity", source = "quantity")
     @Mapping(target = "category", source = "food.category")
     OrderFoodResponseDTO toResponseDTO(OrderFood orderFood);
+
+    @Mapping(source = "food.name", target = "foodName")
+    OrderFoodSheetRequestDTO toOrderFoodSheetRequestDTO(OrderFood orderFood);
 }

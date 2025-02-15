@@ -24,6 +24,7 @@ import br.ifrn.edu.sisconf.mapper.OrderMapper;
 import br.ifrn.edu.sisconf.repository.CustomerRepository;
 import br.ifrn.edu.sisconf.repository.FoodRepository;
 import br.ifrn.edu.sisconf.repository.OrderRepository;
+import br.ifrn.edu.sisconf.security.SisconfUserDetails;
 
 @Service
 public class OrderService {
@@ -66,8 +67,8 @@ public class OrderService {
             .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public OrderResponseDTO createOrder(Long customerId, OrderRequestDTO orderRequestDTO) {
-        Customer customer = customerRepository.findById(customerId)
+    public OrderResponseDTO createOrder(SisconfUserDetails userDetails, OrderRequestDTO orderRequestDTO) {
+        Customer customer = customerRepository.findByPersonKeycloakId(userDetails.getKeycloakId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
 
         Map<Long, Food> foodMap = fetchAndValidateFoods(orderRequestDTO.getFoodsQuantities());
@@ -87,6 +88,7 @@ public class OrderService {
                 orderFood.setFood(food);
                 orderFood.setOrder(order);
                 orderFood.setQuantity(orderFoodRequest.getQuantity());
+                orderFood.setQuantityType(orderFoodRequest.getQuantityType());
                 return orderFood;
             })
             .collect(Collectors.toList());

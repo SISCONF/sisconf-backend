@@ -1,5 +1,6 @@
 package br.ifrn.edu.sisconf.domain;
 
+import br.ifrn.edu.sisconf.domain.enums.OrderFoodQuantityType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -27,4 +28,7 @@ public class OrderFood extends BaseEntity {
 
     @Column(nullable = false)
     private Integer quantity;
+
+    @Column(nullable = false, name = "quantity_type")
+    private OrderFoodQuantityType quantityType;
 }
