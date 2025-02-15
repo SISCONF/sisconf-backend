@@ -25,7 +25,9 @@ public class OrdersGroupController {
 
     @PostMapping
     @Operation(description = "Criar um novo grupo de pedidos")
-    public ResponseEntity<OrdersGroupResponseDTO> save(@RequestBody @Valid OrdersGroupRequestDTO ordersGroupRequestDTO) {
+    public ResponseEntity<OrdersGroupResponseDTO> save(
+        @RequestBody @Valid OrdersGroupRequestDTO ordersGroupRequestDTO
+    ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ordersGroupService.save(ordersGroupRequestDTO));
     }
 
@@ -43,7 +45,10 @@ public class OrdersGroupController {
 
     @PutMapping("/{id}")
     @Operation(description = "Atualizar grupo de pedido")
-    public ResponseEntity<OrdersGroupResponseDTO> update(@PathVariable Long id, @RequestBody @Valid OrdersGroupRequestDTO ordersGroupRequestDTO) {
+    public ResponseEntity<OrdersGroupResponseDTO> update(
+        @PathVariable Long id, 
+        @RequestBody @Valid OrdersGroupRequestDTO ordersGroupRequestDTO
+    ) {
         return ResponseEntity.status(HttpStatus.OK).body(ordersGroupService.update(id, ordersGroupRequestDTO));
     }
 
@@ -59,5 +64,11 @@ public class OrdersGroupController {
     public ResponseEntity<Void> generateSheet(@PathVariable Long id) {
         ordersGroupService.generateSheet(id);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping("/history")
+    @Operation(description = "Lista todos os grupos de pedidos do mais recente ao mais antigo")
+    public ResponseEntity<List<OrdersGroupResponseDTO>> history() {
+        return ResponseEntity.status(HttpStatus.OK).body(ordersGroupService.history());
     }
 }

@@ -67,6 +67,10 @@ public class OrdersGroupService {
     }
 
     private void setOrdersToOrdersGroup(OrdersGroupRequestDTO ordersGroupRequestDTO, OrdersGroup ordersGroup) {
+        if (ordersGroupRepository.existsByOrdersId(ordersGroupRequestDTO.getOrdersIds())) {
+            throw new BusinessException("Um ou mais pedidos já estão em algum grupo de pedidos");
+        }
+
         List<Order> orders = ordersGroupRequestDTO.getOrdersIds().stream()
                 .map(orderService::findOrderById)
                 .collect(Collectors.toList());
@@ -102,7 +106,10 @@ public class OrdersGroupService {
 
     private OrdersGroup findOrdersGroupById(Long id) {
         return ordersGroupRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Grupo de id %d não encontrado", id)));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        String.format("Grupo de id %d não encontrado", id)
+                    )
+                );
     }
 
     public void generateSheet(Long id) {
@@ -111,5 +118,10 @@ public class OrdersGroupService {
             ORDERS_GROUP_SHEET_QUEUE_NAME,
             ordersGroupMapper.toOrdersGroupSheetRequestDTO(ordersGroup)
         );
+    }
+
+    public List<OrdersGroupResponseDTO> history() {
+        List<OrdersGroup> ordersGroups = ordersGroupRepository.findAllByOrderByOrderDateDesc();
+        return ordersGroupMapper.toDTOList(ordersGroups);
     }
 }
