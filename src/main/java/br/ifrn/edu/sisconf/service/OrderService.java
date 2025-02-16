@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import br.ifrn.edu.sisconf.constants.KeycloakConstants;
 import br.ifrn.edu.sisconf.domain.Customer;
 import br.ifrn.edu.sisconf.domain.Food;
 import br.ifrn.edu.sisconf.domain.Order;
@@ -114,9 +115,15 @@ public class OrderService {
     }
 
     public List<OrderResponseDTO> getAllOrders(SisconfUserDetails userDetails) {
-        List<Order> orders = orderRepository.findAllByCustomerPersonKeycloakId(
-            userDetails.getKeycloakId()
-        );
+        boolean shouldListAllOrders = userDetails.hasRole(KeycloakConstants.ROLE_LIST_ALL_ORDERS);
+        List<Order> orders;
+        if (shouldListAllOrders) {
+            orders = orderRepository.findAll();
+        } else {
+            orders = orderRepository.findAllByCustomerPersonKeycloakId(
+                userDetails.getKeycloakId()
+            );
+        }
         return orderMapper.toDTOList(orders);
     }
 

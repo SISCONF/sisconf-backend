@@ -8,4 +8,5 @@ public final class KeycloakConstants {
     public static final String ROLE_RETRIEVE_CUSTOMER = "hasRole('retrieve_customer')";
     public static final String ROLE_MANAGE_STOCK = "hasRole('manage_stock')";
     public static final String ROLE_MANAGE_ORDERS_GROUP = "hasRole('manage_orders_group')";
+    public static final String ROLE_LIST_ALL_ORDERS = "hasRole('list_all_orders')";
 }
