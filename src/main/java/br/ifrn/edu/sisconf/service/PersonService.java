@@ -1,10 +1,22 @@
 package br.ifrn.edu.sisconf.service;
 
+import br.ifrn.edu.sisconf.configs.KeycloakProperties;
 import br.ifrn.edu.sisconf.domain.Person;
+import br.ifrn.edu.sisconf.domain.dtos.Person.LoginRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Person.LoginResponseDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Person.PersonRequestDTO;
 import br.ifrn.edu.sisconf.exception.BusinessException;
 import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
+import br.ifrn.edu.sisconf.exception.keycloak.InvalidCredentialsException;
+import br.ifrn.edu.sisconf.exception.keycloak.KeycloakUnavailableException;
 import br.ifrn.edu.sisconf.repository.PersonRepository;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.ProcessingException;
+
+import org.keycloak.OAuth2Constants;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +27,38 @@ public class PersonService {
 
     @Autowired
     private CityService cityService;
+
+    @Autowired
+    private KeycloakProperties keycloakProperties;
+
+    public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
+        try {
+            Keycloak keycloakUserClient = KeycloakBuilder.builder()
+                .serverUrl(keycloakProperties.getServerUrl())
+                .realm(keycloakProperties.getRealm())
+                .clientId(keycloakProperties.getClientId())
+                .clientSecret(keycloakProperties.getClientSecret())
+                .grantType(OAuth2Constants.PASSWORD)
+                .username(loginRequestDTO.getEmail())
+                .password(loginRequestDTO.getPassword())
+                .build();
+            AccessTokenResponse tokenResponse = keycloakUserClient.tokenManager().getAccessToken();
+            return new LoginResponseDTO(
+                tokenResponse.getToken(),
+                tokenResponse.getRefreshToken(),
+                tokenResponse.getExpiresIn(),
+                tokenResponse.getRefreshExpiresIn(),
+                tokenResponse.getTokenType(),
+                tokenResponse.getNotBeforePolicy(),
+                tokenResponse.getSessionState(),
+                tokenResponse.getScope()
+            );
+        } catch (NotAuthorizedException exception) {
+            throw new InvalidCredentialsException("Credenciais inválidas");
+        } catch (ProcessingException exception) {
+            throw new KeycloakUnavailableException("Serviço de usuários indisponível");
+        }
+    }
 
     public void throwIfLoggedPersonIsDifferentFromPersonResource(
         String loggedPersonKeycloakId,

@@ -1,6 +1,9 @@
 package br.ifrn.edu.sisconf.exception;
 
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+
+import br.ifrn.edu.sisconf.exception.keycloak.InvalidCredentialsException;
+import br.ifrn.edu.sisconf.exception.keycloak.KeycloakUnavailableException;
 import lombok.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -100,5 +103,33 @@ public class GlobalExceptionHandler {
             .build();
         
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-}
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<ErrorResponse> handleInvalidCredentialsException(
+            InvalidCredentialsException exception,
+            WebRequest request) {
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .message(exception.getMessage())
+                .path(((ServletWebRequest) request).getRequest().getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler(KeycloakUnavailableException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<ErrorResponse> handleKeycloakUnavailableException(
+            KeycloakUnavailableException exception,
+            WebRequest request) {
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .message(exception.getMessage())
+                .path(((ServletWebRequest) request).getRequest().getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
 }
