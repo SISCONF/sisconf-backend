@@ -104,19 +104,28 @@ public class OrderService {
         return orderMapper.toResponseDTO(orderRepository.save(order));
     }
 
-    public OrderResponseDTO getOrderById(Long id) {
-        Order order = orderRepository.findById(id)
+    public OrderResponseDTO getOrderById(Long id, SisconfUserDetails userDetails) {
+        Order order = orderRepository.findByIdAndCustomerPersonKeycloakId(
+            id, 
+            userDetails.getKeycloakId()
+        )
                 .orElseThrow(() -> new  ResourceNotFoundException("Pedido com ID não encontrado"));
         return orderMapper.toResponseDTO(order);
     }
 
-    public List<OrderResponseDTO> getAllOrders() {
-        List<Order> orders = orderRepository.findAll();
+    public List<OrderResponseDTO> getAllOrders(SisconfUserDetails userDetails) {
+        List<Order> orders = orderRepository.findAllByCustomerPersonKeycloakId(
+            userDetails.getKeycloakId()
+        );
         return orderMapper.toDTOList(orders);
     }
 
-    public OrderResponseDTO updateOrder(Long id, OrderUpdateRequestDTO orderUpdateRequestDTO) {
-        Order order = orderRepository.findById(id)
+    public OrderResponseDTO updateOrder(
+        Long id, 
+        OrderUpdateRequestDTO orderUpdateRequestDTO,
+        SisconfUserDetails userDetails
+    ) {
+        Order order = orderRepository.findByIdAndCustomerPersonKeycloakId(id, userDetails.getKeycloakId())
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado"));
 
         Map<Long, Food> foodMap = fetchAndValidateFoods(orderUpdateRequestDTO.getFoodsQuantities());
@@ -155,15 +164,18 @@ public class OrderService {
         return orderMapper.toResponseDTO(orderRepository.save(order));
     }
 
-    public void deleteOrder(Long id) {
-        if (!orderRepository.existsById(id)) {
+    public void deleteOrder(Long id, SisconfUserDetails userDetails) {
+        if (!orderRepository.existsByIdAndCustomerPersonKeycloakId(id, userDetails.getKeycloakId())) {
             throw new ResourceNotFoundException("Pedido não encontrado.");
         }
         orderRepository.deleteById(id);
     }
 
-    public List<OrderResponseDTO> history() {
+    public List<OrderResponseDTO> history(SisconfUserDetails userDetails) {
         List<Order> orders = orderRepository.findAllByOrderByOrderDateDesc();
+        orders = orders.stream()
+                        .filter(order -> order.getCustomer().getPerson().getKeycloakId() == userDetails.getKeycloakId())
+                        .toList();
         return orderMapper.toDTOList(orders);
     }
 

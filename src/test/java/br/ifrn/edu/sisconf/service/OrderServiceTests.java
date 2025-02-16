@@ -141,7 +141,9 @@ public class OrderServiceTests {
         when(orderRepository.findAll()).thenReturn(orders);
         when(orderMapper.toDTOList(orders)).thenReturn(orderResponseDTOs);
         
-        List<OrderResponseDTO> allOrders = orderService.getAllOrders();
+        List<OrderResponseDTO> allOrders = orderService.getAllOrders(
+            userDetails
+        );
 
         assertEquals(orderResponseDTOs, allOrders);
         verify(orderRepository).findAll();
@@ -156,7 +158,7 @@ public class OrderServiceTests {
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(orderMapper.toResponseDTO(order)).thenReturn(orderResponseDTO);
 
-        OrderResponseDTO fetchOrder = orderService.getOrderById(order.getId());
+        OrderResponseDTO fetchOrder = orderService.getOrderById(order.getId(), userDetails);
 
         assertEquals(orderResponseDTO, fetchOrder);
         verify(orderRepository).findById(order.getId());
@@ -175,7 +177,7 @@ public class OrderServiceTests {
         when(foodRepository.findAllById(List.of(999L))).thenReturn(List.of());
 
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> 
-            orderService.updateOrder(order.getId(), orderUpdateRequestDTO)
+            orderService.updateOrder(order.getId(), orderUpdateRequestDTO, userDetails)
         );
 
         assertTrue(exception.getMessage().contains("IDs de comidas inválidos"));
@@ -188,7 +190,7 @@ public class OrderServiceTests {
         
         when(orderRepository.existsById(order.getId())).thenReturn(true);
 
-        orderService.deleteOrder(order.getId());
+        orderService.deleteOrder(order.getId(), userDetails);
 
         verify(orderRepository).existsById(order.getId());
         verify(orderRepository).deleteById(order.getId());
@@ -200,7 +202,7 @@ public class OrderServiceTests {
 
         when(orderRepository.existsById(order.getId())).thenReturn(false);
 
-        assertThrows(ResourceNotFoundException.class, () -> orderService.deleteOrder(order.getId()));
+        assertThrows(ResourceNotFoundException.class, () -> orderService.deleteOrder(order.getId(), userDetails));
 
         verify(orderRepository).existsById(order.getId());
         verify(orderRepository, never()).deleteById(order.getId());
@@ -217,7 +219,7 @@ public class OrderServiceTests {
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(orderRepository.save(order)).thenReturn(order);
 
-        orderService.updateOrder(order.getId(), orderUpdateRequestDTO);
+        orderService.updateOrder(order.getId(), orderUpdateRequestDTO, userDetails);
 
         assertEquals(OrderStatus.ACCEPTED, order.getStatus());
         verify(orderRepository).findById(order.getId());
@@ -236,7 +238,7 @@ public class OrderServiceTests {
         when(foodRepository.findAllById(List.of(food.getId()))).thenReturn(List.of(food));
         when(orderRepository.save(order)).thenReturn(order);
 
-        orderService.updateOrder(order.getId(), orderUpdateRequestDTO);
+        orderService.updateOrder(order.getId(), orderUpdateRequestDTO, userDetails);
 
         assertEquals(1, order.getOrderFoods().size());
         assertEquals(food, order.getOrderFoods().get(0).getFood());
@@ -263,7 +265,7 @@ public class OrderServiceTests {
         when(foodRepository.findAllById(List.of(food.getId()))).thenReturn(List.of(food));
         when(orderRepository.save(order)).thenReturn(order);
 
-        orderService.updateOrder(order.getId(), orderUpdateRequestDTO);
+        orderService.updateOrder(order.getId(), orderUpdateRequestDTO, userDetails);
 
         assertEquals(5, existingOrderFood.getQuantity(), "A quantidade deve ser incrementada corretamente.");
         verify(orderRepository).findById(order.getId());
@@ -281,7 +283,7 @@ public class OrderServiceTests {
         when(foodRepository.findAllById(List.of(food.getId()))).thenReturn(List.of(food));
         when(orderRepository.save(order)).thenReturn(order);
 
-        orderService.updateOrder(order.getId(), orderUpdateRequestDTO);
+        orderService.updateOrder(order.getId(), orderUpdateRequestDTO, userDetails);
 
         BigDecimal expectedTotalPrice = food.getUnitPrice().multiply(BigDecimal.valueOf(2)); 
         assertEquals(expectedTotalPrice, order.getTotalPrice(), "O preço total deve corresponder ao valor calculado.");
