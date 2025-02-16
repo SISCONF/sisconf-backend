@@ -141,7 +141,7 @@ public class FoodServiceTest {
         when(foodRepository.findAll()).thenReturn(foods);
         when(foodMapper.toDTOList(foods)).thenReturn(foodResponseDTOs);
         
-        List<FoodResponseDTO> allFoods = foodService.listAllFoods();        
+        List<FoodResponseDTO> allFoods = foodService.listAllFoods(null);        
 
         assertEquals(foodResponseDTOs, allFoods);
         verify(foodRepository).findAll();
