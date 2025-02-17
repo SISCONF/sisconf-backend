@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.jpa.domain.Specification;
 
 import br.ifrn.edu.sisconf.domain.Food;
 import br.ifrn.edu.sisconf.domain.dtos.FoodRequestDTO;
@@ -131,6 +132,7 @@ public class FoodServiceTest {
         verify(foodRepository, never()).save(food);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void listAllFoods() {
         Food food = new Food();
@@ -138,13 +140,13 @@ public class FoodServiceTest {
         FoodResponseDTO foodResponseDTO = new FoodResponseDTO();
         List<FoodResponseDTO> foodResponseDTOs = List.of(foodResponseDTO);
 
-        when(foodRepository.findAll()).thenReturn(foods);
+        when(foodRepository.findAll(any(Specification.class))).thenReturn(foods);
         when(foodMapper.toDTOList(foods)).thenReturn(foodResponseDTOs);
         
         List<FoodResponseDTO> allFoods = foodService.listAllFoods(null);        
 
         assertEquals(foodResponseDTOs, allFoods);
-        verify(foodRepository).findAll();
+        verify(foodRepository).findAll(any(Specification.class));
     }
 
     @Test
