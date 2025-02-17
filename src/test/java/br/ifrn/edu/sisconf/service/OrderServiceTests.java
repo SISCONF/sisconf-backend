@@ -155,13 +155,18 @@ public class OrderServiceTests {
         OrderResponseDTO orderResponseDTO = new OrderResponseDTO();
         orderResponseDTO.setId(1L);
      
-        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(orderRepository.findByIdAndCustomerPersonKeycloakId(
+                order.getId(), userDetails.getKeycloakId()
+            )).thenReturn(Optional.of(order));
         when(orderMapper.toResponseDTO(order)).thenReturn(orderResponseDTO);
 
         OrderResponseDTO fetchOrder = orderService.getOrderById(order.getId(), userDetails);
 
         assertEquals(orderResponseDTO, fetchOrder);
-        verify(orderRepository).findById(order.getId());
+        verify(orderRepository).findByIdAndCustomerPersonKeycloakId(
+            order.getId(),
+            userDetails.getKeycloakId()
+        );
     }
 
     @Test
@@ -216,13 +221,15 @@ public class OrderServiceTests {
         orderUpdateRequestDTO.setStatus(OrderStatus.ACCEPTED);
         orderUpdateRequestDTO.setFoodsQuantities(List.of());
 
-        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(orderRepository.findByIdAndCustomerPersonKeycloakId(
+                order.getId(), userDetails.getKeycloakId()
+            )).thenReturn(Optional.of(order));
         when(orderRepository.save(order)).thenReturn(order);
 
         orderService.updateOrder(order.getId(), orderUpdateRequestDTO, userDetails);
 
         assertEquals(OrderStatus.ACCEPTED, order.getStatus());
-        verify(orderRepository).findById(order.getId());
+        verify(orderRepository).findByIdAndCustomerPersonKeycloakId(order.getId(), userDetails.getKeycloakId());
         verify(orderRepository).save(order);
     }
 
