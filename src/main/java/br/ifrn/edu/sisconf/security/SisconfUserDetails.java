@@ -52,4 +52,10 @@ public class SisconfUserDetails implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+    public boolean hasRole(String role) {
+        return authorities.stream().anyMatch(authority -> authority.getAuthority().equals(
+            "ROLE_" + role.split("'")[1]
+        ));
+    }
 }

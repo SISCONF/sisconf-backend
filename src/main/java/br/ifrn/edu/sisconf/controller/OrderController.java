@@ -40,40 +40,65 @@ public class OrderController {
         @AuthenticationPrincipal SisconfUserDetails userDetails, 
         @Valid @RequestBody OrderRequestDTO orderRequestDTO
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(userDetails, orderRequestDTO));
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            orderService.createOrder(userDetails, orderRequestDTO)
+        );
     }
 
     @GetMapping
     @Operation(description = "Listar todos os pedidos")
-    public ResponseEntity<List<OrderResponseDTO>> getAllOrders() {
-        return ResponseEntity.ok(orderService.getAllOrders());
+    public ResponseEntity<List<OrderResponseDTO>> getAllOrders(
+        @AuthenticationPrincipal SisconfUserDetails userDetails
+    ) {
+        return ResponseEntity.ok(orderService.getAllOrders(
+            userDetails
+        ));
     }
 
     @GetMapping("/{id}")
     @Operation(description = "Obter dados de um pedido")
-    public ResponseEntity<OrderResponseDTO> getOrderById(@PathVariable Long id) {
-        return ResponseEntity.ok(orderService.getOrderById(id));
+    public ResponseEntity<OrderResponseDTO> getOrderById(
+        @PathVariable Long id,
+        @AuthenticationPrincipal SisconfUserDetails userDetails
+    ) {
+        return ResponseEntity.ok(orderService.getOrderById(
+                id, userDetails
+            )
+        );
     }
 
     @PutMapping("/{id}")
     @Operation(description = "Atualizar um pedido")
     public ResponseEntity<OrderResponseDTO> updateOrder(
         @PathVariable Long id, 
-        @Valid @RequestBody OrderUpdateRequestDTO orderUpdateRequestDTO
+        @Valid @RequestBody OrderUpdateRequestDTO orderUpdateRequestDTO,
+        @AuthenticationPrincipal SisconfUserDetails userDetails
     ) {
-        return ResponseEntity.ok(orderService.updateOrder(id, orderUpdateRequestDTO));
+        return ResponseEntity.ok(orderService.updateOrder(
+                id,
+                orderUpdateRequestDTO,
+                userDetails
+            )
+        );
     }
 
     @DeleteMapping("/{id}")
     @Operation(description = "Apagar um pedido")
-    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
-        orderService.deleteOrder(id);
+    public ResponseEntity<Void> deleteOrder(
+        @PathVariable Long id,
+        @AuthenticationPrincipal SisconfUserDetails userDetails
+    ) {
+        orderService.deleteOrder(id, userDetails);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/history")
     @Operation(description = "Listar os pedidos dos mais recentes pros mais antigos")
-    public ResponseEntity<List<OrderResponseDTO>> history() {
-        return ResponseEntity.status(HttpStatus.OK).body(orderService.history());
+    public ResponseEntity<List<OrderResponseDTO>> history(
+        @AuthenticationPrincipal SisconfUserDetails userDetails
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.history(
+            userDetails
+        ));
     }
 }

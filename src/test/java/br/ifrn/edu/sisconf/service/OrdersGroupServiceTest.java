@@ -4,7 +4,6 @@ import br.ifrn.edu.sisconf.domain.Order;
 import br.ifrn.edu.sisconf.domain.OrdersGroup;
 import br.ifrn.edu.sisconf.domain.dtos.OrdersGroup.OrdersGroupRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrdersGroup.OrdersGroupResponseDTO;
-import br.ifrn.edu.sisconf.domain.enums.OrdersGroupStatus;
 import br.ifrn.edu.sisconf.exception.BusinessException;
 import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.OrdersGroupMapper;
