@@ -43,10 +43,6 @@ public class CityControllerTest {
 
     @BeforeEach
     public void setUp() {
-        // Needed because Flyway migrations which creates cities and country states are ran during tests
-        cityRepository.deleteAll();
-        countryStateRepository.deleteAll();
-
         countryState = new CountryState("Estado Teste", "TE", null);
         countryState = countryStateRepository.save(countryState);
 
@@ -56,8 +52,7 @@ public class CityControllerTest {
 
     @AfterEach
     public void tearDown() {
-        cityRepository.deleteAll();
-        countryStateRepository.deleteAll();
+        cityRepository.deleteById(city.getId());
     }
 
     @Test
