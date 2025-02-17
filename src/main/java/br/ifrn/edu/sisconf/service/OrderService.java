@@ -180,9 +180,12 @@ public class OrderService {
 
     public List<OrderResponseDTO> history(SisconfUserDetails userDetails) {
         List<Order> orders = orderRepository.findAllByOrderByOrderDateDesc();
-        orders = orders.stream()
-                        .filter(order -> order.getCustomer().getPerson().getKeycloakId() == userDetails.getKeycloakId())
-                        .toList();
+        boolean shouldListAllOrders = userDetails.hasRole(KeycloakConstants.ROLE_LIST_ALL_ORDERS);
+        if (!shouldListAllOrders) {
+            orders = orders.stream()
+                            .filter(order -> order.getCustomer().getPerson().getKeycloakId() == userDetails.getKeycloakId())
+                            .toList();
+        }
         return orderMapper.toDTOList(orders);
     }
 
