@@ -11,6 +11,6 @@ public interface AddressMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(source = "city", target = "city.id")
+    @Mapping(target = "city", ignore = true)
     Address toEntity(AddressRequestDTO addressCreateRequestDto);
 }

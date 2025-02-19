@@ -166,4 +166,121 @@ public class EntrepreneurControllerTest {
             any(UserRegistrationRecord.class)
         );
     }
-}
+
+    @Test
+    public void shouldUpdateEntrepreneurWhenValidRequestData() throws Exception {
+        // Setup Update Data
+        entrepreneurRequestDTO.setBusinessName("I");
+        entrepreneurRequestDTO.getPerson().setFirstName(
+            "Maximiliano Bartholomew Alexander Christopher William" + 
+            " Ferdinand Jonathan Percival Archibald Montgomery Fitzwilliam"
+        );
+        entrepreneurRequestDTO.getPerson().setLastName(
+            "Maximiliano Bartholomew Alexander Christopher William Ferdinand" + 
+            "Jonathan Percival Archibald Montgomery Fitzwilliam"
+        );
+        entrepreneurRequestDTO.getPerson().setCpf("222.222.222-22");
+        entrepreneurRequestDTO.getPerson().setCnpj("11.111.111/1111-11");
+        entrepreneurRequestDTO.getPerson().setPhone("(22) 92222-2222");
+        entrepreneurRequestDTO.getPerson().setEmail(null);
+        entrepreneurRequestDTO.getPerson().setPassword(null);
+        entrepreneurRequestDTO.getPerson().setPassword2(null);
+        entrepreneurRequestDTO.getPerson().getAddress().setStreet("Rua do Teste");
+        entrepreneurRequestDTO.getPerson().getAddress().setZipCode("19918-123");
+        entrepreneurRequestDTO.getPerson().getAddress().setNumber(22);
+        entrepreneurRequestDTO.getPerson().getAddress().setNeighbourhood("Bairro Teste");
+        var city = cityRepository.findAll().getLast();
+        entrepreneurRequestDTO.getPerson().getAddress().setCity(
+            city.getId()
+        );
+
+        // Mock Spring + Keycloak JWT Decoder
+        String testToken = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
+        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson());
+        when(jwtDecoder.decode(testToken)).thenReturn(jwt);
+
+        // Build request body and update entrepreneur instance in order to compare it to request response
+        String requestBody = objectMapper.writeValueAsString(entrepreneurRequestDTO);
+        entrepreneurMapper.updateEntityFromDTO(entrepreneurRequestDTO, entrepreneur);
+        entrepreneur.getPerson().getAddress().setCity(city);
+        String expectedResponse = objectMapper.writeValueAsString(
+            entrepreneurMapper.toResponseDTO(entrepreneur)
+        );
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.put("/api/entrepreneurs/{id}", entrepreneur.getId())
+                .header("Authorization", "Bearer " + testToken)
+                .contentType("application/json")
+                .content(requestBody)
+            ).andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().json(expectedResponse));       
+    }
+
+    @Test
+    public void shouldNotUpdateEntrepreneurWhenUnupdatableRequestData() throws Exception {
+        // Setup Update Data
+        entrepreneurRequestDTO.setBusinessName("I");
+        entrepreneurRequestDTO.getPerson().setFirstName(
+            "Maximiliano Bartholomew Alexander Christopher William" + 
+            " Ferdinand Jonathan Percival Archibald Montgomery Fitzwilliam"
+        );
+        entrepreneurRequestDTO.getPerson().setLastName(
+            "Maximiliano Bartholomew Alexander Christopher William Ferdinand" + 
+            "Jonathan Percival Archibald Montgomery Fitzwilliam"
+        );
+        entrepreneurRequestDTO.getPerson().setCpf("222.222.222-22");
+        entrepreneurRequestDTO.getPerson().setCnpj("11.111.111/1111-11");
+        entrepreneurRequestDTO.getPerson().setPhone("(22) 92222-2222");
+        entrepreneurRequestDTO.getPerson().getAddress().setStreet("Rua do Teste");
+        entrepreneurRequestDTO.getPerson().getAddress().setZipCode("19918-123");
+        entrepreneurRequestDTO.getPerson().getAddress().setNumber(22);
+        entrepreneurRequestDTO.getPerson().getAddress().setNeighbourhood("Bairro Teste");
+        // Neither passowrd, password2 and email can be updated
+        entrepreneurRequestDTO.getPerson().setEmail("teste@gmail.com");
+        entrepreneurRequestDTO.getPerson().setPassword("novasenha");
+        entrepreneurRequestDTO.getPerson().setPassword2("novasenha");
+        var city = cityRepository.findAll().getLast();
+        entrepreneurRequestDTO.getPerson().getAddress().setCity(
+            city.getId()
+        );
+
+        // Mock Spring + Keycloak JWT Decoder
+        String testToken = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
+        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson());
+        when(jwtDecoder.decode(testToken)).thenReturn(jwt);
+
+        // Build request body and update entrepreneur instance in order to compare it to request response
+        String requestBody = objectMapper.writeValueAsString(entrepreneurRequestDTO);
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.put("/api/entrepreneurs/{id}", entrepreneur.getId())
+                .header("Authorization", "Bearer " + testToken)
+                .contentType("application/json")
+                .content(requestBody)
+            ).andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @Test
+    public void shouldDeleteEntrepreneurWhenCorrespondingIdExists() throws Exception {
+        String testToken = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
+        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson());
+        when(jwtDecoder.decode(testToken)).thenReturn(jwt);
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.delete("/api/entrepreneurs/{id}", entrepreneur.getId())
+                .header("Authorization", "Bearer " + testToken)
+            ).andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    @Test
+    public void shouldReturnNotFoundDeleteEntrepreneurWhenCorrespondingIdDoesNotExist() throws Exception {
+        String testToken = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
+        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson());
+        when(jwtDecoder.decode(testToken)).thenReturn(jwt);
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.delete("/api/entrepreneurs/{id}", -1L)
+                .header("Authorization", "Bearer " + testToken)
+            ).andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+ }

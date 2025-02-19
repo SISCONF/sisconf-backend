@@ -67,6 +67,7 @@ public class EntrepreneurService {
 
         Entrepreneur entrepreneur = entrepreneurMapper.toEntity(entrepreneurRequestDTO);
         entrepreneur.getPerson().setKeycloakId(userRegistrationResponse.keycloakId());
+        personService.savePersonCity(entrepreneur.getPerson(), entrepreneurRequestDTO.getPerson().getAddress().getCity());
         try {
             var savedEntrepreneur = entrepreneurRepository.save(entrepreneur);
             stockService.save(entrepreneur);
@@ -108,6 +109,10 @@ public class EntrepreneurService {
 
         try {
             entrepreneurMapper.updateEntityFromDTO(entrepreneurRequestDTO, entrepreneur);
+            personService.savePersonCity(
+                entrepreneur.getPerson(), 
+                entrepreneurRequestDTO.getPerson().getAddress().getCity()
+            );
             var updatedEntrepreneur = entrepreneurRepository.save(entrepreneur);
             return entrepreneurMapper.toResponseDTO(updatedEntrepreneur);
         } catch (Exception exception) {

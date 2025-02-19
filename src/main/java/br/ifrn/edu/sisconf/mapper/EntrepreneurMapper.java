@@ -42,6 +42,6 @@ public interface EntrepreneurMapper {
     @Mapping(target = "person.customer", ignore = true)
     @Mapping(target = "person.entrepreneur", ignore = true)
     @Mapping(target = "stock", ignore = true)
-    @Mapping(source = "person.address.city", target = "person.address.city.id")
+    @Mapping(target = "person.address.city", ignore = true)
     void updateEntityFromDTO(EntrepreneurRequestDTO entrepreneurRequestDTO, @MappingTarget Entrepreneur entrepreneur);
 }

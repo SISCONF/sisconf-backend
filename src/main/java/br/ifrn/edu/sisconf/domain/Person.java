@@ -34,7 +34,7 @@ public class Person extends BaseEntity {
     @Column(nullable = false, length = 15, unique = true)
     private String phone;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "address_id")
     private Address address;
 

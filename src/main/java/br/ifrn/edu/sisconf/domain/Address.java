@@ -22,7 +22,7 @@ public class Address extends BaseEntity {
     @Column(nullable = false)
     private Integer number;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = CascadeType.REFRESH)
     @JoinColumn(name = "city_id", nullable = false)
     private City city;
 }
