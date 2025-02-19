@@ -16,10 +16,10 @@ public class Person extends BaseEntity {
     @Column(unique = true, nullable = false, name = "keycloak_id")
     private String keycloakId;
 
-    @Column(nullable = false, length = 128, name = "first_name")
+    @Column(nullable = false, length = 255, name = "first_name")
     private String firstName;
 
-    @Column(nullable = false, length = 128, name = "last_name")
+    @Column(nullable = false, length = 255, name = "last_name")
     private String lastName;
 
     @Column(unique = true, nullable = false, length = 128)
