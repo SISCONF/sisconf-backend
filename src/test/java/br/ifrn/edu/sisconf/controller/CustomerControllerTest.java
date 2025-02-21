@@ -17,7 +17,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -48,7 +47,6 @@ import br.ifrn.edu.sisconf.util.JwtTestUtil;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Import(SecurityTestConfig.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class CustomerControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
@@ -122,6 +120,7 @@ public class CustomerControllerTest {
     @AfterEach
     public void tearDown() {
         customerRepository.deleteAll();
+        entrepreneurRepository.deleteAll();
     }
 
     @Test
