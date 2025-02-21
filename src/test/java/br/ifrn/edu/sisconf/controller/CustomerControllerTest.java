@@ -124,11 +124,6 @@ public class CustomerControllerTest {
     }
 
     @Test
-    public void testActiveProfile() {
-        System.out.println("Active profile: " + System.getProperty("spring.profiles.active"));
-    }
-
-    @Test
     public void shouldReturnCustomerDataWhenMeValidKeycloakId() throws Exception {
         String tokenString = JwtTestUtil.getToken(customer.getPerson().getEmail());
         Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
