@@ -353,7 +353,7 @@ public class CustomerControllerTest {
         String roleName = KeycloakConstants.ROLE_LIST_CUSTOMERS.split("'")[1];
         String tokenString = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
         Jwt jwt = JwtTestUtil.getJwt(tokenString, entrepreneur.getPerson(), List.of(
-            roleName
+            "retrieve_customer"
         ));
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
