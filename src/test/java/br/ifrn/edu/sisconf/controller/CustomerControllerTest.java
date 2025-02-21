@@ -124,6 +124,11 @@ public class CustomerControllerTest {
     }
 
     @Test
+    public void testActiveProfile() {
+        System.out.println("Active profile: " + System.getProperty("spring.profiles.active"));
+    }
+
+    @Test
     public void shouldReturnCustomerDataWhenMeValidKeycloakId() throws Exception {
         String tokenString = JwtTestUtil.getToken(customer.getPerson().getEmail());
         Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
@@ -353,7 +358,7 @@ public class CustomerControllerTest {
         String roleName = KeycloakConstants.ROLE_LIST_CUSTOMERS.split("'")[1];
         String tokenString = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
         Jwt jwt = JwtTestUtil.getJwt(tokenString, entrepreneur.getPerson(), List.of(
-            "retrieve_customer"
+            roleName
         ));
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
