@@ -9,11 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import br.ifrn.edu.sisconf.SecurityTestConfig;
 import br.ifrn.edu.sisconf.domain.City;
 import br.ifrn.edu.sisconf.domain.CountryState;
 import br.ifrn.edu.sisconf.repository.CityRepository;
@@ -22,6 +24,7 @@ import br.ifrn.edu.sisconf.repository.CountryStateRepository;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Import(SecurityTestConfig.class)
 public class CountryStateControllerTest {
     @Autowired
     private MockMvc mockMvc;
