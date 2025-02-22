@@ -2,7 +2,6 @@ package br.ifrn.edu.sisconf.util;
 
 import java.time.Instant;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import javax.crypto.SecretKey;
@@ -15,11 +14,9 @@ import io.jsonwebtoken.Jwts.SIG;
 import io.jsonwebtoken.security.Keys;
 
 public class JwtTestUtil {
-    private static final SecretKey SECRET_KEY = Keys.hmacShaKeyFor(
+    public static final SecretKey SECRET_KEY = Keys.hmacShaKeyFor(
         "MySuperSecretTestKeyForJWT1234567890123456".getBytes()
     );
-
-    private static final String KEYCLOAK_CLIENT_ID = "sisconf-backend-spring"; 
 
     public static String getToken(String username) {
         return Jwts.builder()
@@ -30,7 +27,7 @@ public class JwtTestUtil {
                 .compact();
     }
 
-    public static Jwt getJwt(String token, Person person, List<String> roles) {
+    public static Jwt getJwt(String token, Person person) {
         if (token == null) {
             token = getToken(person.getEmail());
         }
@@ -41,12 +38,7 @@ public class JwtTestUtil {
             Map.of(
                 "preferred_username", person.getEmail(), 
                 "email", person.getEmail(),
-                "sub", person.getKeycloakId(),
-                "resource_access", Map.of(
-                    KEYCLOAK_CLIENT_ID, Map.of(
-                        "roles", roles
-                    )
-                )
+                "sub", person.getKeycloakId()
             )
         );
     }

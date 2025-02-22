@@ -17,8 +17,7 @@ public class PersonTestUtil {
             "teste@gmail.com", 
             "123.456.789-10", 
             cnpj, 
-            "(11) 91111-1111", 
-            AddressTestUtil.createValidAddress(),
+            "(11) 91111-1111", AddressTestUtil.createValidAddress(),
             null,
             null
         );
