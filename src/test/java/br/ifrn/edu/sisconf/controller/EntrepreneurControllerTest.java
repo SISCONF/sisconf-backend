@@ -113,7 +113,7 @@ public class EntrepreneurControllerTest {
     @Test
     public void meShouldReturnLoggedEntrepreneurWhenValidKeycloakIdAndToken() throws Exception {
         String testToken = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson());
+        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson(), new ArrayList<>());
         String entrepreneurData = objectMapper.writeValueAsString(
             entrepreneurMapper.toResponseDTO(entrepreneur)
         );
@@ -129,7 +129,7 @@ public class EntrepreneurControllerTest {
     public void meShouldReturnNotFoundWhenValidTokenButEntrepreneurDoesNotExist() throws Exception {
         entrepreneur.getPerson().setKeycloakId("");
         String testToken = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson());
+        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(testToken)).thenReturn(jwt);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/entrepreneurs/me")
@@ -196,7 +196,7 @@ public class EntrepreneurControllerTest {
 
         // Mock Spring + Keycloak JWT Decoder
         String testToken = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson());
+        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(testToken)).thenReturn(jwt);
 
         // Build request body and update entrepreneur instance in order to compare it to request response
@@ -246,7 +246,7 @@ public class EntrepreneurControllerTest {
 
         // Mock Spring + Keycloak JWT Decoder
         String testToken = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson());
+        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(testToken)).thenReturn(jwt);
 
         // Build request body and update entrepreneur instance in order to compare it to request response
@@ -263,7 +263,7 @@ public class EntrepreneurControllerTest {
     @Test
     public void shouldDeleteEntrepreneurWhenCorrespondingIdExists() throws Exception {
         String testToken = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson());
+        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(testToken)).thenReturn(jwt);
 
         mockMvc.perform(
@@ -275,7 +275,7 @@ public class EntrepreneurControllerTest {
     @Test
     public void shouldReturnNotFoundDeleteEntrepreneurWhenCorrespondingIdDoesNotExist() throws Exception {
         String testToken = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson());
+        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(testToken)).thenReturn(jwt);
 
         mockMvc.perform(

@@ -3,6 +3,7 @@ package br.ifrn.edu.sisconf.controller;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.AfterEach;
@@ -29,13 +30,16 @@ import br.ifrn.edu.sisconf.constants.KeycloakConstants;
 import br.ifrn.edu.sisconf.domain.Customer;
 import br.ifrn.edu.sisconf.domain.dtos.AddressRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Customer.CustomerRequestDTO;
+import br.ifrn.edu.sisconf.domain.dtos.Entrepreneur.EntrepreneurRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Person.PersonRequestDTO;
 import br.ifrn.edu.sisconf.domain.enums.CustomerCategory;
 import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationRecord;
 import br.ifrn.edu.sisconf.dto.keycloak.UserRegistrationResponse;
 import br.ifrn.edu.sisconf.mapper.CustomerMapper;
+import br.ifrn.edu.sisconf.mapper.EntrepreneurMapper;
 import br.ifrn.edu.sisconf.repository.CityRepository;
 import br.ifrn.edu.sisconf.repository.CustomerRepository;
+import br.ifrn.edu.sisconf.repository.EntrepreneurRepository;
 import br.ifrn.edu.sisconf.service.keycloak.KeycloakUserService;
 import br.ifrn.edu.sisconf.util.JwtTestUtil;
 
@@ -64,6 +68,12 @@ public class CustomerControllerTest {
 
     @Autowired
     private CityRepository cityRepository;
+
+    @Autowired
+    private EntrepreneurRepository entrepreneurRepository;
+
+    @Autowired
+    private EntrepreneurMapper entrepreneurMapper;
 
     private CustomerRequestDTO customerRequestDTO;
     private Customer customer;
@@ -115,7 +125,7 @@ public class CustomerControllerTest {
     @Test
     public void shouldReturnCustomerDataWhenMeValidKeycloakId() throws Exception {
         String tokenString = JwtTestUtil.getToken(customer.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson());
+        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
         String expectedResponse = objectMapper.writeValueAsString(
@@ -133,7 +143,7 @@ public class CustomerControllerTest {
     public void shouldReturnNotFoundWhenCustomerMeInvalidKeycloakId() throws Exception {
         String tokenString = JwtTestUtil.getToken(customer.getPerson().getEmail());
         customer.getPerson().setKeycloakId("");
-        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson());
+        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
         mockMvc.perform(
@@ -197,7 +207,7 @@ public class CustomerControllerTest {
 
         // Get mocked JWT and return it when decoder gets called
         String tokenString = JwtTestUtil.getToken(customerRequestDTO.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson());
+        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
         mockMvc.perform(
@@ -235,7 +245,7 @@ public class CustomerControllerTest {
 
         // Get mocked JWT and return it when decoder gets called
         String tokenString = JwtTestUtil.getToken(customerRequestDTO.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson());
+        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
         mockMvc.perform(
@@ -272,7 +282,7 @@ public class CustomerControllerTest {
 
         // Get mocked JWT and return it when decoder gets called
         String tokenString = JwtTestUtil.getToken(customerRequestDTO.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson());
+        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
         mockMvc.perform(
@@ -286,7 +296,7 @@ public class CustomerControllerTest {
     @Test
     public void shouldDeleteCustomerWhenCorrespondingIdExists() throws Exception {
         String tokenString = JwtTestUtil.getToken(customer.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson());
+        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
         mockMvc.perform(
@@ -298,12 +308,215 @@ public class CustomerControllerTest {
     @Test
     public void shouldReturnNotFoundWhenDeleteCustomerCorrespondingIdDoesNotExist() throws Exception {
         String tokenString = JwtTestUtil.getToken(customer.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson());
+        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
         mockMvc.perform(
             MockMvcRequestBuilders.delete("/api/customers/{id}", -1L)
             .header("Authorization", "Bearer " + tokenString)
         ).andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    public void shouldReturnListofCustomersWhenEntrepreneurUserRequest() throws Exception {
+        var entrepreneurRequestDTO = new EntrepreneurRequestDTO(
+            "Inovação Global Tecnológica e Consultoria Avançada" +
+            " para Soluções Inteligentes em Desenvolvimento Sustentável" +
+            " e Tecnologia Integr",
+            new PersonRequestDTO(
+                "k",
+                "g",
+                "333.333.333-33",
+                "11.111.111/1111-11",
+                "(11) 93333-3333",
+                "abcd1234",
+                "abcd1234",
+                "teste.entrepreneur@gmail.com",
+                new AddressRequestDTO(
+                    "Rua dos Jacarandás Floridos do Bairro" +
+                    " das Águas Claras em Comemoração ao Centenário" +
+                    " da Fundação da Cidade de Esperança",
+                    "59911-111",
+                    "Residencial das Palmeiras Altas e Horizontes" +
+                    " Verdejantes do Vale Encantado em Celebração às" +
+                    " Belezas Naturais da Região Serrana",
+                    10,
+                    cityRepository.findAll().getFirst().getId()
+                )
+            )
+        );
+        var entrepreneur = entrepreneurMapper.toEntity(entrepreneurRequestDTO);
+        entrepreneur.getPerson().setKeycloakId(UUID.randomUUID().toString());
+        entrepreneur = entrepreneurRepository.save(entrepreneur);
+
+        String roleName = KeycloakConstants.ROLE_LIST_CUSTOMERS.split("'")[1];
+        String tokenString = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
+        Jwt jwt = JwtTestUtil.getJwt(tokenString, entrepreneur.getPerson(), List.of(
+            roleName
+        ));
+        when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
+
+        String expectedResponse = objectMapper.writeValueAsString(customerMapper.toDTOList(List.of(customer)));
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/customers", new ArrayList<>())
+            .header("Authorization", "Bearer " + tokenString)
+        ).andExpect(MockMvcResultMatchers.status().isOk())
+        .andExpect(MockMvcResultMatchers.content().json(expectedResponse));
+
+        entrepreneurRepository.deleteAll();
+    }
+
+    @Test
+    public void shouldReturnForbiddenWhenListofCustomersNotEntrepreneurUserRequest() throws Exception {
+        var entrepreneurRequestDTO = new EntrepreneurRequestDTO(
+            "Inovação Global Tecnológica e Consultoria Avançada" +
+            " para Soluções Inteligentes em Desenvolvimento Sustentável" +
+            " e Tecnologia Integr",
+            new PersonRequestDTO(
+                "k",
+                "g",
+                "333.333.333-33",
+                "11.111.111/1111-11",
+                "(11) 93333-3333",
+                "abcd1234",
+                "abcd1234",
+                "teste.entrepreneur@gmail.com",
+                new AddressRequestDTO(
+                    "Rua dos Jacarandás Floridos do Bairro" +
+                    " das Águas Claras em Comemoração ao Centenário" +
+                    " da Fundação da Cidade de Esperança",
+                    "59911-111",
+                    "Residencial das Palmeiras Altas e Horizontes" +
+                    " Verdejantes do Vale Encantado em Celebração às" +
+                    " Belezas Naturais da Região Serrana",
+                    10,
+                    cityRepository.findAll().getFirst().getId()
+                )
+            )
+        );
+        var entrepreneur = entrepreneurMapper.toEntity(entrepreneurRequestDTO);
+        entrepreneur.getPerson().setKeycloakId(UUID.randomUUID().toString());
+        entrepreneur = entrepreneurRepository.save(entrepreneur);
+
+        String tokenString = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
+        Jwt jwt = JwtTestUtil.getJwt(tokenString, entrepreneur.getPerson(), new ArrayList<>());
+        when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/customers", new ArrayList<>())
+            .header("Authorization", "Bearer " + tokenString)
+        ).andExpect(MockMvcResultMatchers.status().isForbidden());
+
+        entrepreneurRepository.deleteAll();
+    }
+
+    @Test
+    public void shouldReturnCustomerWhenValidExisitingCustomerIdAndRequestUserEntrepreneur() throws Exception {
+        var entrepreneurRequestDTO = new EntrepreneurRequestDTO(
+            "Inovação Global Tecnológica e Consultoria Avançada" +
+            " para Soluções Inteligentes em Desenvolvimento Sustentável" +
+            " e Tecnologia Integr",
+            new PersonRequestDTO(
+                "k",
+                "g",
+                "333.333.333-33",
+                "11.111.111/1111-11",
+                "(11) 93333-3333",
+                "abcd1234",
+                "abcd1234",
+                "teste.entrepreneur@gmail.com",
+                new AddressRequestDTO(
+                    "Rua dos Jacarandás Floridos do Bairro" +
+                    " das Águas Claras em Comemoração ao Centenário" +
+                    " da Fundação da Cidade de Esperança",
+                    "59911-111",
+                    "Residencial das Palmeiras Altas e Horizontes" +
+                    " Verdejantes do Vale Encantado em Celebração às" +
+                    " Belezas Naturais da Região Serrana",
+                    10,
+                    cityRepository.findAll().getFirst().getId()
+                )
+            )
+        );
+        var entrepreneur = entrepreneurMapper.toEntity(entrepreneurRequestDTO);
+        entrepreneur.getPerson().setKeycloakId(UUID.randomUUID().toString());
+        entrepreneur = entrepreneurRepository.save(entrepreneur);
+
+        String tokenString = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
+        String roleName = KeycloakConstants.ROLE_RETRIEVE_CUSTOMER.split("'")[1];
+        Jwt jwt = JwtTestUtil.getJwt(tokenString, entrepreneur.getPerson(), List.of(roleName));
+        when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
+
+        String expectedResponse = objectMapper.writeValueAsString(
+            customerMapper.toResponseDTO(customer)
+        );
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/customers/{id}", customer.getId())
+            .header("Authorization", "Bearer " + tokenString)
+        ).andExpect(MockMvcResultMatchers.content().json(expectedResponse))
+        .andExpect(MockMvcResultMatchers.status().isOk());
+
+        entrepreneurRepository.deleteAll();
+    }
+
+    @Test
+    public void shouldReturnForbiddenWhenGetCustomerRequestUserIsNotEntrepreneur() throws Exception {
+        String tokenString = JwtTestUtil.getToken(customer.getPerson().getEmail());
+        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
+        when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/customers/{id}", customer.getId())
+            .header("Authorization", "Bearer " + tokenString)
+        ).andExpect(MockMvcResultMatchers.status().isForbidden());
+
+        entrepreneurRepository.deleteAll();
+    }
+
+    @Test
+    public void shouldReturnNotFoundWithNonExistingCustomerIdAndRequestUserIsEntrepreneur() throws Exception {
+        var entrepreneurRequestDTO = new EntrepreneurRequestDTO(
+            "Inovação Global Tecnológica e Consultoria Avançada" +
+            " para Soluções Inteligentes em Desenvolvimento Sustentável" +
+            " e Tecnologia Integr",
+            new PersonRequestDTO(
+                "k",
+                "g",
+                "333.333.333-33",
+                "11.111.111/1111-11",
+                "(11) 93333-3333",
+                "abcd1234",
+                "abcd1234",
+                "teste.entrepreneur@gmail.com",
+                new AddressRequestDTO(
+                    "Rua dos Jacarandás Floridos do Bairro" +
+                    " das Águas Claras em Comemoração ao Centenário" +
+                    " da Fundação da Cidade de Esperança",
+                    "59911-111",
+                    "Residencial das Palmeiras Altas e Horizontes" +
+                    " Verdejantes do Vale Encantado em Celebração às" +
+                    " Belezas Naturais da Região Serrana",
+                    10,
+                    cityRepository.findAll().getFirst().getId()
+                )
+            )
+        );
+        var entrepreneur = entrepreneurMapper.toEntity(entrepreneurRequestDTO);
+        entrepreneur.getPerson().setKeycloakId(UUID.randomUUID().toString());
+        entrepreneur = entrepreneurRepository.save(entrepreneur);
+
+        String tokenString = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
+        String roleName = KeycloakConstants.ROLE_RETRIEVE_CUSTOMER.split("'")[1];
+        Jwt jwt = JwtTestUtil.getJwt(tokenString, entrepreneur.getPerson(), List.of(roleName));
+        when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/api/customers/{id}", -1L)
+            .header("Authorization", "Bearer " + tokenString)
+        ).andExpect(MockMvcResultMatchers.status().isNotFound());
+
+        entrepreneurRepository.deleteAll();
     }
 }
