@@ -66,6 +66,9 @@ public class EntrepreneurControllerTest {
     @Autowired
     private CityRepository cityRepository;
 
+    @Autowired
+    private JwtTestUtil jwtTestUtil;
+
     private EntrepreneurRequestDTO entrepreneurRequestDTO;
 
     private Entrepreneur entrepreneur;
@@ -112,8 +115,8 @@ public class EntrepreneurControllerTest {
 
     @Test
     public void meShouldReturnLoggedEntrepreneurWhenValidKeycloakIdAndToken() throws Exception {
-        String testToken = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson(), new ArrayList<>());
+        String testToken = jwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
+        Jwt jwt = jwtTestUtil.getJwt(testToken, entrepreneur.getPerson(), new ArrayList<>());
         String entrepreneurData = objectMapper.writeValueAsString(
             entrepreneurMapper.toResponseDTO(entrepreneur)
         );
@@ -128,8 +131,8 @@ public class EntrepreneurControllerTest {
     @Test
     public void meShouldReturnNotFoundWhenValidTokenButEntrepreneurDoesNotExist() throws Exception {
         entrepreneur.getPerson().setKeycloakId("");
-        String testToken = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson(), new ArrayList<>());
+        String testToken = jwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
+        Jwt jwt = jwtTestUtil.getJwt(testToken, entrepreneur.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(testToken)).thenReturn(jwt);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/entrepreneurs/me")
@@ -195,8 +198,8 @@ public class EntrepreneurControllerTest {
         );
 
         // Mock Spring + Keycloak JWT Decoder
-        String testToken = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson(), new ArrayList<>());
+        String testToken = jwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
+        Jwt jwt = jwtTestUtil.getJwt(testToken, entrepreneur.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(testToken)).thenReturn(jwt);
 
         // Build request body and update entrepreneur instance in order to compare it to request response
@@ -245,8 +248,8 @@ public class EntrepreneurControllerTest {
         );
 
         // Mock Spring + Keycloak JWT Decoder
-        String testToken = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson(), new ArrayList<>());
+        String testToken = jwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
+        Jwt jwt = jwtTestUtil.getJwt(testToken, entrepreneur.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(testToken)).thenReturn(jwt);
 
         // Build request body and update entrepreneur instance in order to compare it to request response
@@ -262,8 +265,8 @@ public class EntrepreneurControllerTest {
 
     @Test
     public void shouldDeleteEntrepreneurWhenCorrespondingIdExists() throws Exception {
-        String testToken = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson(), new ArrayList<>());
+        String testToken = jwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
+        Jwt jwt = jwtTestUtil.getJwt(testToken, entrepreneur.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(testToken)).thenReturn(jwt);
 
         mockMvc.perform(
@@ -274,8 +277,8 @@ public class EntrepreneurControllerTest {
 
     @Test
     public void shouldReturnNotFoundDeleteEntrepreneurWhenCorrespondingIdDoesNotExist() throws Exception {
-        String testToken = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(testToken, entrepreneur.getPerson(), new ArrayList<>());
+        String testToken = jwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
+        Jwt jwt = jwtTestUtil.getJwt(testToken, entrepreneur.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(testToken)).thenReturn(jwt);
 
         mockMvc.perform(

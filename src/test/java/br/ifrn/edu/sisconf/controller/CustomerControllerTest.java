@@ -75,6 +75,9 @@ public class CustomerControllerTest {
     @Autowired
     private EntrepreneurMapper entrepreneurMapper;
 
+    @Autowired
+    private JwtTestUtil jwtTestUtil;
+
     private CustomerRequestDTO customerRequestDTO;
     private Customer customer;
 
@@ -125,8 +128,8 @@ public class CustomerControllerTest {
 
     @Test
     public void shouldReturnCustomerDataWhenMeValidKeycloakId() throws Exception {
-        String tokenString = JwtTestUtil.getToken(customer.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
+        String tokenString = jwtTestUtil.getToken(customer.getPerson().getEmail());
+        Jwt jwt = jwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
         String expectedResponse = objectMapper.writeValueAsString(
@@ -142,9 +145,9 @@ public class CustomerControllerTest {
 
     @Test
     public void shouldReturnNotFoundWhenCustomerMeInvalidKeycloakId() throws Exception {
-        String tokenString = JwtTestUtil.getToken(customer.getPerson().getEmail());
+        String tokenString = jwtTestUtil.getToken(customer.getPerson().getEmail());
         customer.getPerson().setKeycloakId("");
-        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
+        Jwt jwt = jwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
         mockMvc.perform(
@@ -207,8 +210,8 @@ public class CustomerControllerTest {
         String expectedResponse = objectMapper.writeValueAsString(customerMapper.toResponseDTO(customer));
 
         // Get mocked JWT and return it when decoder gets called
-        String tokenString = JwtTestUtil.getToken(customerRequestDTO.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
+        String tokenString = jwtTestUtil.getToken(customerRequestDTO.getPerson().getEmail());
+        Jwt jwt = jwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
         mockMvc.perform(
@@ -245,8 +248,8 @@ public class CustomerControllerTest {
         String requestBody = objectMapper.writeValueAsString(customerRequestDTO);
 
         // Get mocked JWT and return it when decoder gets called
-        String tokenString = JwtTestUtil.getToken(customerRequestDTO.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
+        String tokenString = jwtTestUtil.getToken(customerRequestDTO.getPerson().getEmail());
+        Jwt jwt = jwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
         mockMvc.perform(
@@ -282,8 +285,8 @@ public class CustomerControllerTest {
         String requestBody = objectMapper.writeValueAsString(customerRequestDTO);
 
         // Get mocked JWT and return it when decoder gets called
-        String tokenString = JwtTestUtil.getToken(customerRequestDTO.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
+        String tokenString = jwtTestUtil.getToken(customerRequestDTO.getPerson().getEmail());
+        Jwt jwt = jwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
         mockMvc.perform(
@@ -296,8 +299,8 @@ public class CustomerControllerTest {
 
     @Test
     public void shouldDeleteCustomerWhenCorrespondingIdExists() throws Exception {
-        String tokenString = JwtTestUtil.getToken(customer.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
+        String tokenString = jwtTestUtil.getToken(customer.getPerson().getEmail());
+        Jwt jwt = jwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
         mockMvc.perform(
@@ -308,8 +311,8 @@ public class CustomerControllerTest {
 
     @Test
     public void shouldReturnNotFoundWhenDeleteCustomerCorrespondingIdDoesNotExist() throws Exception {
-        String tokenString = JwtTestUtil.getToken(customer.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
+        String tokenString = jwtTestUtil.getToken(customer.getPerson().getEmail());
+        Jwt jwt = jwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
         mockMvc.perform(
@@ -351,8 +354,8 @@ public class CustomerControllerTest {
         entrepreneur = entrepreneurRepository.save(entrepreneur);
 
         String roleName = KeycloakConstants.ROLE_LIST_CUSTOMERS.split("'")[1];
-        String tokenString = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(tokenString, entrepreneur.getPerson(), List.of(
+        String tokenString = jwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
+        Jwt jwt = jwtTestUtil.getJwt(tokenString, entrepreneur.getPerson(), List.of(
             roleName
         ));
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
@@ -400,8 +403,8 @@ public class CustomerControllerTest {
         entrepreneur.getPerson().setKeycloakId(UUID.randomUUID().toString());
         entrepreneur = entrepreneurRepository.save(entrepreneur);
 
-        String tokenString = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(tokenString, entrepreneur.getPerson(), new ArrayList<>());
+        String tokenString = jwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
+        Jwt jwt = jwtTestUtil.getJwt(tokenString, entrepreneur.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
         mockMvc.perform(
@@ -444,9 +447,9 @@ public class CustomerControllerTest {
         entrepreneur.getPerson().setKeycloakId(UUID.randomUUID().toString());
         entrepreneur = entrepreneurRepository.save(entrepreneur);
 
-        String tokenString = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
+        String tokenString = jwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
         String roleName = KeycloakConstants.ROLE_RETRIEVE_CUSTOMER.split("'")[1];
-        Jwt jwt = JwtTestUtil.getJwt(tokenString, entrepreneur.getPerson(), List.of(roleName));
+        Jwt jwt = jwtTestUtil.getJwt(tokenString, entrepreneur.getPerson(), List.of(roleName));
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
         String expectedResponse = objectMapper.writeValueAsString(
@@ -464,8 +467,8 @@ public class CustomerControllerTest {
 
     @Test
     public void shouldReturnForbiddenWhenGetCustomerRequestUserIsNotEntrepreneur() throws Exception {
-        String tokenString = JwtTestUtil.getToken(customer.getPerson().getEmail());
-        Jwt jwt = JwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
+        String tokenString = jwtTestUtil.getToken(customer.getPerson().getEmail());
+        Jwt jwt = jwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
         mockMvc.perform(
@@ -508,9 +511,9 @@ public class CustomerControllerTest {
         entrepreneur.getPerson().setKeycloakId(UUID.randomUUID().toString());
         entrepreneur = entrepreneurRepository.save(entrepreneur);
 
-        String tokenString = JwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
+        String tokenString = jwtTestUtil.getToken(entrepreneur.getPerson().getEmail());
         String roleName = KeycloakConstants.ROLE_RETRIEVE_CUSTOMER.split("'")[1];
-        Jwt jwt = JwtTestUtil.getJwt(tokenString, entrepreneur.getPerson(), List.of(roleName));
+        Jwt jwt = jwtTestUtil.getJwt(tokenString, entrepreneur.getPerson(), List.of(roleName));
         when(jwtDecoder.decode(tokenString)).thenReturn(jwt);
 
         mockMvc.perform(

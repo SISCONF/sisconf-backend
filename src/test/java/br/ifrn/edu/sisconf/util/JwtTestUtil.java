@@ -7,21 +7,25 @@ import java.util.Map;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.stereotype.Component;
 
 import br.ifrn.edu.sisconf.domain.Person;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Jwts.SIG;
 import io.jsonwebtoken.security.Keys;
 
+@Component
 public class JwtTestUtil {
-    private static final SecretKey SECRET_KEY = Keys.hmacShaKeyFor(
+    private final SecretKey SECRET_KEY = Keys.hmacShaKeyFor(
         "MySuperSecretTestKeyForJWT1234567890123456".getBytes()
     );
 
-    private static final String KEYCLOAK_CLIENT_ID = "sisconf-backend-spring"; 
+    @Value("${keycloak.client-id}")
+    private String keycloakClientId;
 
-    public static String getToken(String username) {
+    public String getToken(String username) {
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date())
@@ -30,7 +34,7 @@ public class JwtTestUtil {
                 .compact();
     }
 
-    public static Jwt getJwt(String token, Person person, List<String> roles) {
+    public Jwt getJwt(String token, Person person, List<String> roles) {
         if (token == null) {
             token = getToken(person.getEmail());
         }
@@ -43,7 +47,7 @@ public class JwtTestUtil {
                 "email", person.getEmail(),
                 "sub", person.getKeycloakId(),
                 "resource_access", Map.of(
-                    KEYCLOAK_CLIENT_ID, Map.of(
+                    keycloakClientId, Map.of(
                         "roles", roles
                     )
                 )
