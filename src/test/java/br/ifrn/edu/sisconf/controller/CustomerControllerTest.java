@@ -120,7 +120,6 @@ public class CustomerControllerTest {
     @AfterEach
     public void tearDown() {
         customerRepository.deleteAll();
-        entrepreneurRepository.deleteAll();
     }
 
     @Test
