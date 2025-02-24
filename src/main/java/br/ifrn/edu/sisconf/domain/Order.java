@@ -38,6 +38,11 @@ public class Order extends BaseEntity {
     @Column(name = "order_date", nullable = false)
     private LocalDateTime orderDate;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, targetEntity = OrderFood.class)
-    private List<OrderFood> orderFoods = new ArrayList<>();;
+    @OneToMany(
+        mappedBy = "order", 
+        cascade = CascadeType.ALL, 
+        targetEntity = OrderFood.class,
+        orphanRemoval = true
+    )
+    private List<OrderFood> orderFoods = new ArrayList<>();
 }

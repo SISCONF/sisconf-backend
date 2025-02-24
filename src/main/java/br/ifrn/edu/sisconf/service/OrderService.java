@@ -74,7 +74,10 @@ public class OrderService {
             .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public OrderResponseDTO createOrder(SisconfUserDetails userDetails, OrderRequestDTO orderRequestDTO) {
+    public OrderResponseDTO createOrder(
+        SisconfUserDetails userDetails, 
+        OrderRequestDTO orderRequestDTO
+    ) {
         Customer customer = customerRepository.findByPersonKeycloakId(userDetails.getKeycloakId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
 
@@ -132,47 +135,46 @@ public class OrderService {
         OrderUpdateRequestDTO orderUpdateRequestDTO,
         SisconfUserDetails userDetails
     ) {
-        Order order = orderRepository.findByIdAndCustomerPersonKeycloakId(id, userDetails.getKeycloakId())
-                .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado"));
+        Order order = orderRepository.findByIdAndCustomerPersonKeycloakId(
+            id, 
+            userDetails.getKeycloakId()
+        ).orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado"));
 
-        Map<Long, Food> foodMap = fetchAndValidateFoods(orderUpdateRequestDTO.getFoodsQuantities());
+        Map<Long, Food> foodMap = fetchAndValidateFoods(
+            orderUpdateRequestDTO.getFoodsQuantities()
+        );
+        
+        order.getOrderFoods().clear();
+        order = orderRepository.save(order);
 
         for (OrderFoodRequestDTO orderFoodRequest : orderUpdateRequestDTO.getFoodsQuantities()) {
             Food food = foodMap.get(orderFoodRequest.getFoodId());
-            
-            boolean foodExistsInOrder = order.getOrderFoods().stream()
-                    .anyMatch(orderFood -> orderFood.getFood().getId().equals(food.getId()));
-
-            if (foodExistsInOrder) {
-                order.getOrderFoods().stream()
-                    .filter(orderFood -> orderFood.getFood().getId().equals(food.getId()))
-                    .forEach(orderFood -> orderFood.setQuantity(
-                            orderFood.getQuantity() + orderFoodRequest.getQuantity()
-                        )
-                    );
-            } else {
-                OrderFood orderFood = new OrderFood();
-                orderFood.setFood(food);
-                orderFood.setOrder(order);
-                orderFood.setQuantity(orderFoodRequest.getQuantity());
-                order.getOrderFoods().add(orderFood);
-            }
+            OrderFood orderFood = new OrderFood();
+            orderFood.setFood(food);
+            orderFood.setOrder(order);
+            orderFood.setQuantity(orderFoodRequest.getQuantity());
+            orderFood.setQuantityType(orderFoodRequest.getQuantityType());
+            order.getOrderFoods().add(orderFood);
         }
 
         BigDecimal totalPrice = order.getOrderFoods().stream()
-            .map(orderFood -> orderFood.getFood().getUnitPrice().multiply(BigDecimal.valueOf(orderFood.getQuantity())))
+            .map(orderFood -> orderFood.getFood().getUnitPrice().multiply(
+                BigDecimal.valueOf(orderFood.getQuantity())
+            ))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         order.setTotalPrice(totalPrice);
-        order.setStatus(orderUpdateRequestDTO.getStatus());
-
         orderMapper.updateEntityFromDTO(orderUpdateRequestDTO, order);
  
         return orderMapper.toResponseDTO(orderRepository.save(order));
     }
 
     public void deleteOrder(Long id, SisconfUserDetails userDetails) {
-        if (!orderRepository.existsByIdAndCustomerPersonKeycloakId(id, userDetails.getKeycloakId())) {
+        if (!orderRepository.existsByIdAndCustomerPersonKeycloakId(
+                id, 
+                userDetails.getKeycloakId()
+            )
+        ) {
             throw new ResourceNotFoundException("Pedido não encontrado.");
         }
         orderRepository.deleteById(id);
