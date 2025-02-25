@@ -16,7 +16,7 @@ jobs:
         HOST: ${{ secrets.EC2_HOST }}
         USER: ${{ secrets.EC2_USER }}
       run: |
-        echo "$PRIVATE_KEY" > sisconf-backend-spring.pem && chmod sisconf-backend-spring.pem
+        echo "$PRIVATE_KEY" > sisconf-backend-spring.pem && chmod 600 sisconf-backend-spring.pem
         ssh -o StrictHostKeyChecking=no -i sisconf-backend-spring.pem ${USER}@${HOST}
         sudo rm -r sisconf-backend
         git clone https://github.com/SISCONF/sisconf-backend.git
