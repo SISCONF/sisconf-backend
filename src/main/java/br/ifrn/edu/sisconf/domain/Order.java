@@ -31,7 +31,7 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-    @ManyToOne(cascade = CascadeType.REFRESH)
+    @ManyToOne
     @JoinColumn(name = "orders_group_id")
     private OrdersGroup ordersGroup;
 
@@ -40,9 +40,10 @@ public class Order extends BaseEntity {
 
     @OneToMany(
         mappedBy = "order", 
-        cascade = CascadeType.ALL, 
+        cascade = CascadeType.ALL,
         targetEntity = OrderFood.class,
-        orphanRemoval = true
+        orphanRemoval = true,
+        fetch = FetchType.EAGER
     )
     private List<OrderFood> orderFoods = new ArrayList<>();
 }

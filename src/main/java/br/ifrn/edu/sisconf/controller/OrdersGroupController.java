@@ -28,7 +28,9 @@ public class OrdersGroupController {
     public ResponseEntity<OrdersGroupResponseDTO> save(
         @RequestBody @Valid OrdersGroupRequestDTO ordersGroupRequestDTO
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ordersGroupService.save(ordersGroupRequestDTO));
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            ordersGroupService.save(ordersGroupRequestDTO)
+        );
     }
 
     @GetMapping

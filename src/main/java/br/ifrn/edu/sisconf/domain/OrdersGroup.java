@@ -35,6 +35,10 @@ public class OrdersGroup extends BaseEntity {
     @Column(name = "doc_url", length = 255)
     private String docUrl;
 
-    @OneToMany(mappedBy = "ordersGroup", cascade = { CascadeType.REFRESH })
+    @OneToMany(
+        mappedBy = "ordersGroup", 
+        cascade = { CascadeType.REFRESH, CascadeType.MERGE }, 
+        fetch = FetchType.EAGER
+    )
     private List<Order> orders = new ArrayList<>();
 }

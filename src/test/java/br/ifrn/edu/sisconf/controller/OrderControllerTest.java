@@ -50,7 +50,6 @@ import br.ifrn.edu.sisconf.repository.OrderRepository;
 import br.ifrn.edu.sisconf.security.SisconfUserDetails;
 import br.ifrn.edu.sisconf.service.OrderService;
 import br.ifrn.edu.sisconf.util.JwtTestUtil;
-import jakarta.transaction.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -160,7 +159,6 @@ public class OrderControllerTest {
     }
 
     @Test
-    @Transactional
     public void shouldReturnListOfOrders() throws Exception {
         String tokenString = jwtTestUtil.getToken(customer.getPerson().getEmail());
         Jwt jwt = jwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
@@ -192,7 +190,6 @@ public class OrderControllerTest {
     }
 
     @Test
-    @Transactional
     public void shouldReturnListOfAllOrdersWhenRequestUserIsEntrepreneur() throws Exception {
         var firstFood = foodRepository.findById(1L).orElseThrow();
         var secondFood = foodRepository.findById(2L).orElseThrow();
@@ -284,7 +281,6 @@ public class OrderControllerTest {
     }
 
     @Test
-    @Transactional
     public void shouldCreateOrderWhenRequestDataValid() throws Exception {
         orderRepository.deleteAll();
         String tokenString = jwtTestUtil.getToken(customer.getPerson().getEmail());
@@ -444,7 +440,6 @@ public class OrderControllerTest {
     }
 
     @Test
-    @Transactional
     public void shouldReturnOrderWhenGetByExistingAndValidId() throws Exception {
         String tokenString = jwtTestUtil.getToken(customer.getPerson().getEmail());
         Jwt jwt = jwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
@@ -462,7 +457,6 @@ public class OrderControllerTest {
     }
 
     @Test
-    @Transactional
     public void shouldReturnNotFoundWhenGetByUnexistingAndInvalidId() throws Exception {
         String tokenString = jwtTestUtil.getToken(customer.getPerson().getEmail());
         Jwt jwt = jwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());
@@ -522,7 +516,6 @@ public class OrderControllerTest {
     }
 
     @Test
-    @Transactional
     public void shouldUpdateOrderWhenValidRequestBody() throws Exception {
         String tokenString = jwtTestUtil.getToken(customer.getPerson().getEmail());
         Jwt jwt = jwtTestUtil.getJwt(tokenString, customer.getPerson(), new ArrayList<>());

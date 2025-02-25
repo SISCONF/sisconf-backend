@@ -12,6 +12,8 @@ import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.EntrepreneurMapper;
 import br.ifrn.edu.sisconf.repository.EntrepreneurRepository;
 import br.ifrn.edu.sisconf.service.keycloak.KeycloakUserService;
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +53,7 @@ public class EntrepreneurService {
         return entrepreneurMapper.toResponseDTO(entrepreneur);
     }
 
+    @Transactional
     public EntrepreneurResponseDTO save(EntrepreneurRequestDTO entrepreneurRequestDTO) {
         PersonRequestDTO personRequestDTO = entrepreneurRequestDTO.getPerson();
         this.validateEntrepreneurCreation(personRequestDTO);
