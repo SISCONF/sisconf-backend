@@ -9,6 +9,7 @@ import br.ifrn.edu.sisconf.exception.BusinessException;
 import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.exception.keycloak.InvalidCredentialsException;
 import br.ifrn.edu.sisconf.exception.keycloak.KeycloakUnavailableException;
+import br.ifrn.edu.sisconf.repository.CityRepository;
 import br.ifrn.edu.sisconf.repository.PersonRepository;
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.ProcessingException;
@@ -27,6 +28,9 @@ public class PersonService {
 
     @Autowired
     private CityService cityService;
+
+    @Autowired
+    private CityRepository cityRepository;
 
     @Autowired
     private KeycloakProperties keycloakProperties;
@@ -140,6 +144,19 @@ public class PersonService {
     public void validatePersonUpdate(PersonRequestDTO personRequestDTO, Long id) {
         this.throwIfCpfIsNotUnique(personRequestDTO.getCpf(), id);
         this.throwIfPhoneIsNotUnique(personRequestDTO.getPhone(), id);
+        if (personRequestDTO.getEmail() != null) {
+            if (!personRequestDTO.getEmail().equals("")) {
+                throw new BusinessException("Email não pode ser atualizado");
+            }
+        }
         cityService.getById(personRequestDTO.getAddress().getCity());
+    }
+
+    public Person savePersonCity(Person person, Long cityId) {
+        var city = cityRepository.findById(cityId).orElseThrow(() -> new ResourceNotFoundException(
+            String.format("Cidade com id %d não encontrada", cityId)
+        ));
+        person.getAddress().setCity(city);
+        return personRepository.save(person);
     }
 }

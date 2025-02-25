@@ -12,6 +12,8 @@ import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.EntrepreneurMapper;
 import br.ifrn.edu.sisconf.repository.EntrepreneurRepository;
 import br.ifrn.edu.sisconf.service.keycloak.KeycloakUserService;
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +53,7 @@ public class EntrepreneurService {
         return entrepreneurMapper.toResponseDTO(entrepreneur);
     }
 
+    @Transactional
     public EntrepreneurResponseDTO save(EntrepreneurRequestDTO entrepreneurRequestDTO) {
         PersonRequestDTO personRequestDTO = entrepreneurRequestDTO.getPerson();
         this.validateEntrepreneurCreation(personRequestDTO);
@@ -67,6 +70,7 @@ public class EntrepreneurService {
 
         Entrepreneur entrepreneur = entrepreneurMapper.toEntity(entrepreneurRequestDTO);
         entrepreneur.getPerson().setKeycloakId(userRegistrationResponse.keycloakId());
+        personService.savePersonCity(entrepreneur.getPerson(), entrepreneurRequestDTO.getPerson().getAddress().getCity());
         try {
             var savedEntrepreneur = entrepreneurRepository.save(entrepreneur);
             stockService.save(entrepreneur);
@@ -108,6 +112,10 @@ public class EntrepreneurService {
 
         try {
             entrepreneurMapper.updateEntityFromDTO(entrepreneurRequestDTO, entrepreneur);
+            personService.savePersonCity(
+                entrepreneur.getPerson(), 
+                entrepreneurRequestDTO.getPerson().getAddress().getCity()
+            );
             var updatedEntrepreneur = entrepreneurRepository.save(entrepreneur);
             return entrepreneurMapper.toResponseDTO(updatedEntrepreneur);
         } catch (Exception exception) {

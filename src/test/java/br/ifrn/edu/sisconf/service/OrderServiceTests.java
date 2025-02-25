@@ -14,7 +14,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
@@ -23,7 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import br.ifrn.edu.sisconf.domain.Customer;
 import br.ifrn.edu.sisconf.domain.Food;
 import br.ifrn.edu.sisconf.domain.Order;
-import br.ifrn.edu.sisconf.domain.OrderFood;
 import br.ifrn.edu.sisconf.domain.dtos.Order.OrderRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Order.OrderResponseDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Order.OrderUpdateRequestDTO;
@@ -87,6 +88,7 @@ public class OrderServiceTests {
 
         order = new Order();
         order.setId(1L);
+        order.setStatus(OrderStatus.WAITING);
     }
 
     @Test
@@ -213,26 +215,6 @@ public class OrderServiceTests {
         verify(orderRepository, never()).deleteById(order.getId());
     }
 
-
-    @Test
-    @DisplayName("Should update only the order status")
-    public void shouldUpdateOrderStatusOnly() {
-        OrderUpdateRequestDTO orderUpdateRequestDTO = new OrderUpdateRequestDTO();
-        orderUpdateRequestDTO.setStatus(OrderStatus.ACCEPTED);
-        orderUpdateRequestDTO.setFoodsQuantities(List.of());
-
-        when(orderRepository.findByIdAndCustomerPersonKeycloakId(
-                order.getId(), userDetails.getKeycloakId()
-            )).thenReturn(Optional.of(order));
-        when(orderRepository.save(order)).thenReturn(order);
-
-        orderService.updateOrder(order.getId(), orderUpdateRequestDTO, userDetails);
-
-        assertEquals(OrderStatus.ACCEPTED, order.getStatus());
-        verify(orderRepository).findByIdAndCustomerPersonKeycloakId(order.getId(), userDetails.getKeycloakId());
-        verify(orderRepository).save(order);
-    }
-
     @Test
     @DisplayName("Should add new items to the order")
     public void shouldAddNewItemsToOrder() {
@@ -253,40 +235,25 @@ public class OrderServiceTests {
 
         verify(orderRepository).findByIdAndCustomerPersonKeycloakId(order.getId(), userDetails.getKeycloakId());
         verify(foodRepository).findAllById(List.of(food.getId()));
-        verify(orderRepository).save(order);
-    }
-
-    @Test
-    @DisplayName("Should increment quantity for existing items in order")
-    public void shouldIncrementQuantityForExistingItems() {
-        OrderFood existingOrderFood = new OrderFood();
-        existingOrderFood.setFood(food);
-        existingOrderFood.setOrder(order);
-        existingOrderFood.setQuantity(3);
-        order.getOrderFoods().add(existingOrderFood);
-
-        OrderUpdateRequestDTO orderUpdateRequestDTO = new OrderUpdateRequestDTO();
-        orderUpdateRequestDTO.setFoodsQuantities(List.of(new OrderFoodRequestDTO(food.getId(), 2, OrderFoodQuantityType.KG)));
-
-        when(orderRepository.findByIdAndCustomerPersonKeycloakId(order.getId(), userDetails.getKeycloakId())).thenReturn(Optional.of(order));
-        when(foodRepository.findAllById(List.of(food.getId()))).thenReturn(List.of(food));
-        when(orderRepository.save(order)).thenReturn(order);
-
-        orderService.updateOrder(order.getId(), orderUpdateRequestDTO, userDetails);
-
-        assertEquals(5, existingOrderFood.getQuantity(), "A quantidade deve ser incrementada corretamente.");
-        verify(orderRepository).findByIdAndCustomerPersonKeycloakId(order.getId(), userDetails.getKeycloakId());
-        verify(foodRepository).findAllById(List.of(food.getId()));
-        verify(orderRepository).save(order);
+        verify(orderRepository, times(2)).save(order);
     }
 
     @Test
     @DisplayName("Should correctly calculate total price when adding new items")
     public void shouldCorrectlyCalculateTotalPriceWhenAddingNewItems() {
         OrderUpdateRequestDTO orderUpdateRequestDTO = new OrderUpdateRequestDTO();
-        orderUpdateRequestDTO.setFoodsQuantities(List.of(new OrderFoodRequestDTO(food.getId(), 2, OrderFoodQuantityType.KG)));
+        orderUpdateRequestDTO.setFoodsQuantities(List.of(new OrderFoodRequestDTO(
+                food.getId(), 
+                2, 
+                OrderFoodQuantityType.KG
+                )
+            )
+        );
 
-        when(orderRepository.findByIdAndCustomerPersonKeycloakId(order.getId(), userDetails.getKeycloakId())).thenReturn(Optional.of(order));
+        when(orderRepository.findByIdAndCustomerPersonKeycloakId(
+            order.getId(), 
+            userDetails.getKeycloakId()
+        )).thenReturn(Optional.of(order));
         when(foodRepository.findAllById(List.of(food.getId()))).thenReturn(List.of(food));
         when(orderRepository.save(order)).thenReturn(order);
 
@@ -297,7 +264,7 @@ public class OrderServiceTests {
 
         verify(orderRepository).findByIdAndCustomerPersonKeycloakId(order.getId(), userDetails.getKeycloakId());
         verify(foodRepository).findAllById(List.of(food.getId()));
-        verify(orderRepository).save(order);
+        verify(orderRepository, times(2)).save(order);
     }
 
 

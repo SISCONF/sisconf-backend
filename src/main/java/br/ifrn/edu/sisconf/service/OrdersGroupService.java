@@ -40,11 +40,9 @@ public class OrdersGroupService {
 
     public OrdersGroupResponseDTO save(OrdersGroupRequestDTO ordersGroupRequestDTO) {
         OrdersGroup ordersGroup = ordersGroupMapper.toEntity(ordersGroupRequestDTO);
-        setOrdersToOrdersGroup(ordersGroupRequestDTO, ordersGroup);
         ordersGroup.setCurrentStatus(OrdersGroupStatus.PLACED);
-
-        // futuramente virá do Serviço de processamento
         ordersGroup.setDocUrl("");
+        setOrdersToOrdersGroup(ordersGroupRequestDTO, ordersGroup);
 
         return ordersGroupMapper.toResponseDTO(ordersGroupRepository.save(ordersGroup));
     }
@@ -66,9 +64,14 @@ public class OrdersGroupService {
        return ordersGroupMapper.toResponseDTO(ordersGroupRepository.save(ordersGroup));
     }
 
-    private void setOrdersToOrdersGroup(OrdersGroupRequestDTO ordersGroupRequestDTO, OrdersGroup ordersGroup) {
+    private void setOrdersToOrdersGroup(
+        OrdersGroupRequestDTO ordersGroupRequestDTO, 
+        OrdersGroup ordersGroup
+    ) {
         if (ordersGroupRepository.existsByOrdersId(ordersGroupRequestDTO.getOrdersIds())) {
-            throw new BusinessException("Um ou mais pedidos já estão em algum grupo de pedidos");
+            throw new BusinessException(
+                "Um ou mais pedidos já estão em algum grupo de pedidos"
+            );
         }
 
         List<Order> orders = ordersGroupRequestDTO.getOrdersIds().stream()
@@ -76,12 +79,14 @@ public class OrdersGroupService {
                 .collect(Collectors.toList());
 
         if (orders.isEmpty()) {
-            throw new BusinessException("É necessário ao menos um pedido para criar um grupo");
+            throw new BusinessException(
+                "É necessário ao menos um pedido para criar um grupo"
+            );
         }
 
         BigDecimal total = orders.stream()
-                .map(Order::getTotalPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        .map(Order::getTotalPrice)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         Integer foodsTotalQuantity = orders.stream()
                 .flatMap(order -> order.getOrderFoods().stream())
@@ -89,17 +94,20 @@ public class OrdersGroupService {
                                 .reduce(0, Integer::sum);
 
         ordersGroup.setItemQuantity(foodsTotalQuantity);
+        ordersGroup.setTotalPrice(total);
 
         orders.forEach(order -> order.setOrdersGroup(ordersGroup));
 
         ordersGroup.getOrders().clear();
         ordersGroup.getOrders().addAll(orders);
-        ordersGroup.setTotalPrice(total);
     }
 
     public void delete(Long id) {
         if (!ordersGroupRepository.existsById(id)) {
-            throw new ResourceNotFoundException(String.format("Grupo de id %d não encontrado", id));
+            throw new ResourceNotFoundException(String.format(
+                "Grupo de id %d não encontrado", id
+                )
+            );
         }
         ordersGroupRepository.deleteById(id);
     }

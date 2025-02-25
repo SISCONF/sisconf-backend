@@ -18,7 +18,7 @@ public class Customer extends BaseEntity {
     @Column(nullable = false)
     private CustomerCategory category;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "person_id", nullable = false, unique = true)
     private Person person;
 

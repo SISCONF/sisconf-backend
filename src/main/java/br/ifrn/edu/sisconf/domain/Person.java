@@ -16,10 +16,10 @@ public class Person extends BaseEntity {
     @Column(unique = true, nullable = false, name = "keycloak_id")
     private String keycloakId;
 
-    @Column(nullable = false, length = 128, name = "first_name")
+    @Column(nullable = false, length = 255, name = "first_name")
     private String firstName;
 
-    @Column(nullable = false, length = 128, name = "last_name")
+    @Column(nullable = false, length = 255, name = "last_name")
     private String lastName;
 
     @Column(unique = true, nullable = false, length = 128)
@@ -34,7 +34,7 @@ public class Person extends BaseEntity {
     @Column(nullable = false, length = 15, unique = true)
     private String phone;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "address_id")
     private Address address;
 

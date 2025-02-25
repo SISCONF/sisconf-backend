@@ -12,6 +12,7 @@ import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.CustomerMapper;
 import br.ifrn.edu.sisconf.repository.CustomerRepository;
 import br.ifrn.edu.sisconf.service.keycloak.KeycloakUserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -75,6 +76,14 @@ public class CustomerService {
             .create(userRegistrationRecord);
         customer.getPerson().setKeycloakId(userRegistrationResponse.keycloakId());
         try {
+            /*
+             * No need to check if city exists again because it's already been checked
+             * and savePersonCity method does it again
+             */
+            personService.savePersonCity(
+                customer.getPerson(), 
+                customerRequestDTO.getPerson().getAddress().getCity()
+            );
             customerRepository.save(customer);
             return customerMapper.toResponseDTO(customer);
         } catch (Exception exception) {
@@ -109,6 +118,14 @@ public class CustomerService {
 
         try {
             customerMapper.updateEntityFromDTO(customerRequestDTO, customer);
+            /*
+             * No need to check if city exists again because it's already been checked
+             * and savePersonCity method does it again
+             */
+            personService.savePersonCity(
+                customer.getPerson(), 
+                customerRequestDTO.getPerson().getAddress().getCity()
+            );
             var updatedCustomer = customerRepository.save(customer);
             return customerMapper.toResponseDTO(updatedCustomer);
         } catch (Exception exception) {
