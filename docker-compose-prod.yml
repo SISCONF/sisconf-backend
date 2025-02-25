@@ -1,0 +1,24 @@
+services:
+  postgres:
+    image: postgres:16
+    volumes:
+      - postgres-prod-data:/var/lib/postgresql/data
+    env_file:
+      - ./envs/prod/postgres.env
+
+  rabbitmq:
+    image: rabbitmq:4.0-management
+    ports:
+      - 5672:5672
+    env_file:
+      - ./envs/prod/rabbitmq.env
+
+  sisconf:
+    build:
+      context: ./
+      dockerfile: ./compose/prod/Dockerfile
+    env_file:
+      - ./envs/prod/spring.env
+
+volumes:
+  postgres-prod-data:
