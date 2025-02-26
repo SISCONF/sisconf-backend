@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD
 
 on: [pull_request, push]
 
@@ -45,3 +45,50 @@ jobs:
       - name: Post Application Building and Testing
         run: |
           docker compose -f docker-compose.yml down
+
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/head/develop' || github.ref == 'refs/head/main'
+    needs: [continuous-integration]
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Deploy to EC2
+      env:
+        PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
+        HOST: ${{ secrets.EC2_HOST }}
+        USER: ${{ secrets.EC2_USER }}
+      run: |
+        echo "$PRIVATE_KEY" > sisconf-backend-spring.pem && chmod 600 sisconf-backend-spring.pem
+        ssh -o StrictHostKeyChecking=no -i sisconf-backend-spring.pem ${USER}@${HOST} << 'EOF'
+
+        if [ -d "sisconf-backend" ]; then
+          cd sisconf-backend
+          sudo docker compose -f docker-compose-prod.yml down
+        fi
+
+        sudo rm -rf sisconf-backend
+        git clone --branch feat/deploy --single-branch https://github.com/SISCONF/sisconf-backend.git
+
+        cd sisconf-backend
+        ls
+        cd ./envs
+        mkdir prod
+        cd prod
+
+        touch spring.env
+        cat ~/spring.env > spring.env
+        touch postgres.env
+        cat ~/postgres.env > postgres.env
+        touch rabbitmq.env
+        cat ~/rabbitmq.env > rabbitmq.env
+
+        cd ~/sisconf-backend
+        mkdir nginx
+        cd nginx
+        touch default.conf
+        cat ~/nginx.conf > default.conf
+
+        cd ~/sisconf-backend
+        sudo docker compose -f docker-compose-prod.yml up -d
+        EOF
