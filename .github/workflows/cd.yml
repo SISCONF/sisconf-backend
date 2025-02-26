@@ -18,7 +18,7 @@ jobs:
       run: |
         echo "$PRIVATE_KEY" > sisconf-backend-spring.pem && chmod 600 sisconf-backend-spring.pem
         ssh -o StrictHostKeyChecking=no -i sisconf-backend-spring.pem ${USER}@${HOST}
-        sudo rm -r sisconf-backend
+        sudo rm -rf sisconf-backend
         git clone https://github.com/SISCONF/sisconf-backend.git
 
         cd sisconf-backend
