@@ -17,7 +17,7 @@ jobs:
         USER: ${{ secrets.EC2_USER }}
       run: |
         echo "$PRIVATE_KEY" > sisconf-backend-spring.pem && chmod 600 sisconf-backend-spring.pem
-        ssh -o StrictHostKeyChecking=no -i sisconf-backend-spring.pem ${USER}@${HOST}
+        ssh -o StrictHostKeyChecking=no -i sisconf-backend-spring.pem ${USER}@${HOST} << 'EOF'
         sudo rm -rf sisconf-backend
         git clone --branch feat/deploy --single-branch https://github.com/SISCONF/sisconf-backend.git
 
@@ -36,3 +36,4 @@ jobs:
 
         cd ~/sisconf-backend
         sudo docker compose -f docker-compose-prod.yml up -d
+        EOF
