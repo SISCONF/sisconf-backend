@@ -35,5 +35,11 @@ jobs:
         cat ~/rabbitmq.env > rabbitmq.env
 
         cd ~/sisconf-backend
+        mkdir nginx
+        cd nginx
+        touch default.conf
+        cat ~/nginx-conf > default.conf
+
+        cd ~/sisconf-backend
         sudo docker compose -f docker-compose-prod.yml up -d
         EOF
