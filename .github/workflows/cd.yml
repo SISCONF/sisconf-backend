@@ -38,7 +38,7 @@ jobs:
         mkdir nginx
         cd nginx
         touch default.conf
-        cat ~/nginx-conf > default.conf
+        cat ~/nginx.conf > default.conf
 
         cd ~/sisconf-backend
         sudo docker compose -f docker-compose-prod.yml up -d
