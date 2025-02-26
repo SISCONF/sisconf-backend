@@ -21,6 +21,16 @@ services:
       - 8080:8080
     env_file:
       - ./envs/prod/spring.env
+  
+  nginx:
+    image: nginx:latest
+    depends_on:
+      - sisconf
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    restart: always
 
 volumes:
   postgres-prod-data:
