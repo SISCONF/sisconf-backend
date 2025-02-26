@@ -17,6 +17,8 @@ services:
     build:
       context: ./
       dockerfile: ./compose/prod/Dockerfile
+    ports:
+      - 8080:8080
     env_file:
       - ./envs/prod/spring.env
 
