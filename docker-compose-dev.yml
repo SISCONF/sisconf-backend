@@ -13,8 +13,18 @@ services:
     image: postgres:16
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
     env_file:
       - ./envs/postgres.env
+  
+  rabbitmq:
+    rabbitmq:
+    image: rabbitmq:4.0-management
+    ports:
+      - 5672:5672
+    env_file:
+      - ./envs/prod/rabbitmq.env
 
 volumes:
   keycloak-data:
