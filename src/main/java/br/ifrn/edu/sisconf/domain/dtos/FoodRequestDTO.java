@@ -12,6 +12,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
+import org.springframework.web.multipart.MultipartFile;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -27,4 +29,7 @@ public class FoodRequestDTO {
 
     @NotNull(message = "A categoria da comida é obrigatória")
     private FoodCategory category;
+
+    @NotNull(message = "A foto do alimento é obrigatória")
+    private MultipartFile image;
 }

@@ -19,6 +19,7 @@ public interface FoodMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "stocks", ignore = true)
+    @Mapping(target = "imageUrl", ignore = true)
     Food toEntity(FoodRequestDTO createFoodDto);
 
     FoodResponseDTO toResponseDTO(Food food);
@@ -30,5 +31,6 @@ public interface FoodMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "stocks", ignore = true)
+    @Mapping(target = "imageUrl", ignore = true)
     void updateEntityFromDTO(FoodRequestDTO dto, @MappingTarget Food food);
 }

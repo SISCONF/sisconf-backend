@@ -197,6 +197,11 @@
             <version>5.10.0</version> <!-- Use the latest version -->
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.20.128</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -271,7 +276,7 @@
             </plugin>
 
             <!-- Plugin para executar a abertura automática do relatório -->
-            <plugin>
+            <!-- <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.8</version>
@@ -290,7 +295,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin> -->
         </plugins>
     </build>
 
