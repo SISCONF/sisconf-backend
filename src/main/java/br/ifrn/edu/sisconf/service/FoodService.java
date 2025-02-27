@@ -81,9 +81,13 @@ public class FoodService {
     }
 
     public FoodResponseDTO update(Long id, FoodRequestDTO foodDto) {
+        String newImage = s3Service.uploadFile(foodDto.getImage());
+
         Food food = foodRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comida não econtrada."));
         throwIfFoodAlreadyExists(foodDto, id);
+
+        food.setImageUrl(newImage);
         mapper.updateEntityFromDTO(foodDto, food);
         var updatedFood = foodRepository.save(food);
 
