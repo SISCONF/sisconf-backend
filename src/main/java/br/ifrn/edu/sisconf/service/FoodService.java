@@ -1,7 +1,6 @@
 package br.ifrn.edu.sisconf.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -40,15 +39,6 @@ public class FoodService {
         }
     }
 
-    public String generatePresignedUrl(String imageUrl) {
-        if (imageUrl == null || imageUrl.isBlank()) {
-            return "https://sisconf-foods-images-bucket.s3.us-east-2.amazonaws.com/food-placeholder.jpg";
-        }
-
-        String key = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
-        return s3Service.generatePresignedUrl(key);
-    }
-
     public FoodResponseDTO createFood(FoodRequestDTO createFoodDto) {
         throwIfFoodAlreadyExists(createFoodDto, null);
         String foodImageUrl = s3Service.uploadFile(createFoodDto.getImage());
@@ -61,8 +51,7 @@ public class FoodService {
     public List<FoodResponseDTO> listAllFoods(FoodCategory category) {
         Specification<Food> spec = Specification.where(FoodSpecification.ofFoodCategory(category));
         List<Food> foods = foodRepository.findAll(spec);
-        List<FoodResponseDTO> foodsWithPresignedURL = foods.stream().map(food -> new FoodResponseDTO(food.getId(), food.getName(), food.getUnitPrice(), food.getCategory(), generatePresignedUrl(food.getImageUrl()))).collect(Collectors.toList());
-        return foodsWithPresignedURL;
+        return mapper.toDTOList(foods);
     }
 
     public void delete(Long id) {
@@ -75,7 +64,6 @@ public class FoodService {
     public FoodResponseDTO getFood(Long id) {
         Food food = foodRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comida não encontrada."));
-        food.setImageUrl(generatePresignedUrl(food.getImageUrl()));
         return mapper.toResponseDTO(food);
 
     }
@@ -87,8 +75,8 @@ public class FoodService {
                 .orElseThrow(() -> new ResourceNotFoundException("Comida não econtrada."));
         throwIfFoodAlreadyExists(foodDto, id);
 
-        food.setImageUrl(newImage);
         mapper.updateEntityFromDTO(foodDto, food);
+        food.setImageUrl(newImage);
         var updatedFood = foodRepository.save(food);
 
         return mapper.toResponseDTO(updatedFood);
