@@ -280,7 +280,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Plugin para executar a abertura automática do relatório -->
+            <!-- Plugin paraexecutar a abertura automática do relatório -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
