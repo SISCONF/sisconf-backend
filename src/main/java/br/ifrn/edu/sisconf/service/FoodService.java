@@ -1,6 +1,7 @@
 package br.ifrn.edu.sisconf.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -24,6 +25,7 @@ public class FoodService {
     @Autowired
     private FoodMapper mapper;
 
+    @Autowired
     private S3Service s3Service;
 
     public void throwIfFoodAlreadyExists(FoodRequestDTO createFoodDto, Long foodId) {
@@ -59,7 +61,8 @@ public class FoodService {
     public List<FoodResponseDTO> listAllFoods(FoodCategory category) {
         Specification<Food> spec = Specification.where(FoodSpecification.ofFoodCategory(category));
         List<Food> foods = foodRepository.findAll(spec);
-        return mapper.toDTOList(foods);
+        List<FoodResponseDTO> foodsWithPresignedURL = foods.stream().map(food -> new FoodResponseDTO(food.getId(), food.getName(), food.getUnitPrice(), food.getCategory(), generatePresignedUrl(food.getImageUrl()))).collect(Collectors.toList());
+        return foodsWithPresignedURL;
     }
 
     public void delete(Long id) {
@@ -72,6 +75,7 @@ public class FoodService {
     public FoodResponseDTO getFood(Long id) {
         Food food = foodRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comida não encontrada."));
+        food.setImageUrl(generatePresignedUrl(food.getImageUrl()));
         return mapper.toResponseDTO(food);
 
     }
