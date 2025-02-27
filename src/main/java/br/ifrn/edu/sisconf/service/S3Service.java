@@ -1,27 +1,25 @@
 package br.ifrn.edu.sisconf.service;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.Date;
+import java.time.Duration;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 @Service
 public class S3Service {
-    private final AmazonS3 s3Client;
+    private final S3Client s3Client;
+    private final S3Presigner s3Presigner;
 
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
@@ -29,23 +27,9 @@ public class S3Service {
     @Value("${aws.s3.region}")
     private String region;
 
-    @Value("${aws.access-key-id}")
-    private String accessKeyId;
-
-    @Value("${aws.secret-access-key}")
-    private String secretAccessKey;
-
-    public S3Service(AmazonS3 s3Client) {
+    public S3Service(S3Client s3Client, S3Presigner s3Presigner) {
         this.s3Client = s3Client;
-    }
-
-    private S3Client getS3Client() {
-        return S3Client.builder()
-                .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(
-                    AwsBasicCredentials.create(accessKeyId, secretAccessKey)
-                ))
-                .build();
+        this.s3Presigner = s3Presigner;
     }
 
     public String uploadFile(MultipartFile file) {
@@ -53,7 +37,6 @@ public class S3Service {
         String filepath = "uploads/" + filename;
 
         try {
-            S3Client s3Client = getS3Client();
             s3Client.putObject(PutObjectRequest.builder().bucket(bucketName).key(filepath).build(), RequestBody.fromBytes(file.getBytes()));
             return "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + filepath;
         } catch (IOException e) {
@@ -62,14 +45,9 @@ public class S3Service {
     }
 
     public String generatePresignedUrl(String key) {
-        Date expirationDate = new Date();
-        Long expirationTimeInMillis = expirationDate.getTime();
-        expirationTimeInMillis += 1000 * 60 * 60; // 1 hora
-        expirationDate.setTime(expirationTimeInMillis);
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder().bucket(bucketName).key(key).build();
+        PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(GetObjectPresignRequest.builder().signatureDuration(Duration.ofDays(1)).getObjectRequest(getObjectRequest).build());
 
-        GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, key).withExpiration(expirationDate);
-
-        URL url = s3Client.generatePresignedUrl(request);
-        return url.toString();
+        return presignedRequest.url().toString();
     }
 }
