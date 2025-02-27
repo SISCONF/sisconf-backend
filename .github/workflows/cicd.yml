@@ -28,6 +28,10 @@ jobs:
       RABBIT_MQ_PORT: ${{secrets.RABBIT_MQ_PORT}}
       RABBIT_MQ_USERNAME: ${{secrets.RABBIT_MQ_USERNAME}}
       RABBIT_MQ_PASSWORD: ${{secrets.RABBIT_MQ_PASSWORD}}
+      AMAZON_S3_ACCESS_KEY_ID: ${secrets.AMAZON_S3_ACCESS_KEY_ID}
+      AMAZON_S3_BUCKET_NAME: ${secrets.AMAZON_S3_BUCKET_NAME}
+      AMAZON_S3_BUCKET_REGION: ${secrets.AMAZON_S3_BUCKET_REGION}
+      AMAZON_S3_SECRET_ACCESS_KEY: ${secrets.AMAZON_S3_SECRET_ACCESS_KEY}
 
     steps:
       - uses: actions/checkout@v4
@@ -51,44 +55,44 @@ jobs:
     if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
     needs: [continuous-integration]
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Deploy to EC2
-      env:
-        PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
-        HOST: ${{ secrets.EC2_HOST }}
-        USER: ${{ secrets.EC2_USER }}
-      run: |
-        echo "$PRIVATE_KEY" > sisconf-backend-spring.pem && chmod 600 sisconf-backend-spring.pem
-        ssh -o StrictHostKeyChecking=no -i sisconf-backend-spring.pem ${USER}@${HOST} << 'EOF'
+      - name: Deploy to EC2
+        env:
+          PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
+          HOST: ${{ secrets.EC2_HOST }}
+          USER: ${{ secrets.EC2_USER }}
+        run: |
+          echo "$PRIVATE_KEY" > sisconf-backend-spring.pem && chmod 600 sisconf-backend-spring.pem
+          ssh -o StrictHostKeyChecking=no -i sisconf-backend-spring.pem ${USER}@${HOST} << 'EOF'
 
-        if [ -d "sisconf-backend" ]; then
+          if [ -d "sisconf-backend" ]; then
+            cd sisconf-backend
+            sudo docker compose -f docker-compose-prod.yml down
+          fi
+
+          sudo rm -rf sisconf-backend
+          git clone --branch feat/deploy --single-branch https://github.com/SISCONF/sisconf-backend.git
+
           cd sisconf-backend
-          sudo docker compose -f docker-compose-prod.yml down
-        fi
+          ls
+          cd ./envs
+          mkdir prod
+          cd prod
 
-        sudo rm -rf sisconf-backend
-        git clone --branch feat/deploy --single-branch https://github.com/SISCONF/sisconf-backend.git
+          touch spring.env
+          cat ~/spring.env > spring.env
+          touch postgres.env
+          cat ~/postgres.env > postgres.env
+          touch rabbitmq.env
+          cat ~/rabbitmq.env > rabbitmq.env
 
-        cd sisconf-backend
-        ls
-        cd ./envs
-        mkdir prod
-        cd prod
+          cd ~/sisconf-backend
+          mkdir nginx
+          cd nginx
+          touch default.conf
+          cat ~/nginx.conf > default.conf
 
-        touch spring.env
-        cat ~/spring.env > spring.env
-        touch postgres.env
-        cat ~/postgres.env > postgres.env
-        touch rabbitmq.env
-        cat ~/rabbitmq.env > rabbitmq.env
-
-        cd ~/sisconf-backend
-        mkdir nginx
-        cd nginx
-        touch default.conf
-        cat ~/nginx.conf > default.conf
-
-        cd ~/sisconf-backend
-        sudo docker compose -f docker-compose-prod.yml up -d
-        EOF
+          cd ~/sisconf-backend
+          sudo docker compose -f docker-compose-prod.yml up -d
+          EOF
