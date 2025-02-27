@@ -1,13 +1,17 @@
 package br.ifrn.edu.sisconf.service;
 
 import java.io.IOException;
+import java.net.URL;
+import java.util.Date;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import lombok.RequiredArgsConstructor;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -16,8 +20,9 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Service
-@RequiredArgsConstructor
 public class S3Service {
+    private final AmazonS3 s3Client;
+
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
 
@@ -29,6 +34,10 @@ public class S3Service {
 
     @Value("${aws.secret-access-key}")
     private String secretAccessKey;
+
+    public S3Service(AmazonS3 s3Client) {
+        this.s3Client = s3Client;
+    }
 
     private S3Client getS3Client() {
         return S3Client.builder()
@@ -50,5 +59,17 @@ public class S3Service {
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload file to S3", e);
         }
+    }
+
+    public String generatePresignedUrl(String key) {
+        Date expirationDate = new Date();
+        Long expirationTimeInMillis = expirationDate.getTime();
+        expirationTimeInMillis += 1000 * 60 * 60; // 1 hora
+        expirationDate.setTime(expirationTimeInMillis);
+
+        GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, key).withExpiration(expirationDate);
+
+        URL url = s3Client.generatePresignedUrl(request);
+        return url.toString();
     }
 }

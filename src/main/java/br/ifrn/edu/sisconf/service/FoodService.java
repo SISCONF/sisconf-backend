@@ -18,12 +18,13 @@ import br.ifrn.edu.sisconf.specification.FoodSpecification;
 
 @Service
 public class FoodService {
-
     @Autowired
     private FoodRepository foodRepository;
 
     @Autowired
     private FoodMapper mapper;
+
+    private S3Service s3Service;
 
     public void throwIfFoodAlreadyExists(FoodRequestDTO createFoodDto, Long foodId) {
         if (foodId == null) {
@@ -37,9 +38,20 @@ public class FoodService {
         }
     }
 
+    public String generatePresignedUrl(String imageUrl) {
+        if (imageUrl == null || imageUrl.isBlank()) {
+            return "https://sisconf-foods-images-bucket.s3.us-east-2.amazonaws.com/food-placeholder.jpg";
+        }
+
+        String key = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+        return s3Service.generatePresignedUrl(key);
+    }
+
     public FoodResponseDTO createFood(FoodRequestDTO createFoodDto) {
         throwIfFoodAlreadyExists(createFoodDto, null);
+        String foodImageUrl = s3Service.uploadFile(createFoodDto.getImage());
         var food = mapper.toEntity(createFoodDto);
+        food.setImageUrl(foodImageUrl);
         foodRepository.save(food);
         return mapper.toResponseDTO(food);
     }
