@@ -18,12 +18,14 @@ import br.ifrn.edu.sisconf.specification.FoodSpecification;
 
 @Service
 public class FoodService {
-
     @Autowired
     private FoodRepository foodRepository;
 
     @Autowired
     private FoodMapper mapper;
+
+    @Autowired
+    private S3Service s3Service;
 
     public void throwIfFoodAlreadyExists(FoodRequestDTO createFoodDto, Long foodId) {
         if (foodId == null) {
@@ -39,7 +41,9 @@ public class FoodService {
 
     public FoodResponseDTO createFood(FoodRequestDTO createFoodDto) {
         throwIfFoodAlreadyExists(createFoodDto, null);
+        String foodImageUrl = s3Service.uploadFile(createFoodDto.getImage());
         var food = mapper.toEntity(createFoodDto);
+        food.setImageUrl(foodImageUrl);
         foodRepository.save(food);
         return mapper.toResponseDTO(food);
     }
@@ -65,10 +69,14 @@ public class FoodService {
     }
 
     public FoodResponseDTO update(Long id, FoodRequestDTO foodDto) {
+        String newImage = s3Service.uploadFile(foodDto.getImage());
+
         Food food = foodRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comida não econtrada."));
         throwIfFoodAlreadyExists(foodDto, id);
+
         mapper.updateEntityFromDTO(foodDto, food);
+        food.setImageUrl(newImage);
         var updatedFood = foodRepository.save(food);
 
         return mapper.toResponseDTO(updatedFood);

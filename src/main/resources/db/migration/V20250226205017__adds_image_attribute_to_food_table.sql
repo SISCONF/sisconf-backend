@@ -1,0 +1,1 @@
+ALTER TABLE food ADD COLUMN image_url VARCHAR(500)

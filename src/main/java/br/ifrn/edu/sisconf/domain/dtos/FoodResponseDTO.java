@@ -17,4 +17,5 @@ public class FoodResponseDTO {
     private String name;
     private BigDecimal unitPrice;
     private FoodCategory category;
+    private String imageUrl;
 }

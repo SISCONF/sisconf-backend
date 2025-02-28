@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.web.multipart.MultipartFile;
 
 import br.ifrn.edu.sisconf.domain.Food;
 import br.ifrn.edu.sisconf.domain.dtos.FoodRequestDTO;
@@ -38,6 +40,9 @@ public class FoodServiceTest {
 
     @Mock
     private FoodMapper foodMapper;
+
+    @Mock
+    private S3Service s3Service;
 
     @Test
     public void duplicateFoodInExistsByNameAndCategoryThrowsError() {
@@ -93,20 +98,24 @@ public class FoodServiceTest {
         foodRequestDTO.setName("Laranja");
         foodRequestDTO.setUnitPrice(new BigDecimal(0.01));
         foodRequestDTO.setCategory(FoodCategory.FRUIT);
+        foodRequestDTO.setImage(mock(MultipartFile.class));
 
         Food food = new Food();
         food.setName("Laranja");
         food.setCategory(FoodCategory.FRUIT);
         food.setUnitPrice(new BigDecimal(0.01));
-        
+        food.setImageUrl("s3://fake-url");
+
         FoodResponseDTO foodResponseDTO = new FoodResponseDTO();
         foodResponseDTO.setName("Laranja");
         foodResponseDTO.setCategory(FoodCategory.FRUIT);
         foodResponseDTO.setUnitPrice(new BigDecimal(0.01));
+        foodResponseDTO.setImageUrl("s3://fake-presigned-url");
 
         when(foodRepository.existsByNameAndCategory(foodRequestDTO.getName(), foodRequestDTO.getCategory())).thenReturn(false);
         when(foodMapper.toEntity(foodRequestDTO)).thenReturn(food);
         when(foodMapper.toResponseDTO(food)).thenReturn(foodResponseDTO);
+
 
         FoodResponseDTO createdFood = foodService.createFood(foodRequestDTO);
 
@@ -204,17 +213,20 @@ public class FoodServiceTest {
         food.setName("Maçã");
         food.setCategory(FoodCategory.FRUIT);
         food.setUnitPrice(new BigDecimal(0.01));
+        food.setImageUrl("s3://fake-url");
 
         FoodRequestDTO foodRequestDTO = new FoodRequestDTO();
         foodRequestDTO.setName("Cenoura");
         foodRequestDTO.setCategory(FoodCategory.VEGETABLE);
         foodRequestDTO.setUnitPrice(new BigDecimal(0.01));
+        foodRequestDTO.setImage(mock(MultipartFile.class));
 
         FoodResponseDTO foodResponseDTO = new FoodResponseDTO();
         foodResponseDTO.setId(1L);
         foodResponseDTO.setName("Cenoura");
         foodResponseDTO.setCategory(FoodCategory.VEGETABLE);
         foodResponseDTO.setUnitPrice(new BigDecimal(0.01));
+        foodResponseDTO.setImageUrl("s3://fake-presigned-url");
 
         when(foodRepository.findById(food.getId())).thenReturn(Optional.of(food));
         when(foodRepository.existsByNameAndCategoryAndIdNot(foodRequestDTO.getName(), foodRequestDTO.getCategory(), food.getId())).thenReturn(false);
@@ -234,12 +246,14 @@ public class FoodServiceTest {
         foodRequestDTO.setName("Cebola");
         foodRequestDTO.setCategory(FoodCategory.VEGETABLE);
         foodRequestDTO.setUnitPrice(new BigDecimal(0.01));
+        foodRequestDTO.setImage(mock(MultipartFile.class));
 
         Food food = new Food();
         food.setId(1L);
         food.setName("Maçã");
         food.setCategory(FoodCategory.FRUIT);
         food.setUnitPrice(new BigDecimal(0.01));
+        food.setImageUrl("s3://fake-url");
 
         when(foodRepository.findById(1L)).thenReturn(Optional.of(food));
         when(foodRepository.existsByNameAndCategoryAndIdNot(foodRequestDTO.getName(), foodRequestDTO.getCategory(), 1L)).thenReturn(true);
@@ -256,6 +270,7 @@ public class FoodServiceTest {
         foodRequestDTO.setName("Laranja");
         foodRequestDTO.setCategory(FoodCategory.FRUIT);
         foodRequestDTO.setUnitPrice(new BigDecimal(0.01));
+        foodRequestDTO.setImage(mock(MultipartFile.class));
 
         when(foodRepository.findById(1L)).thenReturn(Optional.empty());
 
