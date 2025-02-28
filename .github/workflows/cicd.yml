@@ -65,6 +65,7 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > sisconf-backend-spring.pem && chmod 600 sisconf-backend-spring.pem
           ssh -o StrictHostKeyChecking=no -i sisconf-backend-spring.pem ${USER}@${HOST} << 'EOF'
+          BRANCH=${{ github.ref_name }}
 
           if [ -d "sisconf-backend" ]; then
             cd sisconf-backend
@@ -72,7 +73,7 @@ jobs:
           fi
 
           sudo rm -rf sisconf-backend
-          git clone --branch feat/deploy --single-branch https://github.com/SISCONF/sisconf-backend.git
+          git clone --branch ${BRANCH} --single-branch https://github.com/SISCONF/sisconf-backend.git
 
           cd sisconf-backend
           ls
