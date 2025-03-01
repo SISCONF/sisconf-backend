@@ -73,4 +73,15 @@ public class OrdersGroupController {
     public ResponseEntity<List<OrdersGroupResponseDTO>> history() {
         return ResponseEntity.status(HttpStatus.OK).body(ordersGroupService.history());
     }
+
+    @PatchMapping("/{id}")
+    @Operation(description = "Atualiza o pedido geral de maneira parcial")
+    public ResponseEntity<OrdersGroupResponseDTO> partialUpdate(
+        @PathVariable Long id,
+        @Valid @RequestBody OrdersGroupRequestDTO ordersGroupRequestDTO
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(
+            ordersGroupService.update(id, ordersGroupRequestDTO)
+        );
+    }
 }
