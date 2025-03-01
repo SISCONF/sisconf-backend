@@ -11,5 +11,6 @@ import java.util.List;
 @NoArgsConstructor
 public class OrdersGroupRequestDTO {
     private OrdersGroupStatus currentStatus;
+    private String docUrl = "";
     private List<Long> ordersIds = new ArrayList<>();
 }

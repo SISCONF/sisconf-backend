@@ -161,10 +161,13 @@ class OrdersGroupServiceTest {
     @DisplayName("Excluir grupo de pedido com sucesso")
     public void testDeleteOrdersGroupSuccessfully() {
         OrdersGroup ordersGroup = Instancio.create(OrdersGroup.class);
-        when(ordersGroupRepository.existsById(any())).thenReturn(true);
+        when(ordersGroupRepository.existsById(ordersGroup.getId())).thenReturn(true);
+        when(ordersGroupRepository.findById(ordersGroup.getId())).thenReturn(
+            Optional.of(ordersGroup)
+        );
 
-        ordersGroupService.delete(1L);
-        verify(ordersGroupRepository).existsById(any());
+        ordersGroupService.delete(ordersGroup.getId());
+        verify(ordersGroupRepository).existsById(ordersGroup.getId());
 
     }
 

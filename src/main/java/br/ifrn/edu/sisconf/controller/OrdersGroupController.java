@@ -1,6 +1,7 @@
 package br.ifrn.edu.sisconf.controller;
 
 import br.ifrn.edu.sisconf.constants.KeycloakConstants;
+import br.ifrn.edu.sisconf.domain.dtos.OrdersGroupUpdateDocUrlRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrdersGroup.OrdersGroupRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrdersGroup.OrdersGroupResponseDTO;
 import br.ifrn.edu.sisconf.service.OrdersGroupService;
@@ -72,5 +73,16 @@ public class OrdersGroupController {
     @Operation(description = "Lista todos os grupos de pedidos do mais recente ao mais antigo")
     public ResponseEntity<List<OrdersGroupResponseDTO>> history() {
         return ResponseEntity.status(HttpStatus.OK).body(ordersGroupService.history());
+    }
+
+    @PatchMapping("/{id}/doc-url")
+    @Operation(description = "Atualiza a URL da planilha do pedido geral")
+    public ResponseEntity<OrdersGroupResponseDTO> partialUpdate(
+        @PathVariable Long id,
+        @Valid @RequestBody OrdersGroupUpdateDocUrlRequestDTO ordersGroupRequestDTO
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(
+            ordersGroupService.updateDocUrl(id, ordersGroupRequestDTO)
+        );
     }
 }

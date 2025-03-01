@@ -3,6 +3,7 @@ package br.ifrn.edu.sisconf.service;
 import br.ifrn.edu.sisconf.domain.Order;
 import br.ifrn.edu.sisconf.domain.OrderFood;
 import br.ifrn.edu.sisconf.domain.OrdersGroup;
+import br.ifrn.edu.sisconf.domain.dtos.OrdersGroupUpdateDocUrlRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrdersGroup.OrdersGroupRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrdersGroup.OrdersGroupResponseDTO;
 import br.ifrn.edu.sisconf.domain.enums.OrdersGroupStatus;
@@ -109,7 +110,27 @@ public class OrdersGroupService {
                 )
             );
         }
+        var ordersGroup = ordersGroupRepository.findById(id).orElseThrow();
+        for (Order order: ordersGroup.getOrders()) {
+            order.setOrdersGroup(null);
+        }
         ordersGroupRepository.deleteById(id);
+    }
+
+    public OrdersGroupResponseDTO updateDocUrl(
+        Long id, 
+        OrdersGroupUpdateDocUrlRequestDTO updateDocUrlRequestDTO
+    ) {
+        if (!ordersGroupRepository.existsById(id)) {
+            throw new ResourceNotFoundException(String.format(
+                "Grupo de id %d não encontrado", id
+                )
+            );
+        }
+        var ordersGroup = ordersGroupRepository.findById(id).orElseThrow();
+        ordersGroup.setDocUrl(updateDocUrlRequestDTO.getDocUrl());
+        ordersGroup = ordersGroupRepository.save(ordersGroup);
+        return ordersGroupMapper.toResponseDTO(ordersGroup);
     }
 
     private OrdersGroup findOrdersGroupById(Long id) {

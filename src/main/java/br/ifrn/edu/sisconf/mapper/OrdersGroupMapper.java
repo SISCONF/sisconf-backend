@@ -6,6 +6,7 @@ import br.ifrn.edu.sisconf.domain.dtos.OrdersGroup.OrdersGroupRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrdersGroup.OrdersGroupResponseDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrdersGroup.OrdersGroupSheetRequestDTO;
 
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -25,6 +26,7 @@ public interface OrdersGroupMapper {
 
     List<OrdersGroupResponseDTO> toDTOList(List<OrdersGroup> ordersGroups);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "totalPrice", ignore = true)
     @Mapping(target = "orderDate", ignore = true)
     @Mapping(target = "docUrl", ignore = true)

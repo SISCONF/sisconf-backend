@@ -15,6 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrdersGroupSheetRequestDTO {
+    private Long id;
     private BigDecimal totalPrice;
     private LocalDateTime orderDate;
     private Integer itemQuantity;
