@@ -207,6 +207,18 @@
             <artifactId>aws-java-sdk-s3</artifactId>
             <version>1.12.782</version> <!-- Check for the latest version -->
         </dependency>
+
+        <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <version>1.18.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-junit5-plugin</artifactId>
+            <version>1.2.1</version> <!-- Use the latest version -->
+        </dependency>
     </dependencies>
 
     <build>
@@ -301,6 +313,33 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Plugin para criação e execução de testes de mutação -->
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <configuration>
+                    <excludedClasses>
+                        <param>br.ifrn.edu.sisconf.mapper.*</param>
+                        <param>br.ifrn.edu.sisconf.domain.*</param>
+                        <param>br.ifrn.edu.sisconf.domain.enums.*</param>
+                        <param>br.ifrn.edu.sisconf.exception.*</param>
+                        <param>br.ifrn.edu.sisconf.rabbitmq.*</param>
+                        <param>br.ifrn.edu.sisconf.service.rabbitmq.*</param>
+                        <param>br.ifrn.edu.sisconf.service.keycloak.*</param>
+                        <param>br.ifrn.edu.sisconf.specification.*</param>
+                        <param>br.ifrn.edu.sisconf.controller.FoodController</param>
+                        <param>br.ifrn.edu.sisconf.controller.OrdersGroupController</param>
+                        <param>br.ifrn.edu.sisconf.controller.PersonController</param>
+                        <param>br.ifrn.edu.sisconf.controller.StockController</param>
+                        <param>br.ifrn.edu.sisconf.SisconfSecurityConfig</param>
+                        <param>br.ifrn.edu.sisconf.configs.*</param>
+                        <param>br.ifrn.edu.sisconf.security.*</param>
+                        <param>br.ifrn.edu.sisconf.services.S3Service</param>
+                    </excludedClasses>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 
