@@ -16,7 +16,7 @@ public class Entrepreneur extends BaseEntity {
     @Column(length = 128, nullable = false, name = "business_name")
     private String businessName;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "person_id", nullable = false, unique = true)
     private Person person;
 

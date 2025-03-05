@@ -31,13 +31,19 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-    @ManyToOne(cascade = CascadeType.REFRESH)
+    @ManyToOne
     @JoinColumn(name = "orders_group_id")
     private OrdersGroup ordersGroup;
 
     @Column(name = "order_date", nullable = false)
     private LocalDateTime orderDate;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, targetEntity = OrderFood.class)
-    private List<OrderFood> orderFoods = new ArrayList<>();;
+    @OneToMany(
+        mappedBy = "order", 
+        cascade = CascadeType.ALL,
+        targetEntity = OrderFood.class,
+        orphanRemoval = true,
+        fetch = FetchType.EAGER
+    )
+    private List<OrderFood> orderFoods = new ArrayList<>();
 }

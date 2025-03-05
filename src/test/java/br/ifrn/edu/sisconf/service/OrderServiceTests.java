@@ -1,6 +1,7 @@
 package br.ifrn.edu.sisconf.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,7 +14,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
@@ -22,18 +25,20 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import br.ifrn.edu.sisconf.domain.Customer;
 import br.ifrn.edu.sisconf.domain.Food;
 import br.ifrn.edu.sisconf.domain.Order;
-import br.ifrn.edu.sisconf.domain.OrderFood;
 import br.ifrn.edu.sisconf.domain.dtos.Order.OrderRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Order.OrderResponseDTO;
 import br.ifrn.edu.sisconf.domain.dtos.Order.OrderUpdateRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.OrderFoodRequestDTO;
 import br.ifrn.edu.sisconf.domain.enums.FoodCategory;
+import br.ifrn.edu.sisconf.domain.enums.OrderFoodQuantityType;
 import br.ifrn.edu.sisconf.domain.enums.OrderStatus;
 import br.ifrn.edu.sisconf.exception.ResourceNotFoundException;
 import br.ifrn.edu.sisconf.mapper.OrderMapper;
 import br.ifrn.edu.sisconf.repository.CustomerRepository;
 import br.ifrn.edu.sisconf.repository.FoodRepository;
 import br.ifrn.edu.sisconf.repository.OrderRepository;
+import br.ifrn.edu.sisconf.security.SisconfUserDetails;
+import br.ifrn.edu.sisconf.util.PersonTestUtil;
 
 @ExtendWith(MockitoExtension.class)
 public class OrderServiceTests {
@@ -55,6 +60,8 @@ public class OrderServiceTests {
 
     private Customer customer;
 
+    private SisconfUserDetails userDetails;
+
     private Food food;
 
     private Order order;
@@ -65,6 +72,13 @@ public class OrderServiceTests {
 
         customer = new Customer();
         customer.setId(1L);
+        customer.setPerson(PersonTestUtil.createValidPerson(null));
+        userDetails = new SisconfUserDetails(
+            customer.getPerson().getKeycloakId(),
+            customer.getPerson().getEmail(),
+            customer.getPerson().getEmail(),
+            new ArrayList<>()
+        );
 
         food = new Food();
         food.setId(1L);
@@ -74,6 +88,7 @@ public class OrderServiceTests {
 
         order = new Order();
         order.setId(1L);
+        order.setStatus(OrderStatus.WAITING);
     }
 
     @Test
@@ -81,31 +96,37 @@ public class OrderServiceTests {
     public void shouldThrowExceptionWhenCustomerNotFound() {
         OrderRequestDTO orderRequestDTO = new OrderRequestDTO();
 
-        when(customerRepository.findById(customer.getId())).thenReturn(Optional.empty());
+        when(customerRepository.findByPersonKeycloakId(userDetails.getKeycloakId())).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> 
-            orderService.createOrder(customer.getId(), orderRequestDTO)
+            orderService.createOrder(userDetails, orderRequestDTO)
         );
 
         assertEquals("Cliente não encontrado", exception.getMessage());
-        verify(customerRepository).findById(customer.getId());
+        verify(customerRepository).findByPersonKeycloakId(userDetails.getKeycloakId());
     }
 
     @Test
     @DisplayName("Should create a new order with successfully")
     public void shouldCreateOrderWithValidInputs() {
         OrderRequestDTO orderRequestDTO = new OrderRequestDTO();
-        orderRequestDTO.setFoodsQuantities(List.of(new OrderFoodRequestDTO(1L, 2)));
-
+        orderRequestDTO.setFoodsQuantities(
+            List.of(new OrderFoodRequestDTO(
+                1L, 
+                2, 
+                OrderFoodQuantityType.KG)
+            )
+        );
         OrderResponseDTO orderResponseDTO = new OrderResponseDTO();
 
-        when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
+        when(customerRepository.findByPersonKeycloakId(userDetails.getKeycloakId())).
+            thenReturn(Optional.of(customer));
         when(foodRepository.findAllById(List.of(1L))).thenReturn(List.of(food));
         when(orderMapper.toEntity(orderRequestDTO)).thenReturn(order);
         when(orderRepository.save(order)).thenReturn(order);
         when(orderMapper.toResponseDTO(order)).thenReturn(orderResponseDTO);
         
-        OrderResponseDTO createdOrder = orderService.createOrder(customer.getId(), orderRequestDTO);
+        OrderResponseDTO createdOrder = orderService.createOrder(userDetails, orderRequestDTO);
 
         verify(orderRepository).save(order);
         assertEquals(orderResponseDTO, createdOrder);
@@ -119,13 +140,15 @@ public class OrderServiceTests {
         OrderResponseDTO orderResponseDTO = new OrderResponseDTO();
         List<OrderResponseDTO> orderResponseDTOs = List.of(orderResponseDTO);
 
-        when(orderRepository.findAll()).thenReturn(orders);
+        when(orderRepository.findAllByCustomerPersonKeycloakId(userDetails.getKeycloakId())).thenReturn(orders);
         when(orderMapper.toDTOList(orders)).thenReturn(orderResponseDTOs);
         
-        List<OrderResponseDTO> allOrders = orderService.getAllOrders();
+        List<OrderResponseDTO> allOrders = orderService.getAllOrders(
+            userDetails
+        );
 
         assertEquals(orderResponseDTOs, allOrders);
-        verify(orderRepository).findAll();
+        verify(orderRepository).findAllByCustomerPersonKeycloakId(userDetails.getKeycloakId());
     }
 
     @Test
@@ -134,13 +157,18 @@ public class OrderServiceTests {
         OrderResponseDTO orderResponseDTO = new OrderResponseDTO();
         orderResponseDTO.setId(1L);
      
-        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(orderRepository.findByIdAndCustomerPersonKeycloakId(
+                order.getId(), userDetails.getKeycloakId()
+            )).thenReturn(Optional.of(order));
         when(orderMapper.toResponseDTO(order)).thenReturn(orderResponseDTO);
 
-        OrderResponseDTO fetchOrder = orderService.getOrderById(order.getId());
+        OrderResponseDTO fetchOrder = orderService.getOrderById(order.getId(), userDetails);
 
         assertEquals(orderResponseDTO, fetchOrder);
-        verify(orderRepository).findById(order.getId());
+        verify(orderRepository).findByIdAndCustomerPersonKeycloakId(
+            order.getId(),
+            userDetails.getKeycloakId()
+        );
     }
 
     @Test
@@ -148,28 +176,30 @@ public class OrderServiceTests {
     public void shouldThrowExceptionWhenFoodNotFound() {
         OrderUpdateRequestDTO orderUpdateRequestDTO = new OrderUpdateRequestDTO();
         orderUpdateRequestDTO.setStatus(OrderStatus.WAITING);
-        orderUpdateRequestDTO.setFoodsQuantities(List.of(new OrderFoodRequestDTO(999L, 3))); 
+        orderUpdateRequestDTO.setFoodsQuantities(
+            List.of(new OrderFoodRequestDTO(999L, 3, OrderFoodQuantityType.KG))
+        ); 
 
-        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(orderRepository.findByIdAndCustomerPersonKeycloakId(order.getId(), userDetails.getKeycloakId())).thenReturn(Optional.of(order));
         when(foodRepository.findAllById(List.of(999L))).thenReturn(List.of());
 
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> 
-            orderService.updateOrder(order.getId(), orderUpdateRequestDTO)
+            orderService.updateOrder(order.getId(), orderUpdateRequestDTO, userDetails)
         );
 
         assertTrue(exception.getMessage().contains("IDs de comidas inválidos"));
-        verify(orderRepository).findById(order.getId());
+        verify(orderRepository).findByIdAndCustomerPersonKeycloakId(order.getId(), userDetails.getKeycloakId());
     }
 
     @Test
     @DisplayName("Should delete order when it exists")
     public void shouldDeleteOrderSuccessfully() {
         
-        when(orderRepository.existsById(order.getId())).thenReturn(true);
+        when(orderRepository.existsByIdAndCustomerPersonKeycloakId(order.getId(), userDetails.getKeycloakId())).thenReturn(true);
 
-        orderService.deleteOrder(order.getId());
+        orderService.deleteOrder(order.getId(), userDetails);
 
-        verify(orderRepository).existsById(order.getId());
+        verify(orderRepository).existsByIdAndCustomerPersonKeycloakId(order.getId(), userDetails.getKeycloakId());
         verify(orderRepository).deleteById(order.getId());
     }
 
@@ -177,95 +207,64 @@ public class OrderServiceTests {
     @DisplayName("Should throw exception when order does not exist")
     public void shouldThrowExceptionWhenOrderDoesNotExist() {
 
-        when(orderRepository.existsById(order.getId())).thenReturn(false);
+        when(orderRepository.existsByIdAndCustomerPersonKeycloakId(order.getId(), userDetails.getKeycloakId())).thenReturn(false);
 
-        assertThrows(ResourceNotFoundException.class, () -> orderService.deleteOrder(order.getId()));
+        assertThrows(ResourceNotFoundException.class, () -> orderService.deleteOrder(order.getId(), userDetails));
 
-        verify(orderRepository).existsById(order.getId());
+        verify(orderRepository).existsByIdAndCustomerPersonKeycloakId(order.getId(), userDetails.getKeycloakId());
         verify(orderRepository, never()).deleteById(order.getId());
-    }
-
-
-    @Test
-    @DisplayName("Should update only the order status")
-    public void shouldUpdateOrderStatusOnly() {
-        OrderUpdateRequestDTO orderUpdateRequestDTO = new OrderUpdateRequestDTO();
-        orderUpdateRequestDTO.setStatus(OrderStatus.ACCEPTED);
-        orderUpdateRequestDTO.setFoodsQuantities(List.of());
-
-        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-        when(orderRepository.save(order)).thenReturn(order);
-
-        orderService.updateOrder(order.getId(), orderUpdateRequestDTO);
-
-        assertEquals(OrderStatus.ACCEPTED, order.getStatus());
-        verify(orderRepository).findById(order.getId());
-        verify(orderRepository).save(order);
     }
 
     @Test
     @DisplayName("Should add new items to the order")
     public void shouldAddNewItemsToOrder() {
         OrderUpdateRequestDTO orderUpdateRequestDTO = new OrderUpdateRequestDTO();
-        orderUpdateRequestDTO.setFoodsQuantities(List.of(new OrderFoodRequestDTO(food.getId(), 2)));
+        orderUpdateRequestDTO.setFoodsQuantities(
+            List.of(new OrderFoodRequestDTO(food.getId(), 2, OrderFoodQuantityType.KG))
+        );
 
-        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(orderRepository.findByIdAndCustomerPersonKeycloakId(order.getId(), userDetails.getKeycloakId())).thenReturn(Optional.of(order));
         when(foodRepository.findAllById(List.of(food.getId()))).thenReturn(List.of(food));
         when(orderRepository.save(order)).thenReturn(order);
 
-        orderService.updateOrder(order.getId(), orderUpdateRequestDTO);
+        orderService.updateOrder(order.getId(), orderUpdateRequestDTO, userDetails);
 
         assertEquals(1, order.getOrderFoods().size());
         assertEquals(food, order.getOrderFoods().get(0).getFood());
         assertEquals(2, order.getOrderFoods().get(0).getQuantity());
 
-        verify(orderRepository).findById(order.getId());
+        verify(orderRepository).findByIdAndCustomerPersonKeycloakId(order.getId(), userDetails.getKeycloakId());
         verify(foodRepository).findAllById(List.of(food.getId()));
-        verify(orderRepository).save(order);
-    }
-
-    @Test
-    @DisplayName("Should increment quantity for existing items in order")
-    public void shouldIncrementQuantityForExistingItems() {
-        OrderFood existingOrderFood = new OrderFood();
-        existingOrderFood.setFood(food);
-        existingOrderFood.setOrder(order);
-        existingOrderFood.setQuantity(3);
-        order.getOrderFoods().add(existingOrderFood);
-
-        OrderUpdateRequestDTO orderUpdateRequestDTO = new OrderUpdateRequestDTO();
-        orderUpdateRequestDTO.setFoodsQuantities(List.of(new OrderFoodRequestDTO(food.getId(), 2)));
-
-        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-        when(foodRepository.findAllById(List.of(food.getId()))).thenReturn(List.of(food));
-        when(orderRepository.save(order)).thenReturn(order);
-
-        orderService.updateOrder(order.getId(), orderUpdateRequestDTO);
-
-        assertEquals(5, existingOrderFood.getQuantity(), "A quantidade deve ser incrementada corretamente.");
-        verify(orderRepository).findById(order.getId());
-        verify(foodRepository).findAllById(List.of(food.getId()));
-        verify(orderRepository).save(order);
+        verify(orderRepository, times(2)).save(order);
     }
 
     @Test
     @DisplayName("Should correctly calculate total price when adding new items")
     public void shouldCorrectlyCalculateTotalPriceWhenAddingNewItems() {
         OrderUpdateRequestDTO orderUpdateRequestDTO = new OrderUpdateRequestDTO();
-        orderUpdateRequestDTO.setFoodsQuantities(List.of(new OrderFoodRequestDTO(food.getId(), 2)));
+        orderUpdateRequestDTO.setFoodsQuantities(List.of(new OrderFoodRequestDTO(
+                food.getId(), 
+                2, 
+                OrderFoodQuantityType.KG
+                )
+            )
+        );
 
-        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(orderRepository.findByIdAndCustomerPersonKeycloakId(
+            order.getId(), 
+            userDetails.getKeycloakId()
+        )).thenReturn(Optional.of(order));
         when(foodRepository.findAllById(List.of(food.getId()))).thenReturn(List.of(food));
         when(orderRepository.save(order)).thenReturn(order);
 
-        orderService.updateOrder(order.getId(), orderUpdateRequestDTO);
+        orderService.updateOrder(order.getId(), orderUpdateRequestDTO, userDetails);
 
         BigDecimal expectedTotalPrice = food.getUnitPrice().multiply(BigDecimal.valueOf(2)); 
         assertEquals(expectedTotalPrice, order.getTotalPrice(), "O preço total deve corresponder ao valor calculado.");
 
-        verify(orderRepository).findById(order.getId());
+        verify(orderRepository).findByIdAndCustomerPersonKeycloakId(order.getId(), userDetails.getKeycloakId());
         verify(foodRepository).findAllById(List.of(food.getId()));
-        verify(orderRepository).save(order);
+        verify(orderRepository, times(2)).save(order);
     }
 
 

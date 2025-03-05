@@ -2,7 +2,7 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.0.7
     ports:
-      - '8000:8080'
+      - 8000:8080
     env_file:
       - ./envs/keycloak.env
     command: start-dev
@@ -13,6 +13,8 @@ services:
     image: postgres:16
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
     env_file:
       - ./envs/postgres.env
 
@@ -20,7 +22,7 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     ports:
-      - "9090:9090"
+      - 9090:9090
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
@@ -29,7 +31,7 @@ services:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
-      - "3000:3000"
+      - 3000:3000
     links:
       - postgres
     env_file:
@@ -42,16 +44,24 @@ services:
     image: prometheuscommunity/postgres-exporter
     container_name: postgres-exporter
     ports:
-      - "9187:9187"
+      - 9187:9187
     env_file:
       - ./envs/postgres.env
     depends_on:
       - postgres
+  
+  
+  rabbitmq:
+    rabbitmq:
+    image: rabbitmq:4.0-management
+    ports:
+      - 5672:5672
+    env_file:
+      - ./envs/rabbitmq.env
 
 volumes:
   keycloak-data:
   postgres-data:
-  mvn-cache:
   prometheus-data:
   grafana-data:
   postgresql-exporter:

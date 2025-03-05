@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import br.ifrn.edu.sisconf.constants.KeycloakConstants;
 import br.ifrn.edu.sisconf.domain.Customer;
 import br.ifrn.edu.sisconf.domain.Food;
 import br.ifrn.edu.sisconf.domain.Order;
@@ -24,6 +25,7 @@ import br.ifrn.edu.sisconf.mapper.OrderMapper;
 import br.ifrn.edu.sisconf.repository.CustomerRepository;
 import br.ifrn.edu.sisconf.repository.FoodRepository;
 import br.ifrn.edu.sisconf.repository.OrderRepository;
+import br.ifrn.edu.sisconf.security.SisconfUserDetails;
 
 @Service
 public class OrderService {
@@ -50,24 +52,33 @@ public class OrderService {
 
         if (foods.size() != foodIds.size()) {
             throw new ResourceNotFoundException("IDs de comidas inválidos: " + 
-                foodIds.stream().filter(id -> foods.stream().noneMatch(f -> f.getId().equals(id))).collect(Collectors.toList()));
+                foodIds.stream()
+                    .filter(id -> foods.stream().noneMatch(f -> f.getId().equals(id)))
+                    .collect(Collectors.toList()));
         }
 
         return foods.stream().collect(Collectors.toMap(Food::getId, food -> food));
     }
 
-    private BigDecimal calculateTotalPrice(List<OrderFoodRequestDTO> foodsQuantities, Map<Long, Food> foodMap) {
+    private BigDecimal calculateTotalPrice(
+        List<OrderFoodRequestDTO> foodsQuantities, 
+        Map<Long, Food> foodMap
+    ) {
         return foodsQuantities.stream()
             .map(request -> {
                 Food food = foodMap.get(request.getFoodId());
-                BigDecimal foodTotal = food.getUnitPrice().multiply(BigDecimal.valueOf(request.getQuantity()));
+                BigDecimal foodTotal = food.getUnitPrice()
+                                            .multiply(BigDecimal.valueOf(request.getQuantity()));
                 return foodTotal;
             })
             .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public OrderResponseDTO createOrder(Long customerId, OrderRequestDTO orderRequestDTO) {
-        Customer customer = customerRepository.findById(customerId)
+    public OrderResponseDTO createOrder(
+        SisconfUserDetails userDetails, 
+        OrderRequestDTO orderRequestDTO
+    ) {
+        Customer customer = customerRepository.findByPersonKeycloakId(userDetails.getKeycloakId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
 
         Map<Long, Food> foodMap = fetchAndValidateFoods(orderRequestDTO.getFoodsQuantities());
@@ -87,6 +98,7 @@ public class OrderService {
                 orderFood.setFood(food);
                 orderFood.setOrder(order);
                 orderFood.setQuantity(orderFoodRequest.getQuantity());
+                orderFood.setQuantityType(orderFoodRequest.getQuantityType());
                 return orderFood;
             })
             .collect(Collectors.toList());
@@ -96,58 +108,94 @@ public class OrderService {
         return orderMapper.toResponseDTO(orderRepository.save(order));
     }
 
-    public OrderResponseDTO getOrderById(Long id) {
-        Order order = orderRepository.findById(id)
+    public OrderResponseDTO getOrderById(Long id, SisconfUserDetails userDetails) {
+        Order order = orderRepository.findByIdAndCustomerPersonKeycloakId(
+            id, 
+            userDetails.getKeycloakId()
+        )
                 .orElseThrow(() -> new  ResourceNotFoundException("Pedido com ID não encontrado"));
         return orderMapper.toResponseDTO(order);
     }
 
-    public List<OrderResponseDTO> getAllOrders() {
-        List<Order> orders = orderRepository.findAll();
+    public List<OrderResponseDTO> getAllOrders(SisconfUserDetails userDetails) {
+        boolean shouldListAllOrders = userDetails.hasRole(KeycloakConstants.ROLE_LIST_ALL_ORDERS);
+        List<Order> orders;
+        if (shouldListAllOrders) {
+            orders = orderRepository.findAll();
+        } else {
+            orders = orderRepository.findAllByCustomerPersonKeycloakId(
+                userDetails.getKeycloakId()
+            );
+        }
         return orderMapper.toDTOList(orders);
     }
 
-    public OrderResponseDTO updateOrder(Long id, OrderUpdateRequestDTO orderUpdateRequestDTO) {
-        Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado"));
+    public OrderResponseDTO updateOrder(
+        Long id, 
+        OrderUpdateRequestDTO orderUpdateRequestDTO,
+        SisconfUserDetails userDetails
+    ) {
+        Order order = orderRepository.findByIdAndCustomerPersonKeycloakId(
+            id, 
+            userDetails.getKeycloakId()
+        ).orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado"));
 
-        Map<Long, Food> foodMap = fetchAndValidateFoods(orderUpdateRequestDTO.getFoodsQuantities());
+        Map<Long, Food> foodMap = fetchAndValidateFoods(
+            orderUpdateRequestDTO.getFoodsQuantities()
+        );
+        
+        order.getOrderFoods().clear();
+        order = orderRepository.save(order);
 
         for (OrderFoodRequestDTO orderFoodRequest : orderUpdateRequestDTO.getFoodsQuantities()) {
             Food food = foodMap.get(orderFoodRequest.getFoodId());
-            
-            boolean foodExistsInOrder = order.getOrderFoods().stream()
-                    .anyMatch(orderFood -> orderFood.getFood().getId().equals(food.getId()));
-
-            if (foodExistsInOrder) {
-                order.getOrderFoods().stream()
-                    .filter(orderFood -> orderFood.getFood().getId().equals(food.getId()))
-                    .forEach(orderFood -> orderFood.setQuantity(orderFood.getQuantity() + orderFoodRequest.getQuantity()));
-            } else {
-                OrderFood orderFood = new OrderFood();
-                orderFood.setFood(food);
-                orderFood.setOrder(order);
-                orderFood.setQuantity(orderFoodRequest.getQuantity());
-                order.getOrderFoods().add(orderFood);
-            }
+            OrderFood orderFood = new OrderFood();
+            orderFood.setFood(food);
+            orderFood.setOrder(order);
+            orderFood.setQuantity(orderFoodRequest.getQuantity());
+            orderFood.setQuantityType(orderFoodRequest.getQuantityType());
+            order.getOrderFoods().add(orderFood);
         }
 
         BigDecimal totalPrice = order.getOrderFoods().stream()
-            .map(orderFood -> orderFood.getFood().getUnitPrice().multiply(BigDecimal.valueOf(orderFood.getQuantity())))
+            .map(orderFood -> orderFood.getFood().getUnitPrice().multiply(
+                BigDecimal.valueOf(orderFood.getQuantity())
+            ))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         order.setTotalPrice(totalPrice);
-        order.setStatus(orderUpdateRequestDTO.getStatus());
-
         orderMapper.updateEntityFromDTO(orderUpdateRequestDTO, order);
  
         return orderMapper.toResponseDTO(orderRepository.save(order));
     }
 
-    public void deleteOrder(Long id) {
-        if (!orderRepository.existsById(id)) {
+    public void deleteOrder(Long id, SisconfUserDetails userDetails) {
+        if (!orderRepository.existsByIdAndCustomerPersonKeycloakId(
+                id, 
+                userDetails.getKeycloakId()
+            )
+        ) {
             throw new ResourceNotFoundException("Pedido não encontrado.");
         }
         orderRepository.deleteById(id);
+    }
+
+    public List<OrderResponseDTO> history(SisconfUserDetails userDetails) {
+        List<Order> orders = orderRepository.findAllByOrderByOrderDateDesc();
+        boolean shouldListAllOrders = userDetails.hasRole(KeycloakConstants.ROLE_LIST_ALL_ORDERS);
+        if (!shouldListAllOrders) {
+            orders = orders.stream()
+                            .filter(order -> order.getCustomer().getPerson().getKeycloakId() == userDetails.getKeycloakId())
+                            .toList();
+        }
+        return orderMapper.toDTOList(orders);
+    }
+
+    public Order findOrderById(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        String.format("Pedido de id %d não encontrado", orderId)
+                    )
+                );
     }
 }

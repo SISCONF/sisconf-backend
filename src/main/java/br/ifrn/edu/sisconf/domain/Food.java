@@ -28,4 +28,7 @@ public class Food extends BaseEntity {
 
     @OneToMany(mappedBy = "food", targetEntity = StockFood.class)
     private List<Stock> stocks = new ArrayList<>();
+
+    @Column(length = 500, name = "image_url")
+    private String imageUrl;
 }

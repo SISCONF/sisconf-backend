@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.ifrn.edu.sisconf.domain.dtos.FoodRequestDTO;
 import br.ifrn.edu.sisconf.domain.dtos.FoodResponseDTO;
+import br.ifrn.edu.sisconf.domain.enums.FoodCategory;
 import br.ifrn.edu.sisconf.service.FoodService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,8 +40,12 @@ public class FoodController {
 
     @GetMapping
     @Operation(description = "Listar todos alimentos")
-    public ResponseEntity<List<FoodResponseDTO>> getAllFoods() {
-        return ResponseEntity.ok(foodService.listAllFoods());
+    public ResponseEntity<List<FoodResponseDTO>> getAllFoods(
+        @RequestParam(required = false) FoodCategory category
+    ) {
+        return ResponseEntity.ok(foodService.listAllFoods(
+            category
+        ));
     }
 
     @DeleteMapping("/{id}")
