@@ -87,6 +87,8 @@ jobs:
           cat ~/postgres.env > postgres.env
           touch rabbitmq.env
           cat ~/rabbitmq.env > rabbitmq.env
+          touch grafana.env
+          cat ~/grafana.env > grafana.env
 
           cd ~/sisconf-backend
           mkdir nginx

@@ -63,5 +63,4 @@ volumes:
   keycloak-data:
   postgres-data:
   prometheus-data:
-  grafana-data:
   postgresql-exporter:
