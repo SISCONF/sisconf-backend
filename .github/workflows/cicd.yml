@@ -70,6 +70,7 @@ jobs:
           if [ -d "sisconf-backend" ]; then
             cd sisconf-backend
             sudo docker compose -f docker-compose-prod.yml down
+            cd ..
           fi
 
           sudo rm -rf sisconf-backend
