@@ -25,17 +25,6 @@ services:
     env_file:
       - ./envs/prod/spring.env
   
-  nginx:
-    image: nginx:latest
-    depends_on:
-      - sisconf
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-  
   prometheus:
     image: prom/prometheus:latest
     ports:
@@ -65,6 +54,18 @@ services:
       - ./envs/prod/postgres.env
     depends_on:
       - postgres
+
+  nginx:
+    image: nginx:latest
+    depends_on:
+      - sisconf
+      - grafana
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - /etc/letsencrypt:/etc/letsencrypt:ro
 
 volumes:
   postgres-prod-data:
