@@ -44,6 +44,8 @@ services:
     depends_on:
       - prometheus
       - postgres
+    volumes:
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
   
   postgresql-exporter:
     image: prometheuscommunity/postgres-exporter
