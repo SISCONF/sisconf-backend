@@ -14,7 +14,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
-      - 5432:5432
+      - 9987:5432
     env_file:
       - ./envs/postgres.env
 
@@ -52,7 +52,6 @@ services:
   
   
   rabbitmq:
-    rabbitmq:
     image: rabbitmq:4.0-management
     ports:
       - 5672:5672
