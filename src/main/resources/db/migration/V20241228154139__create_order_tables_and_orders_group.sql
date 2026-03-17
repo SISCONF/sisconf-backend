@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS orders_group (
+    id SERIAL PRIMARY KEY,
+    total_price DECIMAL(10, 2) NOT NULL,
+    current_status VARCHAR(50) NOT NULL,
+    item_quantity INTEGER NOT NULL,
+    doc_url VARCHAR(255) NOT NULL,
+    order_date TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS orders (
+    id SERIAL PRIMARY KEY,
+    code UUID NOT NULL,
+    total_price DECIMAL(10, 2) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    customer_id INT NOT NULL REFERENCES customer(id) ON DELETE RESTRICT,
+    orders_group_id INT REFERENCES orders_group(id) ON DELETE RESTRICT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

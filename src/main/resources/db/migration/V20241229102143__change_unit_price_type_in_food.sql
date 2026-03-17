@@ -1,0 +1,1 @@
+ALTER TABLE food ALTER COLUMN unit_price TYPE NUMERIC;
